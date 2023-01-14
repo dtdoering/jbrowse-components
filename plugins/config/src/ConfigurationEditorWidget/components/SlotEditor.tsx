@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import  { useEffect, useState } from 'react'
 import { observer } from 'mobx-react'
 import { getPropertyMembers, IAnyType } from 'mobx-state-tree'
 import { getEnv, FileLocation } from '@jbrowse/core/util'

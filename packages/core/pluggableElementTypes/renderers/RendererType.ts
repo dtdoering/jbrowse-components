@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import { ReactElement, createElement } from 'react'
 import { getDefaultValue } from '../../util/mst-reflection'
 import PluggableElementBase from '../PluggableElementBase'
 import { AnyConfigurationSchemaType } from '../../configuration/configurationSchema'
@@ -48,7 +48,7 @@ export default class RendererType extends PluggableElementBase {
 
   async render(props: RenderProps): Promise<RenderResults> {
     return {
-      reactElement: React.createElement(this.ReactComponent, props, null),
+      reactElement: createElement(this.ReactComponent, props, null),
     }
   }
 

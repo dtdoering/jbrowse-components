@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { fireEvent, render, waitFor } from '@testing-library/react'
 import { createTestSession } from '@jbrowse/web/src/rootModel'
 import '@testing-library/jest-dom/extend-expect'

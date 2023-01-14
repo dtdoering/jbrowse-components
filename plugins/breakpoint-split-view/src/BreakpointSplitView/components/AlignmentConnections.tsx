@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import  { useMemo, useState } from 'react'
 import Path from 'svg-path-generator'
 import { observer } from 'mobx-react'
 import { getSnapshot } from 'mobx-state-tree'

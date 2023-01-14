@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import  { useState } from 'react'
 import { observer } from 'mobx-react'
 import { Button, Grid, MenuItem, Paper, TextField } from '@mui/material'
 import { FileSelector } from '@jbrowse/core/ui'

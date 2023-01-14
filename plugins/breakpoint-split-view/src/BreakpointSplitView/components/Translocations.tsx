@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import  { useState, useMemo } from 'react'
 import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 import { getSnapshot } from 'mobx-state-tree'

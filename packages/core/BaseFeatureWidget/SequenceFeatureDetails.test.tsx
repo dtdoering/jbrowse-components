@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { render } from '@testing-library/react'
 import fs from 'fs'
 import SequencePanel from './SequencePanel'

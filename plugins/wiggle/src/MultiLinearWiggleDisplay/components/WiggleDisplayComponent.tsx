@@ -1,4 +1,4 @@
-import React from 'react'
+import { ReactNode, Fragment } from 'react'
 import {
   measureText,
   getContainingView,
@@ -36,7 +36,7 @@ const Wrapper = observer(
     exportSVG,
   }: {
     model: WiggleDisplayModel
-    children: React.ReactNode
+    children: ReactNode
     exportSVG?: boolean
   }) => {
     if (exportSVG) {
@@ -134,7 +134,7 @@ const ColorLegend = observer(
         {sources.map((source, idx) => {
           const boxHeight = Math.min(20, rowHeight)
           return (
-            <React.Fragment key={source.name + '-' + idx}>
+            <Fragment key={source.name + '-' + idx}>
               {!needsFullHeightScalebar ? (
                 <RectBg
                   y={idx * rowHeight + 1}
@@ -161,7 +161,7 @@ const ColorLegend = observer(
                   {source.name}
                 </text>
               ) : null}
-            </React.Fragment>
+            </Fragment>
           )
         })}
       </>

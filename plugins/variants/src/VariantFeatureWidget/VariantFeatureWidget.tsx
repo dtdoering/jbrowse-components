@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react'
+
 import { observer } from 'mobx-react'
 import { Divider, Paper } from '@mui/material'
 import { FeatureDetails } from '@jbrowse/core/BaseFeatureWidget/BaseFeatureDetail'

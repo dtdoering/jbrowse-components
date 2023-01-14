@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { renderToStaticMarkup } from 'react-dom/server'
 import { when } from 'mobx'
 import { getParent } from 'mobx-state-tree'

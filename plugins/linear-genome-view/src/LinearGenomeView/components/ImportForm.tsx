@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy } from 'react'
+import  { useState, useEffect, lazy } from 'react'
 import { makeStyles } from 'tss-react/mui'
 import { observer } from 'mobx-react'
 import { getSession } from '@jbrowse/core/util'

@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import React, { useEffect, useState } from 'react'
+import  { useEffect, useState } from 'react'
 import { observer } from 'mobx-react'
 import { PluginRecord } from '@jbrowse/core/PluginLoader'
 import { Region } from '@jbrowse/core/util/types'

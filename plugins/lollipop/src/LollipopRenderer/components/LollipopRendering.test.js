@@ -1,5 +1,5 @@
 import SimpleFeature from '@jbrowse/core/util/simpleFeature'
-import React from 'react'
+
 import { render } from '@testing-library/react'
 import ConfigSchema from '../configSchema'
 import { FloatingLayout, PrecomputedFloatingLayout } from '../Layout'

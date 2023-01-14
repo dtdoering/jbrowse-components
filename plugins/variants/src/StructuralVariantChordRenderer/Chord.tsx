@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { observer } from 'mobx-react'
 import { polarToCartesian, Feature } from '@jbrowse/core/util'
 import {

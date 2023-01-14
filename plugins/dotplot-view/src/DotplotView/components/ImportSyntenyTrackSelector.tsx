@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import  { useState, useEffect } from 'react'
 import { Select, MenuItem, Paper, Typography } from '@mui/material'
 import { getTrackName } from '@jbrowse/core/util/tracks'
 import { getSession } from '@jbrowse/core/util'

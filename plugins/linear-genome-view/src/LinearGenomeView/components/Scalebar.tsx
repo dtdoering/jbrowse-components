@@ -1,3 +1,4 @@
+import { forwardRef, CSSProperties } from 'react'
 import { Paper, Typography } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import {
@@ -6,7 +7,7 @@ import {
   InterRegionPaddingBlock,
 } from '@jbrowse/core/util/blockTypes'
 import { observer } from 'mobx-react'
-import React from 'react'
+
 import { LinearGenomeViewModel } from '..'
 import {
   ContentBlock as ContentBlockComponent,
@@ -152,11 +153,11 @@ const RenderedScalebarLabels = observer(({ model }: { model: LGV }) => {
 
 interface ScalebarProps {
   model: LGV
-  style?: React.CSSProperties
+  style?: CSSProperties
   className?: string
 }
 
-const Scalebar = React.forwardRef<HTMLDivElement, ScalebarProps>(
+const Scalebar = forwardRef<HTMLDivElement, ScalebarProps>(
   ({ model, style, className, ...other }, ref) => {
     const { classes, cx } = useStyles()
 

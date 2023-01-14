@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { observer } from 'mobx-react'
 import { onSnapshot } from 'mobx-state-tree'
 import { useQueryParam, StringParam } from 'use-query-params'

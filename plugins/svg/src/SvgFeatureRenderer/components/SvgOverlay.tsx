@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { bpSpanPx } from '@jbrowse/core/util'
 import { Feature } from '@jbrowse/core/util/simpleFeature'
 import { Region } from '@jbrowse/core/util/types'

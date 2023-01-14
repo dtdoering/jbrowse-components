@@ -1,4 +1,4 @@
-import React from 'react'
+import { createRef } from 'react'
 import { readConfObject } from '@jbrowse/core/configuration'
 import { bpSpanPx, measureText } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
@@ -48,7 +48,7 @@ function ArcRendering(props: any) {
     const caption = readConfObject(config, 'caption', { feature })
     const strokeWidth = readConfObject(config, 'thickness', { feature }) || 1
     const height = readConfObject(config, 'height', { feature }) || 100
-    const ref = React.createRef<SVGPathElement>()
+    const ref = createRef<SVGPathElement>()
     const tooltipWidth = 20 + measureText(caption?.toString())
 
     const t = 0.5

@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react'
+import  { Suspense } from 'react'
 import { observer } from 'mobx-react'
 import { getEnv } from 'mobx-state-tree'
 import { readConfObject } from '@jbrowse/core/configuration'

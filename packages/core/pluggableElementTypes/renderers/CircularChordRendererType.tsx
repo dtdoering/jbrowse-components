@@ -1,4 +1,4 @@
-import React from 'react'
+
 import SimpleFeature, {
   SimpleFeatureSerialized,
 } from '../../util/simpleFeature'

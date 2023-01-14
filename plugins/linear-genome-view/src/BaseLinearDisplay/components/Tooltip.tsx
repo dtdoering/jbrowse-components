@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { ReactNode, isValidElement, forwardRef, useState, useMemo } from 'react'
 import { getConf } from '@jbrowse/core/configuration'
 import { SanitizedHTML } from '@jbrowse/core/ui'
 import { observer } from 'mobx-react'
@@ -29,13 +29,13 @@ const useStyles = makeStyles()(theme => ({
   },
 }))
 
-const TooltipContents = React.forwardRef<
+const TooltipContents = forwardRef<
   HTMLDivElement,
-  { message: React.ReactNode | string }
->(({ message }: { message: React.ReactNode | string }, ref) => {
+  { message: ReactNode | string }
+>(({ message }: { message: ReactNode | string }, ref) => {
   return (
     <div ref={ref}>
-      {React.isValidElement(message) ? (
+      {isValidElement(message) ? (
         message
       ) : message ? (
         <SanitizedHTML html={String(message)} />

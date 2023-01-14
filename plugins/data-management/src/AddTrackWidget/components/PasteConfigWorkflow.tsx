@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import  { useState } from 'react'
 import { Button, TextField } from '@mui/material'
 import { ErrorMessage } from '@jbrowse/core/ui'
 import { makeStyles } from 'tss-react/mui'

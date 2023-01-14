@@ -1,4 +1,4 @@
-import React from 'react'
+
 import BlockMsg from '../components/BlockMsg'
 import { Stats } from '@jbrowse/core/data_adapters/BaseAdapter'
 

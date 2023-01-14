@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { observer } from 'mobx-react'
 import { Axis, LEFT, RIGHT } from 'react-d3-axis-mod'
 import { WiggleDisplayModel } from '../models/model'

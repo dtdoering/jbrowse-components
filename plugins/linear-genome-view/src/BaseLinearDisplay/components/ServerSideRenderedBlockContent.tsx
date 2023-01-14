@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { isValidElement, useEffect, useState } from 'react'
 import { makeStyles } from 'tss-react/mui'
 import { observer } from 'mobx-react'
 import { getParent } from 'mobx-state-tree'
@@ -75,7 +75,7 @@ const ServerSideRenderedBlockContent = observer(function ({
   }
   if (model.message) {
     // the message can be a fully rendered react component, e.g. the region too large message
-    return React.isValidElement(model.message) ? (
+    return isValidElement(model.message) ? (
       model.message
     ) : (
       <BlockMsg message={`${model.message}`} severity="info" />

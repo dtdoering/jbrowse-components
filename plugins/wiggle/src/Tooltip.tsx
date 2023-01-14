@@ -1,4 +1,9 @@
-import React, { useMemo, useState } from 'react'
+import {
+  RefAttributes,
+  ForwardRefExoticComponent,
+  useMemo,
+  useState,
+} from 'react'
 import { observer } from 'mobx-react'
 import { alpha, Portal } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
@@ -41,9 +46,9 @@ type Coord = [number, number]
 
 // React.forwardRef component for the tooltip, the ref is used for measuring
 // the size of the tooltip
-export type TooltipContentsComponent = React.ForwardRefExoticComponent<
+export type TooltipContentsComponent = ForwardRefExoticComponent<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  { feature: Feature; model: any } & React.RefAttributes<HTMLDivElement>
+  { feature: Feature; model: any } & RefAttributes<HTMLDivElement>
 >
 
 function Tooltip({

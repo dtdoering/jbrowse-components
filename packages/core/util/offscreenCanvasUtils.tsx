@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { CanvasSequence } from 'canvas-sequencer'
 
 // locals

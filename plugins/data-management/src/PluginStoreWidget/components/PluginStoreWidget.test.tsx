@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { getSnapshot, getParent } from 'mobx-state-tree'
 import { ThemeProvider } from '@mui/material/styles'
 import { render, cleanup, fireEvent, waitFor } from '@testing-library/react'

@@ -1,4 +1,4 @@
-import React from 'react'
+
 import TextSearchAdapterType from '../pluggableElementTypes/TextSearchAdapterType'
 import { SearchType } from '../data_adapters/BaseAdapter'
 

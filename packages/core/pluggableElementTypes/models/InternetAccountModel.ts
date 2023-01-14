@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { Instance, types } from 'mobx-state-tree'
 import { getConf } from '../../configuration'
 import { RemoteFileWithRangeCache } from '../../util/io'

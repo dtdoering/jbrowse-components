@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { IAnyModelType } from 'mobx-state-tree'
 import PluggableElementBase from './PluggableElementBase'
 

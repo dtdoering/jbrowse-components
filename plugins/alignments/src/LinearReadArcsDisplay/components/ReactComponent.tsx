@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { isAlive } from 'mobx-state-tree'
 import { makeStyles } from 'tss-react/mui'
 import { observer } from 'mobx-react'

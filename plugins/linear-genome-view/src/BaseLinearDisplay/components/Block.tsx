@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { BaseBlock } from '@jbrowse/core/util/blockTypes'
 import { makeStyles } from 'tss-react/mui'
 import { observer } from 'mobx-react'

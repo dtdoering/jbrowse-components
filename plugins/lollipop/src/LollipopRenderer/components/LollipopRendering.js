@@ -1,9 +1,8 @@
 import { readConfObject } from '@jbrowse/core/configuration'
-import { PropTypes as CommonPropTypes } from '@jbrowse/core/util/types/mst'
 import { bpToPx } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
-import ReactPropTypes from 'prop-types'
-import React from 'react'
+
+// locals
 import Lollipop from './Lollipop'
 import Stick from './Stick'
 
@@ -91,8 +90,8 @@ function LollipopRendering(props) {
     bpPerPx,
     layout,
     config,
-    features,
-    displayModel: { selectedFeatureId },
+    features = new Map(),
+    displayModel: { selectedFeatureId } = {},
   } = props
 
   const [region] = regions
@@ -159,45 +158,6 @@ function LollipopRendering(props) {
       {lollipopsRendered}
     </svg>
   )
-}
-
-LollipopRendering.propTypes = {
-  layout: ReactPropTypes.shape({
-    getLayout: ReactPropTypes.func.isRequired,
-    add: ReactPropTypes.func.isRequired,
-    getTotalHeight: ReactPropTypes.func.isRequired,
-  }).isRequired,
-
-  regions: ReactPropTypes.arrayOf(CommonPropTypes.Region).isRequired,
-  bpPerPx: ReactPropTypes.number.isRequired,
-  features: ReactPropTypes.instanceOf(Map),
-  config: CommonPropTypes.ConfigSchema.isRequired,
-  displayModel: ReactPropTypes.shape({
-    /** id of the currently selected feature, if any */
-    selectedFeatureId: ReactPropTypes.string,
-  }),
-
-  onMouseDown: ReactPropTypes.func,
-  onMouseUp: ReactPropTypes.func,
-  onMouseEnter: ReactPropTypes.func,
-  onMouseLeave: ReactPropTypes.func,
-  onMouseOver: ReactPropTypes.func,
-  onMouseOut: ReactPropTypes.func,
-  onClick: ReactPropTypes.func,
-}
-
-LollipopRendering.defaultProps = {
-  displayModel: {},
-
-  features: new Map(),
-
-  onMouseDown: undefined,
-  onMouseUp: undefined,
-  onMouseEnter: undefined,
-  onMouseLeave: undefined,
-  onMouseOver: undefined,
-  onMouseOut: undefined,
-  onClick: undefined,
 }
 
 export default observer(LollipopRendering)

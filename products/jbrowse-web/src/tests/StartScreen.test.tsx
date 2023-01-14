@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import React from 'react'
 import { fireEvent, render } from '@testing-library/react'
 
 import StartScreen from '../StartScreen'
@@ -8,15 +7,13 @@ import { setup, getPluginManager } from './util'
 
 setup()
 
-describe('<StartScreen />', () => {
-  it('renders with an empty views config', async () => {
-    const pluginManager = getPluginManager({})
-    const root = pluginManager.rootModel
-    const { findByText } = render(
-      <StartScreen rootModel={root} onFactoryReset={factoryReset} />,
-    )
-    expect(await findByText('Start a new session')).toBeTruthy()
-  })
+test('renders with an empty views config', async () => {
+  const pluginManager = getPluginManager({})
+  const root = pluginManager.rootModel
+  const { findByText } = render(
+    <StartScreen rootModel={root} onFactoryReset={factoryReset} />,
+  )
+  await findByText('Start a new session')
 })
 
 test('Add New Session', async () => {

@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { Paper } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { observer } from 'mobx-react'

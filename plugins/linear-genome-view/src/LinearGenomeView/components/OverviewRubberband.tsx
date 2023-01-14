@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import  { useRef, useEffect, useState } from 'react'
 import { Tooltip } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { getSession, stringify } from '@jbrowse/core/util'

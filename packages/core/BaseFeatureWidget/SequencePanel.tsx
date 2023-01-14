@@ -1,5 +1,4 @@
-import React from 'react'
-
+import { forwardRef } from 'react'
 import { defaultCodonTable, generateCodonTable, revcom } from '../util'
 import {
   ParentFeat,
@@ -17,7 +16,7 @@ interface SequencePanelProps {
   mode: string
   intronBp?: number
 }
-const SequencePanel = React.forwardRef<HTMLDivElement, SequencePanelProps>(
+const SequencePanel = forwardRef<HTMLDivElement, SequencePanelProps>(
   (props, ref) => {
     const { feature, mode, intronBp = 10 } = props
     let {

@@ -1,4 +1,4 @@
-import React from 'react'
+
 
 const ErrorMessage = ({ error }: { error: unknown }) => {
   let snapshotError = ''

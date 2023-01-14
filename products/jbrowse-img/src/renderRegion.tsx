@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { createViewState } from '@jbrowse/react-linear-genome-view'
 import {
   LinearGenomeViewModel,

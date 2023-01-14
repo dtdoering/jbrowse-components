@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { FileSelector } from '@jbrowse/core/ui'
 import { Paper } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'

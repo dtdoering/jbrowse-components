@@ -1,6 +1,4 @@
-import React from 'react'
 import { render } from '@testing-library/react'
-
 import { toMatchImageSnapshot } from 'jest-image-snapshot'
 import { LocalFile } from 'generic-filehandle'
 import rangeParser from 'range-parser'

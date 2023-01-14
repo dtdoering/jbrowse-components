@@ -1,4 +1,4 @@
-import React from 'react'
+import { forwardRef } from 'react'
 import { observer } from 'mobx-react'
 import { Feature } from '@jbrowse/core/util'
 import { Tooltip } from '@jbrowse/plugin-wiggle'
@@ -32,7 +32,7 @@ const pct = (n: number, total: number) => `${toP((n / (total || 1)) * 100)}%`
 interface Props {
   feature: Feature
 }
-const TooltipContents = React.forwardRef<HTMLDivElement, Props>(function (
+const TooltipContents = forwardRef<HTMLDivElement, Props>(function (
   { feature },
   reactRef,
 ) {

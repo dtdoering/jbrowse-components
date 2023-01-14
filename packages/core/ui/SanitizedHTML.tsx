@@ -1,4 +1,4 @@
-import React from 'react'
+
 import escapeHTML from 'escape-html'
 import dompurify from 'dompurify'
 

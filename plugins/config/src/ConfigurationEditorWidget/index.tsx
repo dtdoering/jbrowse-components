@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { observer } from 'mobx-react'
 import { isStateTreeNode, getType } from 'mobx-state-tree'
 import { ConfigurationSchema } from '@jbrowse/core/configuration'

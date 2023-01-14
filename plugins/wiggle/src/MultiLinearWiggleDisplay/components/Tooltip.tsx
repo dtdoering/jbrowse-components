@@ -1,4 +1,4 @@
-import React from 'react'
+import { forwardRef } from 'react'
 import { observer } from 'mobx-react'
 import { Feature } from '@jbrowse/core/util'
 
@@ -8,7 +8,7 @@ import Tooltip, { TooltipContentsComponent } from '../../Tooltip'
 
 const en = (n: number) => n.toLocaleString('en-US')
 
-const TooltipContents = React.forwardRef<
+const TooltipContents = forwardRef<
   HTMLDivElement,
   { model: { sources: Source[] }; feature: Feature }
 >(({ model, feature }, ref) => {

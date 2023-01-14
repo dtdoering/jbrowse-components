@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { IAnyStateTreeNode } from 'mobx-state-tree'
 import { SimpleFeatureSerializedNoId } from '../util/simpleFeature'
 import { AbstractViewModel } from '../util'

@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { observer } from 'mobx-react'
 import { List, Typography } from '@mui/material'
 import PluginManager from '@jbrowse/core/PluginManager'

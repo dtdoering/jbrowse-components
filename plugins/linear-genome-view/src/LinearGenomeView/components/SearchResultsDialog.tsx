@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { resolveIdentifier, getRoot } from 'mobx-state-tree'
 import { getSession, getEnv } from '@jbrowse/core/util'
 import { Dialog } from '@jbrowse/core/ui'

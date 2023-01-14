@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { createViewState, JBrowseCircularGenomeView } from '../src'
 
 export const Volvox = () => {

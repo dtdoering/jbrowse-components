@@ -1,4 +1,11 @@
-import React, { useContext, useMemo, useCallback } from 'react'
+import {
+  MouseEvent,
+  ReactNode,
+  createContext,
+  useContext,
+  useMemo,
+  useCallback,
+} from 'react'
 import {
   Divider,
   ListItemIcon,
@@ -19,7 +26,7 @@ import {
 import HoverMenu from 'material-ui-popup-state/HoverMenu'
 import ChevronRight from '@mui/icons-material/ChevronRight'
 
-const CascadingContext = React.createContext({
+const CascadingContext = createContext({
   parentPopupState: null,
   rootPopupState: null,
 } as { parentPopupState: PopupState | null; rootPopupState: PopupState | null })
@@ -30,14 +37,14 @@ function CascadingMenuItem({
 }: {
   onClick?: Function
   disabled?: boolean
-  children: React.ReactNode
+  children: ReactNode
 }) {
   const { rootPopupState } = useContext(CascadingContext)
   if (!rootPopupState) {
     throw new Error('must be used inside a CascadingMenu')
   }
   const handleClick = useCallback(
-    (event: React.MouseEvent) => {
+    (event: MouseEvent) => {
       rootPopupState.close()
       onClick?.(event)
     },
@@ -53,14 +60,14 @@ function CascadingSubmenu({
   popupId,
   ...props
 }: {
-  children: React.ReactNode
+  children: ReactNode
   title: string
   onMenuItemClick: Function
   menuItems: JBMenuItem[]
   inset: boolean
   popupId: string
 }) {
-  const { parentPopupState } = React.useContext(CascadingContext)
+  const { parentPopupState } = useContext(CascadingContext)
   const popupState = usePopupState({
     popupId,
     variant: 'popover',
@@ -122,8 +129,8 @@ function CascadingMenu({
   onMenuItemClick: Function
   menuItems: JBMenuItem[]
 }) {
-  const { rootPopupState } = React.useContext(CascadingContext)
-  const context = React.useMemo(
+  const { rootPopupState } = useContext(CascadingContext)
+  const context = useMemo(
     () => ({
       rootPopupState: rootPopupState || popupState,
       parentPopupState: popupState,
@@ -162,7 +169,7 @@ function CascadingMenuList({
   onMenuItemClick: Function
 }) {
   function handleClick(callback: Function) {
-    return (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
+    return (event: MouseEvent<HTMLLIElement, MouseEvent>) => {
       onMenuItemClick(event, callback)
     }
   }

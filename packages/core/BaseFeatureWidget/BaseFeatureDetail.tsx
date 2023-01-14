@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react'
+import { ReactNode, isValidElement, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import {
   Accordion,
@@ -155,12 +155,12 @@ export const FieldName = ({
   )
 }
 
-export const BasicValue = ({ value }: { value: string | React.ReactNode }) => {
+export const BasicValue = ({ value }: { value: string | ReactNode }) => {
   const { classes } = useStyles()
   const isLink = `${value}`.match(/^https?:\/\//)
   return (
     <div className={classes.fieldValue}>
-      {React.isValidElement(value) ? (
+      {isValidElement(value) ? (
         value
       ) : isLink ? (
         <SanitizedHTML html={`<a href="${value}">${value}</a>`} />

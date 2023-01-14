@@ -1,5 +1,5 @@
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon'
-import React from 'react'
+
 
 export function CursorMove(props: SvgIconProps) {
   return (

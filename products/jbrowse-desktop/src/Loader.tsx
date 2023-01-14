@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import  { useState, useCallback, useEffect } from 'react'
 import { observer } from 'mobx-react'
 import PluginManager from '@jbrowse/core/PluginManager'
 import { CssBaseline, ThemeProvider } from '@mui/material'

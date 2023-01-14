@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { ThemeOptions } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import { CanvasSequence } from 'canvas-sequencer'

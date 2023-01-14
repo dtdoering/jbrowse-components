@@ -1,4 +1,4 @@
-import React, { lazy, useEffect, useState, Suspense } from 'react'
+import  { lazy, useEffect, useState, Suspense } from 'react'
 import {
   IconButton,
   IconButtonProps as IconButtonPropsType,

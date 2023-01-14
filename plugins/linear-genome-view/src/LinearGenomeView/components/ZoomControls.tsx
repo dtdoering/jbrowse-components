@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import  { useState, useEffect } from 'react'
 import { observer } from 'mobx-react'
 import { Slider, IconButton } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'

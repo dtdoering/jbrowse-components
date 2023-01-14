@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react'
+import { FC, Fragment, isValidElement } from 'react'
 import { BaseDisplay } from '@jbrowse/core/pluggableElementTypes/models'
 import { getConf } from '@jbrowse/core/configuration'
 import { MenuItem } from '@jbrowse/core/ui'
@@ -144,8 +144,8 @@ function stateModelFactory() {
       /**
        * #getter
        */
-      get TooltipComponent(): React.FC<any> {
-        return Tooltip as unknown as React.FC
+      get TooltipComponent(): FC<any> {
+        return Tooltip as unknown as FC
       },
 
       /**
@@ -169,7 +169,7 @@ function stateModelFactory() {
        * make this return a react component
        */
       get DisplayMessageComponent() {
-        return undefined as undefined | React.FC<any>
+        return undefined as undefined | FC<any>
       },
     }))
     .views(self => ({
@@ -758,7 +758,7 @@ function stateModelFactory() {
               const clipid = getId(id, index)
 
               return (
-                <React.Fragment key={`frag-${index}`}>
+                <Fragment key={`frag-${index}`}>
                   <defs>
                     <clipPath id={clipid}>
                       <rect
@@ -771,7 +771,7 @@ function stateModelFactory() {
                   </defs>
                   <g transform={`translate(${offset} 0)`}>
                     <g clipPath={`url(#${clipid})`}>
-                      {React.isValidElement(rendering.reactElement) ? (
+                      {isValidElement(rendering.reactElement) ? (
                         rendering.reactElement
                       ) : (
                         <g
@@ -781,7 +781,7 @@ function stateModelFactory() {
                       )}
                     </g>
                   </g>
-                </React.Fragment>
+                </Fragment>
               )
             })}
           </>

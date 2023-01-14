@@ -1,4 +1,4 @@
-import React, { lazy, useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import { observer } from 'mobx-react'
 import { TextField } from '@mui/material'
 
@@ -26,9 +26,9 @@ export const ColorSlot = (props: {
         {...TextFieldProps}
       />
       <div style={{ marginTop: 10 }}>
-        <React.Suspense fallback={<div />}>
+        <Suspense fallback={<div />}>
           <ColorPicker color={value} onChange={event => onChange(event)} />
-        </React.Suspense>
+        </Suspense>
       </div>
     </div>
   )

@@ -4,7 +4,12 @@ module.exports = api => {
     babelrcRoots: ['.', './packages/*', './products/*', './plugins/*'],
     comments: true,
     presets: [
-      '@babel/preset-react',
+      [
+        '@babel/preset-react',
+        {
+          runtime: 'automatic',
+        },
+      ],
       [
         '@babel/preset-env',
         {

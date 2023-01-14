@@ -1,4 +1,4 @@
-import React from 'react'
+import { Fragment } from 'react'
 import { Feat, stitch } from './util'
 
 // note that these are currently put into the style section instead of being
@@ -67,7 +67,7 @@ export function GenecDNA({
         const intron = sequence.slice(chunk.end, chunks[idx + 1]?.start)
 
         return (
-          <React.Fragment key={JSON.stringify(chunk)}>
+          <Fragment key={JSON.stringify(chunk)}>
             <span
               style={{
                 background: chunk.type === 'CDS' ? cdsColor : utrColor,
@@ -82,7 +82,7 @@ export function GenecDNA({
                   : intron}
               </span>
             ) : null}
-          </React.Fragment>
+          </Fragment>
         )
       })}
 

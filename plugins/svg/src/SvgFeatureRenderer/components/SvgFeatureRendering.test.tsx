@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { render, fireEvent } from '@testing-library/react'
 import GranularRectLayout from '@jbrowse/core/util/layouts/GranularRectLayout'
 import PrecomputedLayout from '@jbrowse/core/util/layouts/PrecomputedLayout'

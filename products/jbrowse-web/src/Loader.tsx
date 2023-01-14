@@ -1,4 +1,4 @@
-import React, { lazy, useEffect, useState, Suspense } from 'react'
+import { lazy, useEffect, useState, Suspense } from 'react'
 import PluginManager from '@jbrowse/core/PluginManager'
 import { observer } from 'mobx-react'
 import { inDevelopment } from '@jbrowse/core/util'

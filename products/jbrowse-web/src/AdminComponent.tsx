@@ -1,4 +1,3 @@
-import React from 'react'
 import type PluginManager from '@jbrowse/core/PluginManager'
 import { AppRootModel } from '@jbrowse/core/util/types'
 import { observer } from 'mobx-react'

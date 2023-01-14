@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { Box, Button, Typography, FormControl } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { isElectron } from '../../util'

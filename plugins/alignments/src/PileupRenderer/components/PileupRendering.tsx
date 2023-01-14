@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react'
+import  { useRef, useState, useEffect } from 'react'
 import { Region } from '@jbrowse/core/util/types'
 import { PrerenderedCanvas } from '@jbrowse/core/ui'
 import { bpSpanPx } from '@jbrowse/core/util'

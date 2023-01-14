@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import  { useState } from 'react'
 import { Button, Paper, Typography, alpha } from '@mui/material'
 import { getSession } from '@jbrowse/core/util'
 import { makeStyles } from 'tss-react/mui'

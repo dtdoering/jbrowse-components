@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import  { useState } from 'react'
 import copy from 'copy-to-clipboard'
 import { Paper } from '@mui/material'
 import { observer } from 'mobx-react'

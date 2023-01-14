@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react'
+import { Fragment } from 'react'
 import { AnyConfigurationModel } from '@jbrowse/core/configuration'
 import { contrastingTextColor } from '@jbrowse/core/util/color'
 import { Feature } from '@jbrowse/core/util'
@@ -73,7 +73,7 @@ function Translation(props: {
           : w * index + effectiveFrame / scale - drop
         const { letter, codon } = element
         return (
-          <React.Fragment key={`${index}-${letter}`}>
+          <Fragment key={`${index}-${letter}`}>
             <rect
               x={x}
               y={y}
@@ -100,7 +100,7 @@ function Translation(props: {
                 {letter}
               </text>
             ) : null}
-          </React.Fragment>
+          </Fragment>
         )
       })}
     </>
@@ -135,7 +135,7 @@ function DNA(props: {
         const color = theme.palette.bases[letter.toUpperCase()]
         const x = reverse ? rightPx - (index + 1) * w : leftPx + index * w
         return (
-          <React.Fragment key={index}>
+          <Fragment key={index}>
             <rect
               x={x}
               y={y}
@@ -155,7 +155,7 @@ function DNA(props: {
                 {letter}
               </text>
             ) : null}
-          </React.Fragment>
+          </Fragment>
         )
       })}
     </>

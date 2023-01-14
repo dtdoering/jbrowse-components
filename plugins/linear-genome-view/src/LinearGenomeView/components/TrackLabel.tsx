@@ -1,4 +1,4 @@
-import React from 'react'
+import { forwardRef } from 'react'
 import { IconButton, Paper, Typography, alpha } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { observer } from 'mobx-react'
@@ -60,7 +60,7 @@ interface Props {
   className?: string
 }
 
-const TrackLabel = React.forwardRef<HTMLDivElement, Props>(
+const TrackLabel = forwardRef<HTMLDivElement, Props>(
   ({ track, className }, ref) => {
     const { classes, cx } = useStyles()
     const view = getContainingView(track) as LGV
