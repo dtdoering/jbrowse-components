@@ -61,22 +61,6 @@ const blockState = types
       doReload() {
         self.reloadFlag = self.reloadFlag + 1
       },
-      afterAttach() {
-        const display = getContainingDisplay(self)
-        makeAbortableReaction(
-          self as any,
-          renderBlockData,
-          renderBlockEffect, // reaction doesn't expect async here
-          {
-            name: `${display.id}/${assembleLocString(self.region)} rendering`,
-            delay: display.renderDelay,
-            fireImmediately: true,
-          },
-          this.setLoading,
-          this.setRendered,
-          this.setError,
-        )
-      },
       setStatus(message: string) {
         self.status = message
       },
@@ -262,10 +246,23 @@ export function renderBlockData(
   }
 }
 
-async function renderBlockEffect(
-  props: ReturnType<typeof renderBlockData> | undefined,
-  signal: AbortSignal,
+interface RenderProps {
+  displayError: Error
+  rendererType: any
+  renderProps: { [key: string]: any }
+  rpcManager: { call: Function }
+  cannotBeRenderedReason: string
+  renderArgs: { [key: string]: any }
+}
+
+interface ErrorProps {
+  displayError: string
+}
+
+export async function renderBlockEffect(
+  props: RenderProps | ErrorProps | undefined,
   self: BlockModel,
+  signal?: AbortSignal,
 ) {
   if (!props) {
     return
