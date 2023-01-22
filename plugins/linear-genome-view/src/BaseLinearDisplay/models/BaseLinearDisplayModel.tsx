@@ -202,7 +202,11 @@ function stateModelFactory() {
       /**
        * #getter
        */
-      getFeatureOverlapping(blockKey: string, x: number, y: number) {
+      getFeatureOverlapping(
+        blockKey: string,
+        x: number,
+        y: number,
+      ): string | undefined {
         return self.blockState.get(blockKey)?.layout?.getByCoord(x, y)
       },
 
@@ -649,8 +653,7 @@ function stateModelFactory() {
        *  react node allows user to force load at current setting
        */
       regionCannotBeRendered(_region: Region) {
-        const { regionTooLarge } = self
-        return regionTooLarge ? <TooLargeMessage model={self} /> : null
+        return self.regionTooLarge ? <TooLargeMessage model={self} /> : null
       },
 
       /**
@@ -683,10 +686,11 @@ function stateModelFactory() {
        */
       renderProps() {
         const view = getContainingView(self) as LGV
+        const { currBpPerPx } = self
+        const { bpPerPx } = view
         return {
           ...getParentRenderProps(self),
-          notReady:
-            self.currBpPerPx !== view.bpPerPx || !self.estimatedRegionStats,
+          notReady: currBpPerPx !== bpPerPx || !self.estimatedRegionStats,
           rpcDriverName: self.rpcDriverName,
           displayModel: self,
           onFeatureClick(_: unknown, featureId?: string) {
