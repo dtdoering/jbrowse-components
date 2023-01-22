@@ -35,6 +35,7 @@ import { Tooltip } from '../components/BaseLinearDisplay'
 import TooLargeMessage from '../components/TooLargeMessage'
 import BlockState, { renderBlockData,renderBlockEffect } from './serverSideRenderedBlock'
 import { ThemeOptions } from '@mui/material'
+import { getId, getDisplayStr } from './util'
 
 type LGV = LinearGenomeViewModel
 
@@ -46,25 +47,7 @@ export interface Layout {
   name: string
 }
 
-// stabilize clipid under test for snapshot
-function getId(id: string, index: number) {
-  const isJest = typeof jest === 'undefined'
-  return `clip-${isJest ? id : 'jest'}-${index}`
-}
-
 type LayoutRecord = [number, number, number, number]
-
-function getDisplayStr(totalBytes: number) {
-  let displayBp
-  if (Math.floor(totalBytes / 1000000) > 0) {
-    displayBp = `${Number.parseFloat((totalBytes / 1000000).toPrecision(3))} Mb`
-  } else if (Math.floor(totalBytes / 1000) > 0) {
-    displayBp = `${Number.parseFloat((totalBytes / 1000).toPrecision(3))} Kb`
-  } else {
-    displayBp = `${Math.floor(totalBytes)} bytes`
-  }
-  return displayBp
-}
 
 const minDisplayHeight = 20
 
