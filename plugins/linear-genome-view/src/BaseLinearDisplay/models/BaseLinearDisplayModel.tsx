@@ -33,7 +33,10 @@ import MenuOpenIcon from '@mui/icons-material/MenuOpen'
 import { LinearGenomeViewModel, ExportSvgOptions } from '../../LinearGenomeView'
 import { Tooltip } from '../components/BaseLinearDisplay'
 import TooLargeMessage from '../components/TooLargeMessage'
-import BlockState, { renderBlockData,renderBlockEffect } from './serverSideRenderedBlock'
+import BlockState, {
+  renderBlockData,
+  renderBlockEffect,
+} from './serverSideRenderedBlock'
 import { ThemeOptions } from '@mui/material'
 import { getId, getDisplayStr } from './util'
 
@@ -167,7 +170,7 @@ function stateModelFactory() {
       get features() {
         const featureMaps = []
         for (const block of self.blockState.values()) {
-          if (block && block.features) {
+          if (block?.features) {
             featureMaps.push(block.features)
           }
         }
@@ -267,18 +270,19 @@ function stateModelFactory() {
           autorun(
             async () => {
               const view = getContainingView(self) as LGV
-              if (view.initialized) {
-                await Promise.all(
-                  [...self.blockState].map(async ([_key, block]) => {
-                    try {
-                      const data = renderBlockData(block)
-                      await renderBlockEffect(data, block)
-                    } catch (e) {
-                      block.setError(e)
-                    }
-                  }),
-                )
+              if (!view.initialized) {
+                return
               }
+              await Promise.all(
+                [...self.blockState].map(async ([_key, block]) => {
+                  try {
+                    const data = renderBlockData(block)
+                    await renderBlockEffect(data, block)
+                  } catch (e) {
+                    block.setError(e)
+                  }
+                }),
+              )
             },
             {
               name: 'blockRenderer',

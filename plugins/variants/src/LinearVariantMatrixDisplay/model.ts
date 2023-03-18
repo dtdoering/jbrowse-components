@@ -1,7 +1,7 @@
 import { ConfigurationReference } from '@jbrowse/core/configuration'
 
 import { linearBasicDisplayModelFactory } from '@jbrowse/plugin-linear-genome-view'
-import { types } from 'mobx-state-tree'
+import { Instance, types } from 'mobx-state-tree'
 
 // locals
 import { AnyConfigurationSchemaType } from '@jbrowse/core/configuration'
@@ -9,7 +9,6 @@ import { AnyConfigurationSchemaType } from '@jbrowse/core/configuration'
 /**
  * #stateModel LinearVariantMatrixDisplay
  * extends `LinearBasicDisplay`
- * very similar to basic display, but provides custom widget on feature click
  */
 export default function stateModelFactory(
   configSchema: AnyConfigurationSchemaType,
@@ -33,9 +32,15 @@ export default function stateModelFactory(
       samples: undefined as string[] | undefined,
     }))
     .views(() => ({
+      /**
+       * #getter
+       */
       get blockType() {
         return 'dynamicBlocks'
       },
+      /**
+       * #getter
+       */
       get renderDelay() {
         return 1000
       },
@@ -51,6 +56,9 @@ export default function stateModelFactory(
     .views(self => {
       const { renderProps: superRenderProps } = self
       return {
+        /**
+         * #method
+         */
         renderProps() {
           const superProps = superRenderProps()
           return {
@@ -61,3 +69,9 @@ export default function stateModelFactory(
       }
     })
 }
+
+export type LinearVariantMatrixDisplayStateModel = ReturnType<
+  typeof stateModelFactory
+>
+export type LinearVariantMatrixDisplayModel =
+  Instance<LinearVariantMatrixDisplayStateModel>

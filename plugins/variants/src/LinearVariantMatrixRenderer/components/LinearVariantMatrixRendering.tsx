@@ -2,11 +2,11 @@ import React, { useEffect } from 'react'
 import { PrerenderedCanvas } from '@jbrowse/core/ui'
 import { Region } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
-import { LinearVariantDisplayModel } from '../../LinearVariantDisplay/model'
+import { LinearVariantMatrixDisplayModel } from '../../LinearVariantMatrixDisplay/model'
 
 export default observer(function LinearVariantMatrixRendering(props: {
   blockKey: string
-  displayModel: LinearVariantDisplayModel
+  displayModel: LinearVariantMatrixDisplayModel
   width: number
   height: number
   regions: Region[]
