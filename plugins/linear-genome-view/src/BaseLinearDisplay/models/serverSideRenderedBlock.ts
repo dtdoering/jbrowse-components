@@ -269,3 +269,12 @@ export async function renderBlockEffect(
     }
   }
 }
+
+export async function renderBlock(block: BlockModel) {
+  try {
+    const data = renderBlockData(block)
+    await renderBlockEffect(data, block)
+  } catch (e) {
+    block.setError(e)
+  }
+}

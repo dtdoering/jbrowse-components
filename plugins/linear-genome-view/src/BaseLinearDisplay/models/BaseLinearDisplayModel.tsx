@@ -35,7 +35,7 @@ import { Tooltip } from '../components/BaseLinearDisplay'
 import TooLargeMessage from '../components/TooLargeMessage'
 import BlockState, {
   renderBlockData,
-  renderBlockEffect,
+  renderBlock,
 } from './serverSideRenderedBlock'
 import { ThemeOptions } from '@mui/material'
 import { getId, getDisplayStr } from './util'
@@ -273,16 +273,9 @@ function stateModelFactory() {
               if (!view.initialized) {
                 return
               }
-              await Promise.all(
-                [...self.blockState].map(async ([_key, block]) => {
-                  try {
-                    const data = renderBlockData(block)
-                    await renderBlockEffect(data, block)
-                  } catch (e) {
-                    block.setError(e)
-                  }
-                }),
-              )
+              ;[...self.blockState.values()]
+                .filter(b => !b.filled)
+                .forEach(b => renderBlock(b))
             },
             {
               name: 'blockRenderer',
@@ -307,7 +300,7 @@ function stateModelFactory() {
               })
               self.blockState.forEach((_, key) => {
                 if (!blocksPresent[key]) {
-                  // this.deleteBlock(key)
+                  this.deleteBlock(key)
                 }
               })
             }
