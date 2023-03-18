@@ -137,7 +137,7 @@ any
 
 ```js
 // type
-;(blockKey: string, x: number, y: number) => any
+;(blockKey: string, x: number, y: number) => string
 ```
 
 #### getter: getFeatureByID
