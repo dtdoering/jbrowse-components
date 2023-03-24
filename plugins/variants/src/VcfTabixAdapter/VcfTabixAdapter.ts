@@ -32,6 +32,7 @@ export default class extends BaseFeatureDataAdapter {
       tbiFilehandle: !isCSI ? openLocation(location, pm) : undefined,
       chunkCacheSize: 50 * 2 ** 20,
       chunkSizeLimit: 1000000000,
+      yieldTime: 0,
     })
 
     const header = await vcf.getHeader()

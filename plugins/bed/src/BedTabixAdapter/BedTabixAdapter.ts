@@ -3,14 +3,15 @@ import {
   BaseFeatureDataAdapter,
   BaseOptions,
 } from '@jbrowse/core/data_adapters/BaseAdapter'
-import { openLocation } from '@jbrowse/core/util/io'
+import PluginManager from '@jbrowse/core/PluginManager'
 import { ObservableCreate } from '@jbrowse/core/util/rxjs'
 import { FileLocation, Region, Feature } from '@jbrowse/core/util'
-import { TabixIndexedFile } from '@gmod/tabix'
-import { featureData } from '../util'
-import PluginManager from '@jbrowse/core/PluginManager'
 import { AnyConfigurationModel } from '@jbrowse/core/configuration'
+import { openLocation } from '@jbrowse/core/util/io'
 import { getSubAdapterType } from '@jbrowse/core/data_adapters/dataAdapterCache'
+import { TabixIndexedFile } from '@gmod/tabix'
+// locals
+import { featureData } from '../util'
 
 export default class BedTabixAdapter extends BaseFeatureDataAdapter {
   private parser: BED
@@ -39,7 +40,7 @@ export default class BedTabixAdapter extends BaseFeatureDataAdapter {
       filehandle: openLocation(bedGzLoc, pm),
       csiFilehandle: type === 'CSI' ? openLocation(loc, pm) : undefined,
       tbiFilehandle: type !== 'CSI' ? openLocation(loc, pm) : undefined,
-      chunkCacheSize: 50 * 2 ** 20,
+      yieldTime: 0,
     })
     this.columnNames = this.getConf('columnNames')
     this.scoreColumn = this.getConf('scoreColumn')

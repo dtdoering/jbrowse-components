@@ -38,22 +38,16 @@ export default class extends BaseFeatureDataAdapter {
     super(config, getSubAdapter, pluginManager)
     const gffGzLocation = readConfObject(config, 'gffGzLocation')
     const indexType = readConfObject(config, ['index', 'indexType'])
-    const location = readConfObject(config, ['index', 'location'])
+    const loc = readConfObject(config, ['index', 'location'])
     const dontRedispatch = readConfObject(config, 'dontRedispatch')
+    const pm = this.pluginManager
 
     this.dontRedispatch = dontRedispatch || ['chromosome', 'contig', 'region']
     this.gff = new TabixIndexedFile({
-      filehandle: openLocation(gffGzLocation, this.pluginManager),
-      csiFilehandle:
-        indexType === 'CSI'
-          ? openLocation(location, this.pluginManager)
-          : undefined,
-      tbiFilehandle:
-        indexType !== 'CSI'
-          ? openLocation(location, this.pluginManager)
-          : undefined,
-      chunkCacheSize: 50 * 2 ** 20,
-      renameRefSeqs: (n: string) => n,
+      filehandle: openLocation(gffGzLocation, pm),
+      csiFilehandle: indexType === 'CSI' ? openLocation(loc, pm) : undefined,
+      tbiFilehandle: indexType !== 'CSI' ? openLocation(loc, pm) : undefined,
+      yieldTime: 0,
     })
   }
 
@@ -87,9 +81,8 @@ export default class extends BaseFeatureDataAdapter {
         query.refName,
         query.start,
         query.end,
-        (line: string, fileOffset: number) => {
-          lines.push(this.parseLine(metadata.columnNumbers, line, fileOffset))
-        },
+        (line, fileOffset) =>
+          lines.push(this.parseLine(metadata.columnNumbers, line, fileOffset)),
       )
       if (allowRedispatch && lines.length) {
         let minStart = Infinity
