@@ -48,38 +48,38 @@ export class RemoteFileWithRangeCache extends RemoteFile {
     url: RequestInfo,
     init?: RequestInit,
   ): Promise<PolyfilledResponse> {
-    if (!fetchers[String(url)]) {
-      fetchers[String(url)] = this.fetchBinaryRange.bind(this)
-    }
-    // if it is a range request, route it through the range cache
-    const requestHeaders = init && init.headers
-    let range
-    if (requestHeaders) {
-      if (requestHeaders instanceof Headers) {
-        range = requestHeaders.get('range')
-      } else if (Array.isArray(requestHeaders)) {
-        ;[, range] = requestHeaders.find(([key]) => key === 'range') || [
-          undefined,
-          undefined,
-        ]
-      } else {
-        range = requestHeaders.range
-      }
-    }
-    if (range) {
-      const rangeParse = /bytes=(\d+)-(\d+)/.exec(range)
-      if (rangeParse) {
-        const [, start, end] = rangeParse
-        const s = Number.parseInt(start, 10)
-        const e = Number.parseInt(end, 10)
-        const response = (await globalRangeCache.getRange(url, s, e - s + 1, {
-          signal: init && init.signal,
-        })) as BinaryRangeResponse
-        const { headers } = response
-        return new Response(response.buffer, { status: 206, headers })
-      }
-    }
-    return super.fetch(url, init)
+    // if (!fetchers[String(url)]) {
+    //   fetchers[String(url)] = this.fetchBinaryRange.bind(this)
+    // }
+    // // if it is a range request, route it through the range cache
+    // const requestHeaders = init && init.headers
+    // let range
+    // if (requestHeaders) {
+    //   if (requestHeaders instanceof Headers) {
+    //     range = requestHeaders.get('range')
+    //   } else if (Array.isArray(requestHeaders)) {
+    //     ;[, range] = requestHeaders.find(([key]) => key === 'range') || [
+    //       undefined,
+    //       undefined,
+    //     ]
+    //   } else {
+    //     range = requestHeaders.range
+    //   }
+    // }
+    // if (range) {
+    //   const rangeParse = /bytes=(\d+)-(\d+)/.exec(range)
+    //   if (rangeParse) {
+    //     const [, start, end] = rangeParse
+    //     const s = Number.parseInt(start, 10)
+    //     const e = Number.parseInt(end, 10)
+    //     const response = (await globalRangeCache.getRange(url, s, e - s + 1, {
+    //       signal: init && init.signal,
+    //     })) as BinaryRangeResponse
+    //     const { headers } = response
+    //     return new Response(response.buffer, { status: 206, headers })
+    //   }
+    // }
+    return fetch(url, init)
   }
 
   public async fetchBinaryRange(

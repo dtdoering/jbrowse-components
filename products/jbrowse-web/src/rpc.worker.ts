@@ -42,7 +42,7 @@ async function getPluginManager() {
   // Load runtime plugins
   const config = await receiveConfiguration()
   const pluginLoader = new PluginLoader(config.plugins, {
-    fetchESM: url => import(/* webpackIgnore:true */ url),
+    fetchESM: url => import(/* @vite-ignore */ url),
   })
   pluginLoader.installGlobalReExports(self)
   const runtimePlugins = await pluginLoader.load(config.windowHref)
