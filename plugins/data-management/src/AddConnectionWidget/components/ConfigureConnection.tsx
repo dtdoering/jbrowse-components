@@ -1,4 +1,4 @@
-import  { Suspense } from 'react'
+import { Suspense } from 'react'
 import { observer } from 'mobx-react'
 import { ConfigurationEditor } from '@jbrowse/plugin-config'
 import { ConnectionType } from '@jbrowse/core/pluggableElementTypes'

@@ -1,4 +1,3 @@
-
 import escapeHTML from 'escape-html'
 import dompurify from 'dompurify'
 

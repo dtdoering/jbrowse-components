@@ -1,4 +1,4 @@
-import  { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import Path from 'svg-path-generator'
 import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'

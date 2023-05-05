@@ -1,4 +1,3 @@
-
 import {
   isStateTreeNode,
   Instance,

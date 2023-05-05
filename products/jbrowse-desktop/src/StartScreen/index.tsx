@@ -1,4 +1,3 @@
-
 import { Grid, Paper, Typography } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import PluginManager from '@jbrowse/core/PluginManager'

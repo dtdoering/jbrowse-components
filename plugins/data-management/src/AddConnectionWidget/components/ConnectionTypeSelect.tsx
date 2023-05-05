@@ -1,4 +1,4 @@
-import  { useEffect } from 'react'
+import { useEffect } from 'react'
 import { IconButton, MenuItem, TextField } from '@mui/material'
 import { ConnectionType } from '@jbrowse/core/pluggableElementTypes'
 import { observer } from 'mobx-react'

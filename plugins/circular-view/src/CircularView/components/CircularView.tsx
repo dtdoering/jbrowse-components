@@ -1,4 +1,3 @@
-
 import { observer } from 'mobx-react'
 import { ResizeHandle } from '@jbrowse/core/ui'
 import { assembleLocString } from '@jbrowse/core/util'

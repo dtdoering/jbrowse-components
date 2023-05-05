@@ -1,4 +1,3 @@
-
 import { Instance, types } from 'mobx-state-tree'
 import { ConfigurationReference, getConf } from '../../configuration'
 import { RemoteFileWithRangeCache } from '../../util/io'

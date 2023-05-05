@@ -1,4 +1,3 @@
-
 import { ConfigurationReference } from '@jbrowse/core/configuration'
 import { UriLocation } from '@jbrowse/core/util/types'
 import { SvgIconProps, SvgIcon } from '@mui/material'

@@ -1,7 +1,1 @@
-declare module 'load-script2'
 declare module 'librpc-web-mod'
-declare module '@gmod/gtf'
-declare module 'canvas-sequencer'
-declare module 'canvas2svg'
-declare module 'hic-straw'
-declare module 'svg-path-generator'

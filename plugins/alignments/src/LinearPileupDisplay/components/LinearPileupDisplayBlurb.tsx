@@ -1,4 +1,3 @@
-
 import { observer } from 'mobx-react'
 import { Typography } from '@mui/material'
 

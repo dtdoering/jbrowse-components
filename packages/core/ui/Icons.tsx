@@ -1,6 +1,5 @@
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon'
 
-
 // Icons below come from https://material.io/resources/icons/?icon=line_style&style=baseline
 export function ContentCopy(props: SvgIconProps) {
   return (

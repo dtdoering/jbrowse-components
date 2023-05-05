@@ -1,4 +1,4 @@
-import  { useRef } from 'react'
+import { useRef } from 'react'
 import { makeStyles } from 'tss-react/mui'
 import { observer } from 'mobx-react'
 import { Menu } from '@jbrowse/core/ui'

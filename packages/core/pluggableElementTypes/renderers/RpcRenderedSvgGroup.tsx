@@ -1,4 +1,4 @@
-import  { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { observer } from 'mobx-react'
 import { hydrate, unmountComponentAtNode } from 'react-dom'
 import { AnyReactComponentType, Feature, rIC } from '../../util'

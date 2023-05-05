@@ -1,4 +1,4 @@
-import  { useState } from 'react'
+import { useState } from 'react'
 import { IconButton, Typography } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { SearchBox } from '@jbrowse/plugin-linear-genome-view'

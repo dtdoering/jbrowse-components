@@ -1,4 +1,3 @@
-
 import clone from 'clone'
 import { getParent, isAlive, types } from 'mobx-state-tree'
 

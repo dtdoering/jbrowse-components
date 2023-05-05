@@ -1,4 +1,4 @@
-import  { useState } from 'react'
+import { useState } from 'react'
 import { observer } from 'mobx-react'
 import { FormControl, FormHelperText, Select, MenuItem } from '@mui/material'
 import { getEnv } from '@jbrowse/core/util'

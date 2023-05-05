@@ -1,4 +1,3 @@
-
 import { Grid, IconButton, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { getParent } from 'mobx-state-tree'

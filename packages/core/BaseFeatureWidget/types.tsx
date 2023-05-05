@@ -1,4 +1,3 @@
-
 import { IAnyStateTreeNode } from 'mobx-state-tree'
 import { SimpleFeatureSerialized } from '../util/simpleFeature'
 import { AbstractViewModel } from '../util'

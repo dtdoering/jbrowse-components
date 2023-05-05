@@ -1,4 +1,3 @@
-
 import { Typography, TypographyProps } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { keyframes } from 'tss-react'

@@ -1,4 +1,3 @@
-
 import { render } from '@testing-library/react'
 import SimpleFeature from '@jbrowse/core/util/simpleFeature'
 import DivSequenceRendering from './DivSequenceRendering'

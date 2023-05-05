@@ -1,5 +1,3 @@
-
-
 const ErrorMessage = ({ error }: { error: unknown }) => {
   let snapshotError = ''
   let str = `${error}`

@@ -1,4 +1,4 @@
-import  { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import normalizeWheel from 'normalize-wheel'
 
 // locals

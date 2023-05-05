@@ -1,4 +1,4 @@
-import  { Suspense } from 'react'
+import { Suspense } from 'react'
 import { render } from '@testing-library/react'
 import { createViewState } from '..'
 import JBrowseCircularGenomeView from './JBrowseCircularGenomeView'

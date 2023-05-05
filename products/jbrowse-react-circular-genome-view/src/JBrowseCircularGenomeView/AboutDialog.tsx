@@ -1,4 +1,3 @@
-
 import { version } from '../version'
 import { DialogContent, Link, Typography } from '@mui/material'
 import { Dialog } from '@jbrowse/core/ui'

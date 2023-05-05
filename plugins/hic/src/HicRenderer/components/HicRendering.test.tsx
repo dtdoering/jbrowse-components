@@ -1,4 +1,3 @@
-
 import { render } from '@testing-library/react'
 import HicRendering from './HicRendering'
 

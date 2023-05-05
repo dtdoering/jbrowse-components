@@ -1,5 +1,3 @@
-
-
 type LogoVariant = 'color' | 'black' | 'white'
 
 interface LogoProps {

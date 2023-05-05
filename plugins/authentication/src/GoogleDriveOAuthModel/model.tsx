@@ -1,4 +1,3 @@
-
 import { ConfigurationReference } from '@jbrowse/core/configuration'
 import { Instance, types } from 'mobx-state-tree'
 import { RemoteFileWithRangeCache } from '@jbrowse/core/util/io'

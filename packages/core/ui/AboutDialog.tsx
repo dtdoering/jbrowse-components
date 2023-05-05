@@ -1,4 +1,4 @@
-import  { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import copy from 'copy-to-clipboard'
 import { Button, DialogContent, Typography } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'

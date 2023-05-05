@@ -1,4 +1,3 @@
-
 import { render } from '@testing-library/react'
 
 import { ConfigurationSchema } from '@jbrowse/core/configuration'

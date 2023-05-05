@@ -1,4 +1,3 @@
-
 import { SvgIcon, SvgIconProps } from '@mui/material'
 
 export function Curves(props: SvgIconProps) {

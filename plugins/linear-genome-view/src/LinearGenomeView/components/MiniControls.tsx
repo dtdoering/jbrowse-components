@@ -1,4 +1,4 @@
-import  { useState } from 'react'
+import { useState } from 'react'
 import { observer } from 'mobx-react'
 import { IconButton, Paper } from '@mui/material'
 import Menu from '@jbrowse/core/ui/Menu'

@@ -1,4 +1,4 @@
-import  { useState } from 'react'
+import { useState } from 'react'
 import { Button, Paper, TextField } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { getSession, isElectron } from '@jbrowse/core/util'

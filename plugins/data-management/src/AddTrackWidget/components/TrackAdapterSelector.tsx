@@ -1,4 +1,3 @@
-
 import { ListSubheader, MenuItem, TextField } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { getEnv } from '@jbrowse/core/util'

@@ -1,4 +1,3 @@
-
 import {
   AnyConfigurationModel,
   readConfObject,

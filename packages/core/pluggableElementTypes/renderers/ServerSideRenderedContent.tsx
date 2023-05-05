@@ -1,4 +1,4 @@
-import  { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { ThemeProvider } from '@mui/material/styles'
 import { hydrate, unmountComponentAtNode } from 'react-dom'
 

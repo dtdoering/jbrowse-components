@@ -1,4 +1,3 @@
-
 import { render, fireEvent } from '@testing-library/react'
 import { createTestSession } from '@jbrowse/web/src/rootModel'
 import AddTrackWidget from './AddTrackWidget'

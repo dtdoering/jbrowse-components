@@ -1,4 +1,4 @@
-import  { ReactNode } from 'react'
+import { ReactNode } from 'react'
 import { createJBrowseTheme as coreCreateJBrowseTheme } from '@jbrowse/core/ui'
 import { ThemeOptions } from '@mui/material/styles'
 

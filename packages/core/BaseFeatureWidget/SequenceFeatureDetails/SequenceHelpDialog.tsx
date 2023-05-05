@@ -1,4 +1,3 @@
-
 import { Button, DialogContent, DialogActions, Typography } from '@mui/material'
 import { Dialog } from '@jbrowse/core/ui'
 

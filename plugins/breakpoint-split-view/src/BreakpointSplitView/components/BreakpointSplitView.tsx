@@ -1,4 +1,4 @@
-import  { useRef } from 'react'
+import { useRef } from 'react'
 import { observer } from 'mobx-react'
 import { getEnv } from 'mobx-state-tree'
 import { makeStyles } from 'tss-react/mui'

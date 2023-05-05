@@ -1,4 +1,3 @@
-
 import { DialogContent, DialogContentText } from '@mui/material'
 import { Dialog } from '@jbrowse/core/ui'
 import { observer } from 'mobx-react'

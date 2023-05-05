@@ -1,4 +1,3 @@
-
 import { render } from '@testing-library/react'
 import { types } from 'mobx-state-tree'
 import { ConfigurationSchema } from '@jbrowse/core/configuration'

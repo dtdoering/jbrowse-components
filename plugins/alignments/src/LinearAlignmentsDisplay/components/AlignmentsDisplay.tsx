@@ -1,4 +1,3 @@
-
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 import { getConf } from '@jbrowse/core/configuration'

@@ -1,4 +1,3 @@
-
 import { FileSelector } from '@jbrowse/core/ui'
 import { AbstractRootModel } from '@jbrowse/core/util'
 import { Paper } from '@mui/material'

@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react'
-import  { useRef } from 'react'
+import { useRef } from 'react'
 
 import { Region } from '@jbrowse/core/util/types'
 import { Feature } from '@jbrowse/core/util'

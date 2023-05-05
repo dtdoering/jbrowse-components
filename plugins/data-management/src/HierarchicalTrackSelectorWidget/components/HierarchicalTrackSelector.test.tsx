@@ -1,4 +1,3 @@
-
 import { createJBrowseTheme } from '@jbrowse/core/ui'
 import { createTestSession } from '@jbrowse/web/src/rootModel'
 import { render } from '@testing-library/react'

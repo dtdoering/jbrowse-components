@@ -1,4 +1,3 @@
-
 import { fireEvent, render } from '@testing-library/react'
 import AssemblyManager from './AssemblyManager'
 

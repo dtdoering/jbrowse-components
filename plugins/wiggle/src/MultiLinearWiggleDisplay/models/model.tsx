@@ -1,4 +1,4 @@
-import  { lazy } from 'react'
+import { lazy } from 'react'
 import { addDisposer, isAlive, types, Instance } from 'mobx-state-tree'
 import { autorun, when } from 'mobx'
 import { axisPropsFromTickScale } from 'react-d3-axis-mod'

@@ -1,4 +1,3 @@
-
 import { observer } from 'mobx-react'
 import { assembleLocString } from '@jbrowse/core/util'
 import { Dialog } from '@jbrowse/core/ui'

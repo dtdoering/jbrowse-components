@@ -1,4 +1,3 @@
-
 import { MenuItem, TextField } from '@mui/material'
 import { getEnv } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'

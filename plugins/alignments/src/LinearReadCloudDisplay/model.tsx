@@ -1,4 +1,4 @@
-import  { lazy } from 'react'
+import { lazy } from 'react'
 import { autorun } from 'mobx'
 import { addDisposer, cast, types, Instance } from 'mobx-state-tree'
 import {

@@ -1,4 +1,3 @@
-
 import { observer } from 'mobx-react'
 import { iterMap } from '@jbrowse/core/util'
 import { Menu } from '@jbrowse/core/ui'

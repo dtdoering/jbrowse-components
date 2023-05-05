@@ -1,4 +1,3 @@
-
 import { ThemeOptions } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import { renderToString } from 'react-dom/server'

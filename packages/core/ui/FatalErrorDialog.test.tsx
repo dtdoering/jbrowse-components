@@ -1,4 +1,3 @@
-
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import FatalErrorDialog from './FatalErrorDialog'
 
