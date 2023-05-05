@@ -9,6 +9,10 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[plugins/alignments/src/LinearPileupDisplay/model.ts](https://github.com/GMOD/jbrowse-components/blob/main/plugins/alignments/src/LinearPileupDisplay/model.ts)
+
 ## Docs
 
 extends `BaseLinearDisplay`
@@ -28,7 +32,7 @@ type: types.literal('LinearPileupDisplay')
 
 ```js
 // type signature
-ITypeUnion<any, any, any>
+AnyConfigurationSchemaType
 // code
 configuration: ConfigurationReference(configSchema)
 ```
@@ -130,18 +134,18 @@ filterBy: types.optional(FilterModel, {})
 
 ### LinearPileupDisplay - Getters
 
-#### getter: maxHeight
-
-```js
-// type
-any
-```
-
 #### getter: rendererConfig
 
 ```js
 // type
 { [x: string]: any; } & NonEmptyObject & { setSubschema(slotName: string, data: unknown): any; } & IStateTreeNode<AnyConfigurationSchemaType>
+```
+
+#### getter: maxHeight
+
+```js
+// type
+any
 ```
 
 #### getter: featureHeightSetting
@@ -185,7 +189,7 @@ string
 
 ```js
 // type signature
-contextMenuItems: () => { label: string; icon: (props: SvgIconProps<"svg", {}>) => Element; onClick: () => void; }[]
+contextMenuItems: () => { label: string; icon: (props: SvgIconProps) => Element; onClick: () => void; }[]
 ```
 
 #### method: renderProps
@@ -308,7 +312,7 @@ toggleMismatchAlpha: () => void
 
 ```js
 // type signature
-setConfig: (configuration: { [x: string]: any; } & NonEmptyObject & { setSubschema(slotName: string, data: unknown): any; } & IStateTreeNode<AnyConfigurationSchemaType>) => void
+setConfig: (conf: { [x: string]: any; } & NonEmptyObject & { setSubschema(slotName: string, data: unknown): any; } & IStateTreeNode<AnyConfigurationSchemaType>) => void
 ```
 
 #### action: setSortedBy

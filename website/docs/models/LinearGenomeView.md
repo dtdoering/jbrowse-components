@@ -9,6 +9,10 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[plugins/linear-genome-view/src/LinearGenomeView/model.ts](https://github.com/GMOD/jbrowse-components/blob/main/plugins/linear-genome-view/src/LinearGenomeView/model.ts)
+
 ## Docs
 
 ### LinearGenomeView - Properties
@@ -147,7 +151,9 @@ show the "center line"
 IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
 showCenterLine: types.optional(types.boolean, () =>
-          JSON.parse(localStorageGetItem('lgv-showCenterLine') || 'false'),
+          Boolean(
+            JSON.parse(localStorageGetItem('lgv-showCenterLine') || 'false'),
+          ),
         )
 ```
 
@@ -160,7 +166,9 @@ show the "cytobands" in the overview scale bar
 IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
 showCytobandsSetting: types.optional(types.boolean, () =>
-          JSON.parse(localStorageGetItem('lgv-showCytobands') || 'true'),
+          Boolean(
+            JSON.parse(localStorageGetItem('lgv-showCytobands') || 'true'),
+          ),
         )
 ```
 
@@ -226,13 +234,6 @@ any
 boolean
 ```
 
-#### getter: isSearchDialogDisplayed
-
-```js
-// type
-boolean
-```
-
 #### getter: scaleBarHeight
 
 ```js
@@ -251,7 +252,7 @@ number
 
 ```js
 // type
-any
+number
 ```
 
 #### getter: trackHeightsWithResizeHandles
@@ -371,7 +372,7 @@ BlockSet
 #### getter: dynamicBlocks
 
 dynamic blocks represent the exact coordinates of the currently visible genome
-regions on the screen. they are similar to static blocks, but statcic blocks can
+regions on the screen. they are similar to static blocks, but static blocks can
 go offscreen while dynamic blocks represent exactly what is on screen
 
 ```js
@@ -474,6 +475,15 @@ were selected by the rubberband
 ```js
 // type signature
 getSelectedRegions: (leftOffset?: BpOffset, rightOffset?: BpOffset) => { start: number; end: number; regionNumber?: number; reversed?: boolean; refName: string; assemblyName: string; key: string; offsetPx: number; widthPx: number; variant?: string; isLeftEndOfDisplayedRegion?: boolean; }[]
+```
+
+#### method: exportSvg
+
+creates an svg export and save using FileSaver
+
+```js
+// type signature
+exportSvg: (opts?: ExportSvgOptions) => Promise<void>
 ```
 
 #### method: menuItems
@@ -599,12 +609,14 @@ scrollTo: (offsetPx: number) => number
 
 ```js
 // type signature
-zoomTo: (bpPerPx: number) => number
+zoomTo: (bpPerPx: number, offset?: number, centerAtOffset?: boolean) => number
 ```
 
 #### action: setOffsets
 
-sets offsets used in the get sequence dialog
+sets offsets of rubberband, used in the get sequence dialog can call
+view.getSelectedRegions(view.leftOffset,view.rightOffset) to compute the
+selected regions from the offsets
 
 ```js
 // type signature
@@ -615,14 +627,7 @@ setOffsets: (left?: BpOffset, right?: BpOffset) => void
 
 ```js
 // type signature
-setSearchResults: (results?: BaseResult[], query?: string) => void
-```
-
-#### action: setGetSequenceDialogOpen
-
-```js
-// type signature
-setGetSequenceDialogOpen: (open: boolean) => void
+setSearchResults: (searchResults: BaseResult[], searchQuery: string, assemblyName?: string) => void
 ```
 
 #### action: setNewView
@@ -682,7 +687,7 @@ toggleTrack: (trackId: string) => void
 
 ```js
 // type signature
-setTrackLabels: (setting: "hidden" | "offset" | "overlapping") => void
+setTrackLabels: (setting: "offset" | "hidden" | "overlapping") => void
 ```
 
 #### action: toggleCenterLine
@@ -766,15 +771,6 @@ this "clears the view" and makes the view return to the import form
 clearView: () => void
 ```
 
-#### action: exportSvg
-
-creates an svg export and save using FileSaver
-
-```js
-// type signature
-exportSvg: (opts?: ExportSvgOptions) => Promise<void>
-```
-
 #### action: slide
 
 perform animated slide
@@ -812,18 +808,29 @@ moveTo: (start?: BpOffset, end?: BpOffset) => void
 
 #### action: navToLocString
 
-navigate to the given locstring
+Navigate to the given locstring, will change displayed regions if needed, and
+wait for assemblies to be initialized
 
 ```js
 // type signature
-navToLocString: (locString: string, optAssemblyName?: string) => Promise<void>
+navToLocString: (input: string, optAssemblyName?: string) => Promise<any>
+```
+
+#### action: navToLocations
+
+Similar to `navToLocString`, but accepts parsed location objects instead of
+strings. Will try to perform `setDisplayedRegions` if changing regions
+
+```js
+// type signature
+navToLocations: (parsedLocStrings: ParsedLocString[], assemblyName?: string) => Promise<void>
 ```
 
 #### action: navTo
 
 Navigate to a location based on its refName and optionally start, end, and
-assemblyName. Can handle if there are multiple displayedRegions from same
-refName. Only navigates to a location if it is entirely within a
+assemblyName. Will not try to change displayed regions, use `navToLocations`
+instead. Only navigates to a location if it is entirely within a
 displayedRegion. Navigates to the first matching location encountered.
 
 Throws an error if navigation was unsuccessful
@@ -834,6 +841,13 @@ navTo: (query: NavLocation) => void
 ```
 
 #### action: navToMultiple
+
+Navigate to a location based on its refName and optionally start, end, and
+assemblyName. Will not try to change displayed regions, use navToLocations
+instead. Only navigates to a location if it is entirely within a
+displayedRegion. Navigates to the first matching location encountered.
+
+Throws an error if navigation was unsuccessful
 
 ```js
 // type signature

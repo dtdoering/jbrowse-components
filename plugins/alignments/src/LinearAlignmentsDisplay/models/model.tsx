@@ -20,6 +20,7 @@ import {
 import { BaseDisplay } from '@jbrowse/core/pluggableElementTypes/models'
 import PluginManager from '@jbrowse/core/PluginManager'
 import { MenuItem } from '@jbrowse/core/ui'
+import { FeatureDensityStats } from '@jbrowse/core/data_adapters/BaseAdapter'
 
 const minDisplayHeight = 20
 
@@ -27,9 +28,9 @@ function getLowerPanelDisplays(pluginManager: PluginManager) {
   return (
     pluginManager
       .getDisplayElements()
-      // @ts-ignore
+      // @ts-expect-error
       .filter(f => f.subDisplay?.type === 'LinearAlignmentsDisplay')
-      // @ts-ignore
+      // @ts-expect-error
       .filter(f => f.subDisplay?.lowerPanel)
   )
 }
@@ -87,7 +88,6 @@ function AlignmentsModel(
      * #property
      * refers to LinearPileupDisplay sub-display model
      */
-    // @ts-ignore
     PileupDisplay: types.maybe(types.union(...lowerPanelDisplays)),
     /**
      * #property
@@ -111,7 +111,7 @@ function AlignmentsModel(
     /**
      * #property
      */
-    height: 250,
+    heightPreConfig: types.maybe(types.number),
     /**
      * #property
      */
@@ -153,6 +153,21 @@ function stateModelFactory(
        */
       setSNPCoverageHeight(n: number) {
         self.snpCovHeight = n
+      },
+    }))
+    .views(self => ({
+      /**
+       * #getter
+       */
+      get height() {
+        return self.heightPreConfig ?? getConf(self, 'height')
+      },
+
+      get featureIdUnderMouse() {
+        return (
+          self.PileupDisplay.featureIdUnderMouse ||
+          self.SNPCoverageDisplay.featureIdUnderMouse
+        )
       },
     }))
     .views(self => ({
@@ -227,9 +242,9 @@ function stateModelFactory(
       /**
        * #action
        */
-      updateStatsLimit(stats: unknown) {
-        self.PileupDisplay.updateStatsLimit(stats)
-        self.SNPCoverageDisplay.updateStatsLimit(stats)
+      setFeatureDensityStatsLimit(stats?: FeatureDensityStats) {
+        self.PileupDisplay.setFeatureDensityStatsLimit(stats)
+        self.SNPCoverageDisplay.setFeatureDensityStatsLimit(stats)
       },
 
       /**
@@ -245,8 +260,8 @@ function stateModelFactory(
        * #action
        */
       setHeight(n: number) {
-        self.height = Math.max(n, minDisplayHeight)
-        return self.height
+        self.heightPreConfig = Math.max(n, minDisplayHeight)
+        return self.heightPreConfig
       },
       /**
        * #action
@@ -368,6 +383,14 @@ function stateModelFactory(
           ]
         },
       }
+    })
+    .preProcessSnapshot(snap => {
+      if (!snap) {
+        return snap
+      }
+      // @ts-expect-error
+      const { height, ...rest } = snap
+      return { heightPreConfig: height, ...rest }
     })
 }
 

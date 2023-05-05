@@ -27,7 +27,7 @@ function ResizeHandle({
   className: originalClassName,
   ...props
 }: {
-  onDrag: (arg: number) => number
+  onDrag: (arg: number) => number | void
   vertical?: boolean
   flexbox?: boolean
   className?: string
@@ -64,11 +64,9 @@ function ResizeHandle({
 
   let className
   if (flexbox) {
-    if (vertical) {
-      className = classes.flexbox_verticalHandle
-    } else {
-      className = classes.flexbox_horizontalHandle
-    }
+    className = vertical
+      ? classes.flexbox_verticalHandle
+      : classes.flexbox_horizontalHandle
   } else if (vertical) {
     className = classes.verticalHandle
   } else {
@@ -83,7 +81,6 @@ function ResizeHandle({
         prevPos.current = vertical ? event.clientX : event.clientY
         setMouseDragging(true)
       }}
-      role="presentation"
       className={cx(className, originalClassName)}
       {...props}
     />

@@ -429,7 +429,34 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
       },
     },
   ],
-  "configuration": {},
+  "configuration": {
+    "extraThemes": {
+      "darkForest": {
+        "name": "Dark (forest, from config file)",
+        "palette": {
+          "mode": "dark",
+          "primary": {
+            "main": "#464",
+          },
+          "quaternary": {
+            "main": "#6a4",
+          },
+          "secondary": {
+            "main": "#376",
+          },
+          "tertiary": {
+            "main": "#253",
+          },
+        },
+      },
+    },
+    "logoPath": {
+      "internetAccountId": undefined,
+      "internetAccountPreAuthorization": undefined,
+      "locationType": "UriLocation",
+      "uri": "",
+    },
+  },
   "connections": [],
   "defaultSession": {
     "activeWidgets": {
@@ -514,6 +541,7 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
       "category": [
         "VCF",
       ],
+      "description": "A uniquely interesting track",
       "displays": [
         {
           "displayId": "volvox_sv_test-LinearVariantDisplay",
@@ -524,7 +552,7 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
           "type": "ChordVariantDisplay",
         },
       ],
-      "name": "volvox structural variant test",
+      "name": "volvox structural variant test (<i>HTML italic</i>)",
       "trackId": "volvox_sv_test",
       "type": "VariantTrack",
     },
@@ -654,6 +682,7 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
       "displays": [
         {
           "displayId": "volvox_cram_pileup_pileup",
+          "height": 400,
           "type": "LinearPileupDisplay",
         },
         {
@@ -674,9 +703,12 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
         },
       ],
       "metadata": {
-        "source": "We generated 150bp paired end reads from a <i>Volvox mythicus</i>, an imaginary species, for this jbrowse demo",
+        "source": "We generated 150bp paired end reads from a <i>Volvox mythicus</i>, an imaginary species, for this jbrowse demo. See <a href=https://google.com>Google</a>",
+        "sub": {
+          "subkey": "wow",
+        },
       },
-      "name": "volvox-sorted.cram (contigA, LinearPileupDisplay)",
+      "name": "volvox-sorted.cram (contigA, LinearPileupDisplay, large height)",
       "trackId": "volvox_cram_pileup",
       "type": "AlignmentsTrack",
     },
@@ -928,6 +960,7 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
       "displays": [
         {
           "displayId": "volvox_alignments_alignments",
+          "height": 400,
           "pileupDisplay": {
             "displayId": "volvox_bam_altname_alignments_pileup",
             "type": "LinearPileupDisplay",
@@ -951,7 +984,7 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
           "type": "LinearReadCloudDisplay",
         },
       ],
-      "name": "volvox-sorted.bam (ctgA)",
+      "name": "volvox-sorted.bam (ctgA, larger default height)",
       "trackId": "volvox_alignments",
       "type": "AlignmentsTrack",
     },
@@ -2148,6 +2181,7 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
       ],
       "formatDetails": {
         "feature": "jexl:{name:'<a href=https://google.com/?q='+feature.name+'>'+feature.name+'</a>',extrafield:'Field added with custom callback:' + feature.name,phase:undefined,type:undefined}",
+        "subfeatures": "jexl:{name:'<a href=https://google.com/?q='+feature.name+'>Subfeature: '+(!feature.name?'No name':feature.name)+'</a>'}",
       },
       "name": "GFF3Tabix genes",
       "trackId": "gff3tabix_genes",

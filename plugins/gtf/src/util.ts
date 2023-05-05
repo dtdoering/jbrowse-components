@@ -23,7 +23,7 @@ export function featureData(data: FeatureLoc) {
   if (data.frame === null) {
     delete f.score
   }
-  const defaultFields = [
+  const defaultFields = new Set([
     'start',
     'end',
     'seq_name',
@@ -32,32 +32,32 @@ export function featureData(data: FeatureLoc) {
     'source',
     'frame',
     'strand',
-  ]
-  Object.keys(data.attributes).forEach(a => {
+  ])
+  for (const a of Object.keys(data.attributes)) {
     let b = a.toLowerCase()
-    if (defaultFields.includes(b)) {
+    if (defaultFields.has(b)) {
       // add "suffix" to tag name if it already exists
       // reproduces behavior of NCList
       b += '2'
     }
     if (data.attributes[a] !== null) {
-      let attr = data.attributes[a]
+      let attr = data.attributes[a] as string[] | string
       if (Array.isArray(attr) && attr.length === 1) {
-        // gtf uses double quotes for text values in the attributes column, remove them
-        const formattedAttr = attr[0].replace(/^"|"$/g, '')
-        attr = formattedAttr
+        // gtf uses double quotes for text values in the attributes column,
+        // remove them
+        attr = `${attr[0]}`.replace(/^"|"$/g, '')
       }
       f[b] = attr
     }
-  })
+  }
   f.refName = f.seq_name
   f.type = f.featureType
 
   // the SimpleFeature constructor takes care of recursively inflating subfeatures
-  if (data.child_features && data.child_features.length) {
-    f.subfeatures = data.child_features
-      .map(childLocs => childLocs.map(childLoc => featureData(childLoc)))
-      .flat()
+  if (data.child_features && data.child_features.length > 0) {
+    f.subfeatures = data.child_features.flatMap(childLocs =>
+      childLocs.map(childLoc => featureData(childLoc)),
+    )
   }
 
   delete f.child_features

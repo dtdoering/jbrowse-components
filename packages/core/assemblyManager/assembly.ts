@@ -5,12 +5,14 @@ import AbortablePromiseCache from 'abortable-promise-cache'
 // locals
 import { getConf, AnyConfigurationModel } from '../configuration'
 import {
+  BaseOptions,
   BaseRefNameAliasAdapter,
   RegionsAdapter,
 } from '../data_adapters/BaseAdapter'
 import PluginManager from '../PluginManager'
 import { when, Region, Feature } from '../util'
 import QuickLRU from '../util/QuickLRU'
+import RpcManager from '../rpc/RpcManager'
 
 const refNameRegex = new RegExp(
   '[0-9A-Za-z!#$%&+./:;?@^_|~-][0-9A-Za-z!#$%&*+./:;=?@^_|~-]*',
@@ -62,7 +64,7 @@ async function loadRefNameMap(
   })
 
   const refNames = (await assembly.rpcManager.call(
-    sessionId,
+    sessionId || 'assemblyRpc',
     'CoreGetRefNames',
     {
       adapterConfig,
@@ -100,7 +102,7 @@ async function loadRefNameMap(
 
 // Valid refName pattern from https://samtools.github.io/hts-specs/SAMv1.pdf
 function checkRefName(refName: string) {
-  if (!refName.match(refNameRegex)) {
+  if (!refNameRegex.test(refName)) {
     throw new Error(`Encountered invalid refName: "${refName}"`)
   }
 }
@@ -109,13 +111,7 @@ function getAdapterId(adapterConf: unknown) {
   return jsonStableStringify(adapterConf)
 }
 
-type RefNameAliases = Record<string, string>
-
-export interface BaseOptions {
-  signal?: AbortSignal
-  sessionId: string
-  statusCallback?: Function
-}
+type RefNameAliases = Record<string, string | undefined>
 
 interface CacheData {
   adapterConf: unknown
@@ -142,16 +138,22 @@ export interface Loading {
   lowerCaseRefNameAliases: RefNameAliases
   cytobands: Feature[]
 }
+
+/**
+ * #stateModel Assembly
+ */
 export default function assemblyFactory(
   assemblyConfigType: IAnyType,
   pm: PluginManager,
 ) {
   const adapterLoads = new AbortablePromiseCache<CacheData, RefNameMap>({
     cache: new QuickLRU({ maxSize: 1000 }),
+
+    // @ts-expect-error
     async fill(
       args: CacheData,
       signal?: AbortSignal,
-      statusCallback?: Function,
+      statusCallback?: (arg: string) => void,
     ) {
       const { adapterConf, self, options } = args
       return loadRefNameMap(
@@ -164,6 +166,9 @@ export default function assemblyFactory(
   })
   return types
     .model({
+      /**
+       * #property
+       */
       configuration: types.safeReference(assemblyConfigType),
     })
     .volatile(() => ({
@@ -176,72 +181,107 @@ export default function assemblyFactory(
       cytobands: undefined as Feature[] | undefined,
     }))
     .views(self => ({
+      /**
+       * #getter
+       */
       get initialized() {
-        // @ts-ignore
+        // @ts-expect-error
         self.load()
         return !!self.refNameAliases
       },
+      /**
+       * #getter
+       */
       get name(): string {
         return getConf(self, 'name')
       },
-
+      /**
+       * #getter
+       */
       get regions() {
-        // @ts-ignore
+        // @ts-expect-error
         self.load()
         return self.volatileRegions
       },
-
+      /**
+       * #getter
+       */
       get aliases(): string[] {
         return getConf(self, 'aliases')
       },
-
+      /**
+       * #getter
+       */
       get displayName(): string | undefined {
         return getConf(self, 'displayName')
       },
-
+      /**
+       * #getter
+       */
       hasName(name: string) {
         return this.allAliases.includes(name)
       },
-
+      /**
+       * #getter
+       */
       get allAliases() {
         return [this.name, ...this.aliases]
       },
-
-      // note: lowerCaseRefNameAliases not included here: this allows the list
-      // of refnames to be just the "normal casing", but things like
-      // getCanonicalRefName can resolve a lower-case name if needed
+      /**
+       * #getter
+       * note: lowerCaseRefNameAliases not included here: this allows the list
+       * of refnames to be just the "normal casing", but things like
+       * getCanonicalRefName can resolve a lower-case name if needed
+       */
       get allRefNames() {
         return !self.refNameAliases
           ? undefined
           : Object.keys(self.refNameAliases)
       },
-
+      /**
+       * #getter
+       */
       get lowerCaseRefNames() {
         return !self.lowerCaseRefNameAliases
           ? undefined
           : Object.keys(self.lowerCaseRefNameAliases || {})
       },
 
+      /**
+       * #getter
+       */
       get allRefNamesWithLowerCase() {
         return this.allRefNames && this.lowerCaseRefNames
           ? [...new Set([...this.allRefNames, ...this.lowerCaseRefNames])]
           : undefined
       },
-      get rpcManager() {
+      /**
+       * #getter
+       */
+      get rpcManager(): RpcManager {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return getParent<any>(self, 2).rpcManager
       },
+      /**
+       * #getter
+       */
       get refNameColors() {
         const colors: string[] = getConf(self, 'refNameColors')
         return colors.length === 0 ? refNameColors : colors
       },
     }))
     .views(self => ({
+      /**
+       * #getter
+       */
       get refNames() {
         return self.regions?.map(region => region.refName)
       },
     }))
     .views(self => ({
+      /**
+       * #method
+       */
       getCanonicalRefName(refName: string) {
         if (!self.refNameAliases || !self.lowerCaseRefNameAliases) {
           throw new Error(
@@ -252,16 +292,22 @@ export default function assemblyFactory(
           self.refNameAliases[refName] || self.lowerCaseRefNameAliases[refName]
         )
       },
+      /**
+       * #method
+       */
       getRefNameColor(refName: string) {
         if (!self.refNames) {
           return undefined
         }
-        const idx = self.refNames.findIndex(r => r === refName)
+        const idx = self.refNames.indexOf(refName)
         if (idx === -1) {
           return undefined
         }
         return self.refNameColors[idx % self.refNameColors.length]
       },
+      /**
+       * #method
+       */
       isValidRefName(refName: string) {
         if (!self.refNameAliases) {
           throw new Error(
@@ -272,6 +318,9 @@ export default function assemblyFactory(
       },
     }))
     .actions(self => ({
+      /**
+       * #action
+       */
       setLoaded({
         adapterRegionsWithAssembly,
         refNameAliases,
@@ -283,23 +332,41 @@ export default function assemblyFactory(
         this.setRefNameAliases(refNameAliases, lowerCaseRefNameAliases)
         this.setCytobands(cytobands)
       },
+      /**
+       * #action
+       */
       setError(e: unknown) {
         console.error(e)
         self.error = e
       },
+      /**
+       * #action
+       */
       setRegions(regions: Region[]) {
         self.volatileRegions = regions
       },
+      /**
+       * #action
+       */
       setRefNameAliases(aliases: RefNameAliases, lcAliases: RefNameAliases) {
         self.refNameAliases = aliases
         self.lowerCaseRefNameAliases = lcAliases
       },
+      /**
+       * #action
+       */
       setCytobands(cytobands: Feature[]) {
         self.cytobands = cytobands
       },
+      /**
+       * #action
+       */
       setLoadingP(p?: Promise<void>) {
         self.loadingP = p
       },
+      /**
+       * #action
+       */
       load() {
         if (!self.loadingP) {
           self.loadingP = this.loadPre().catch(e => {
@@ -309,11 +376,14 @@ export default function assemblyFactory(
         }
         return self.loadingP
       },
+      /**
+       * #action
+       */
       async loadPre() {
         const conf = self.configuration
-        const refNameAliasesAdapterConf = conf.refNameAliases?.adapter
-        const cytobandAdapterConf = conf.cytobands?.adapter
-        const sequenceAdapterConf = conf.sequence.adapter
+        const refNameAliasesAdapterConf = conf?.refNameAliases?.adapter
+        const cytobandAdapterConf = conf?.cytobands?.adapter
+        const sequenceAdapterConf = conf?.sequence.adapter
         const assemblyName = self.name
 
         const regions = await getAssemblyRegions(sequenceAdapterConf, pm)
@@ -352,6 +422,9 @@ export default function assemblyFactory(
       },
     }))
     .views(self => ({
+      /**
+       * #method
+       */
       getAdapterMapEntry(adapterConf: unknown, options: BaseOptions) {
         const { signal, statusCallback, ...rest } = options
         if (!options.sessionId) {
@@ -374,10 +447,11 @@ export default function assemblyFactory(
       },
 
       /**
+       * #method
        * get Map of `canonical-name -> adapter-specific-name`
        */
       async getRefNameMapForAdapter(adapterConf: unknown, opts: BaseOptions) {
-        if (!opts || !opts.sessionId) {
+        if (!opts?.sessionId) {
           throw new Error('sessionId is required')
         }
         const map = await this.getAdapterMapEntry(adapterConf, opts)
@@ -385,6 +459,7 @@ export default function assemblyFactory(
       },
 
       /**
+       * #method
        * get Map of `adapter-specific-name -> canonical-name`
        */
       async getReverseRefNameMapForAdapter(
@@ -413,7 +488,7 @@ async function getCytobands(config: AnyConfigurationModel, pm: PluginManager) {
   const CLASS = await type.getAdapterClass()
   const adapter = new CLASS(config, undefined, pm)
 
-  // @ts-ignore
+  // @ts-expect-error
   return adapter.getData()
 }
 

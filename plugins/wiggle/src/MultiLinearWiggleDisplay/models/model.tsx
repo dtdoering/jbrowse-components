@@ -30,8 +30,7 @@ import {
 import {
   getNiceDomain,
   getScale,
-  getStats,
-  statsAutorun,
+  quantitativeStatsAutorun,
   YSCALEBAR_LABEL_OFFSET,
 } from '../../util'
 
@@ -77,7 +76,6 @@ const stateModelFactory = (
         resolution: types.optional(types.number, 1),
         fill: types.maybe(types.boolean),
         minSize: types.maybe(types.number),
-        height: 200,
         color: types.maybe(types.string),
         posColor: types.maybe(types.string),
         negColor: types.maybe(types.string),
@@ -111,7 +109,7 @@ const stateModelFactory = (
       clearLayout() {
         self.layout = []
       },
-      updateStats(stats: { scoreMin: number; scoreMax: number }) {
+      updateQuantitativeStats(stats: { scoreMin: number; scoreMax: number }) {
         const { scoreMin, scoreMax } = stats
         const EPSILON = 0.000001
         if (!self.stats) {
@@ -177,11 +175,7 @@ const stateModelFactory = (
       },
 
       toggleLogScale() {
-        if (self.scale !== 'log') {
-          self.scale = 'log'
-        } else {
-          self.scale = 'linear'
-        }
+        self.scale = self.scale === 'log' ? 'linear' : 'log'
       },
 
       setScaleType(scale?: string) {
@@ -667,27 +661,12 @@ const stateModelFactory = (
       type ExportSvgOpts = Parameters<typeof superRenderSvg>[0]
 
       return {
-        // re-runs stats and refresh whole display on reload
         async reload() {
           self.setError()
-          const aborter = new AbortController()
-          let stats
-          try {
-            self.setLoading(aborter)
-            stats = await getStats(self, {
-              signal: aborter.signal,
-              ...self.renderProps(),
-            })
-            if (isAlive(self)) {
-              self.updateStats(stats)
-              superReload()
-            }
-          } catch (e) {
-            self.setError(e)
-          }
+          superReload()
         },
         afterAttach() {
-          statsAutorun(self)
+          quantitativeStatsAutorun(self)
           addDisposer(
             self,
             autorun(async () => {

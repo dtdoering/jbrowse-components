@@ -9,6 +9,10 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[plugins/circular-view/src/BaseChordDisplay/models/model.tsx](https://github.com/GMOD/jbrowse-components/blob/main/plugins/circular-view/src/BaseChordDisplay/models/model.tsx)
+
 ## Docs
 
 extends `BaseDisplay`
@@ -31,6 +35,15 @@ bezierRadiusRatio: 0.1
 IMaybe<ISimpleType<string>>
 // code
 assemblyName: types.maybe(types.string)
+```
+
+#### property: configuration
+
+```js
+// type signature
+ConfigurationSchemaType<{ onChordClick: { type: string; description: string; defaultValue: boolean; contextVariable: string[]; }; }, ConfigurationSchemaOptions<undefined, "displayId">>
+// code
+configuration: ConfigurationReference(baseChordDisplayConfig)
 ```
 
 ### BaseChordDisplay - Getters
@@ -75,6 +88,13 @@ renderProps: () => any
 ```js
 // type signature
 isCompatibleWithRenderer: (renderer: RendererType) => boolean
+```
+
+#### method: renderSvg
+
+```js
+// type signature
+renderSvg: (opts: ExportSvgOptions & { theme: ThemeOptions; }) => Promise<Element>
 ```
 
 ### BaseChordDisplay - Actions

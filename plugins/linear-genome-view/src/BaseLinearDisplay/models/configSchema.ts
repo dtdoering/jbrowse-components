@@ -29,6 +29,24 @@ const baseLinearDisplayConfigSchema = ConfigurationSchema(
       description:
         "maximum data to attempt to download for a given track, used if adapter doesn't specify one",
     },
+    /**
+     * #slot
+     */
+    height: {
+      type: 'number',
+      defaultValue: 100,
+      description: 'default height for the track',
+    },
+    /**
+     * #slot
+     */
+    mouseover: {
+      type: 'string',
+      description: 'text to display when the cursor hovers over a feature',
+      defaultValue: `jexl:get(feature,'name')`,
+
+      contextVariable: ['feature'],
+    },
   },
   {
     /**

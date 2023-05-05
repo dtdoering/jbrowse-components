@@ -54,4 +54,5 @@ const WiggleTooltip = observer(function (props: {
   return <Tooltip TooltipContents={TooltipContents} {...props} />
 })
 export default WiggleTooltip
-export { Tooltip }
+
+export { default as Tooltip } from '../../Tooltip'

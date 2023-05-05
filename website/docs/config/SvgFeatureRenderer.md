@@ -7,6 +7,10 @@ toplevel: true
 Note: this document is automatically generated from configuration objects in our
 source code. See [Config guide](/docs/config_guide) for more info
 
+## Source file
+
+[plugins/svg/src/SvgFeatureRenderer/configSchema.ts](https://github.com/GMOD/jbrowse-components/blob/main/plugins/svg/src/SvgFeatureRenderer/configSchema.ts)
+
 ## Docs
 
 ### SvgFeatureRenderer - Slots
@@ -29,7 +33,7 @@ color2: {
       type: 'color',
       description:
         'the secondary color of each feature, used for connecting lines, etc',
-      defaultValue: 'black',
+      defaultValue: '#f0f',
       contextVariable: ['feature'],
     }
 ```
@@ -104,7 +108,7 @@ name: {
 nameColor: {
         type: 'color',
         description: 'the color of the name label, if shown',
-        defaultValue: 'black',
+        defaultValue: '#f0f',
         contextVariable: ['feature'],
       }
 ```
@@ -138,7 +142,7 @@ fontSize: {
         type: 'number',
         description:
           'height in pixels of the text to use for names and descriptions',
-        defaultValue: 13,
+        defaultValue: 12,
         contextVariable: ['feature'],
       }
 ```

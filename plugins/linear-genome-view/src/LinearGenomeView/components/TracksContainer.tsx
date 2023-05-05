@@ -14,21 +14,18 @@ import Gridlines from './Gridlines'
 import CenterLine from './CenterLine'
 import VerticalGuide from './VerticalGuide'
 import RubberbandSpan from './RubberbandSpan'
+import { getEnv } from '@jbrowse/core/util'
 
 const useStyles = makeStyles()({
   tracksContainer: {
     position: 'relative',
     overflow: 'hidden',
   },
-  spacer: {
-    position: 'relative',
-    height: 3,
-  },
 })
 
 type LGV = LinearGenomeViewModel
 
-function TracksContainer({
+export default observer(function TracksContainer({
   children,
   model,
 }: {
@@ -36,6 +33,7 @@ function TracksContainer({
   model: LGV
 }) {
   const { classes } = useStyles()
+  const { pluginManager } = getEnv(model)
   const { mouseDown: mouseDown1, mouseUp } = useSideScroll(model)
   const ref = useRef<HTMLDivElement>(null)
   const {
@@ -54,6 +52,12 @@ function TracksContainer({
     mouseDown: mouseDown2,
   } = useRangeSelect(ref, model, true)
   useWheelScroll(ref, model)
+
+  const additionals = pluginManager.evaluateExtensionPoint(
+    'LinearGenomeView-TracksContainerComponent',
+    undefined,
+    { model },
+  ) as React.ReactNode
 
   return (
     <div
@@ -103,9 +107,8 @@ function TracksContainer({
           />
         }
       />
+      {additionals}
       {children}
     </div>
   )
-}
-
-export default observer(TracksContainer)
+})

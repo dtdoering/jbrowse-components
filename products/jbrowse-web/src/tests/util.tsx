@@ -1,7 +1,7 @@
 import { clearCache } from '@jbrowse/core/util/io/RemoteFileWithRangeCache'
 import { clearAdapterCache } from '@jbrowse/core/data_adapters/dataAdapterCache'
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { render } from '@testing-library/react'
+import { render, waitFor } from '@testing-library/react'
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { toMatchImageSnapshot } from 'jest-image-snapshot'
@@ -29,9 +29,9 @@ type LGV = LinearGenomeViewModel
 
 jest.mock('../makeWorkerInstance', () => () => {})
 
-// @ts-ignore
+// @ts-expect-error
 global.nodeImage = Image
-// @ts-ignore
+// @ts-expect-error
 global.nodeCreateCanvas = createCanvas
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,22 +47,9 @@ export function getPluginManager(initialState?: any, adminMode = true) {
     },
     { pluginManager },
   )
-  // @ts-ignore
-  if (rootModel && rootModel.jbrowse.defaultSession.length) {
-    const { name } = rootModel.jbrowse.defaultSession
-    localStorage.setItem(
-      `localSaved-1`,
-      JSON.stringify({ session: rootModel.jbrowse.defaultSession }),
-    )
-    rootModel.activateSession(name)
-  } else {
-    rootModel.setDefaultSession()
-  }
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  rootModel.session!.views.map(view => view.setWidth(800))
+  rootModel.setDefaultSession()
   pluginManager.setRootModel(rootModel)
-
   pluginManager.configure()
   return pluginManager
 }
@@ -98,11 +85,6 @@ export function generateReadBuffer(getFile: (s: string) => GenericFilehandle) {
 }
 
 export function setup() {
-  window.requestIdleCallback = (cb: Function) => cb()
-  window.cancelIdleCallback = () => {}
-  window.requestAnimationFrame = (cb: Function) => setTimeout(cb)
-  window.cancelAnimationFrame = () => {}
-
   Storage.prototype.getItem = jest.fn(() => null)
   Storage.prototype.setItem = jest.fn()
   Storage.prototype.removeItem = jest.fn()
@@ -110,9 +92,6 @@ export function setup() {
 
   expect.extend({ toMatchImageSnapshot })
 }
-
-// eslint-disable-next-line no-global-assign
-window = Object.assign(window, { innerWidth: 800 })
 
 export function canvasToBuffer(canvas: HTMLCanvasElement) {
   return Buffer.from(
@@ -142,9 +121,20 @@ export function JBrowse(props: any) {
 
 export const hts = (str: string) => 'htsTrackEntry-' + str
 export const pc = (str: string) => `prerendered_canvas_${str}_done`
+export const pv = (str: string) => pc(`{volvox}ctgA:${str}`)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createView(args?: any, adminMode?: boolean) {
+export async function createView(args?: any, adminMode?: boolean) {
+  const ret = createViewNoWait(args, adminMode)
+  const { view } = ret
+  if (view && 'initialized' in view) {
+    await waitFor(() => expect(view.initialized).toBe(true), { timeout: 20000 })
+  }
+  return ret
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createViewNoWait(args?: any, adminMode?: boolean) {
   const pluginManager = getPluginManager(args, adminMode)
   const rest = render(<JBrowse pluginManager={pluginManager} />)
 
@@ -163,26 +153,33 @@ export function doBeforeEach(
   clearCache()
   clearAdapterCache()
 
-  // @ts-ignore
+  // @ts-expect-error
   fetch.resetMocks()
-  // @ts-ignore
+  // @ts-expect-error
   fetch.mockResponse(generateReadBuffer(url => new LocalFile(cb(url))))
 }
 
 export async function doSetupForImportForm(val?: unknown) {
-  const args = createView(val)
+  const args = await createView(val)
   const { view, findByTestId, getByPlaceholderText, findByPlaceholderText } =
     args
 
   // clear view takes us to the import form
   view.clearView()
 
-  const autocomplete = await findByTestId('autocomplete')
+  const autocomplete = await findByTestId(
+    'autocomplete',
+    {},
+    { timeout: 10000 },
+  )
   const input = (await findByPlaceholderText(
     'Search for location',
+    {},
+    { timeout: 10000 },
   )) as HTMLInputElement
 
-  // this will be the input that is obtained after opening the LGV from the import form
+  // this will be the input that is obtained after opening the LGV from the
+  // import form
   const getInputValue = () =>
     (getByPlaceholderText('Search for location') as HTMLInputElement).value
 

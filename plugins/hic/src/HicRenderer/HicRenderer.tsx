@@ -1,8 +1,6 @@
 import ServerSideRendererType, {
   RenderArgs as ServerSideRenderArgs,
-  RenderArgsSerialized,
   RenderArgsDeserialized as ServerSideRenderArgsDeserialized,
-  RenderResults,
   ResultsSerialized as ServerSideResultsSerialized,
   ResultsDeserialized as ServerSideResultsDeserialized,
 } from '@jbrowse/core/pluggableElementTypes/renderers/ServerSideRendererType'
@@ -13,7 +11,7 @@ import { toArray } from 'rxjs/operators'
 import { readConfObject } from '@jbrowse/core/configuration'
 import { BaseFeatureDataAdapter } from '@jbrowse/core/data_adapters/BaseAdapter'
 import { getAdapter } from '@jbrowse/core/data_adapters/dataAdapterCache'
-import { AnyConfigurationModel } from '@jbrowse/core/configuration/configurationSchema'
+import { AnyConfigurationModel } from '@jbrowse/core/configuration'
 
 interface HicFeature {
   bin1: number
@@ -43,8 +41,6 @@ export interface RenderArgsDeserializedWithFeatures
   extends RenderArgsDeserialized {
   features: HicFeature[]
 }
-
-export type { RenderArgsSerialized, RenderResults }
 
 export type ResultsSerialized = ServerSideResultsSerialized
 
@@ -157,3 +153,8 @@ export default class HicRenderer extends ServerSideRendererType {
     return features as any
   }
 }
+
+export {
+  type RenderArgsSerialized,
+  type RenderResults,
+} from '@jbrowse/core/pluggableElementTypes/renderers/ServerSideRendererType'

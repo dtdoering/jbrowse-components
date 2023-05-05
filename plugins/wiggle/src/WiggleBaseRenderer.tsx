@@ -1,10 +1,6 @@
 import FeatureRendererType, {
   RenderArgs as FeatureRenderArgs,
-  RenderArgsSerialized,
   RenderArgsDeserialized as FeatureRenderArgsDeserialized,
-  RenderResults,
-  ResultsSerialized,
-  ResultsDeserialized,
 } from '@jbrowse/core/pluggableElementTypes/renderers/FeatureRendererType'
 import { renderToAbstractCanvas, Feature } from '@jbrowse/core/util'
 import { ThemeOptions } from '@mui/material'
@@ -34,13 +30,6 @@ export interface MultiRenderArgsDeserialized
   sources: Source[]
 }
 
-export type {
-  RenderArgsSerialized,
-  RenderResults,
-  ResultsSerialized,
-  ResultsDeserialized,
-}
-
 export default abstract class WiggleBaseRenderer extends FeatureRendererType {
   supportsSVG = true
 
@@ -50,7 +39,7 @@ export default abstract class WiggleBaseRenderer extends FeatureRendererType {
     const [region] = regions
     const width = (region.end - region.start) / bpPerPx
 
-    // @ts-ignore
+    // @ts-expect-error
     const { reducedFeatures, ...rest } = await renderToAbstractCanvas(
       width,
       height,
@@ -73,9 +62,11 @@ export default abstract class WiggleBaseRenderer extends FeatureRendererType {
     return {
       ...results,
       ...rest,
-      features: (reducedFeatures
-        ? new Map(reducedFeatures.map((r: Feature) => [r.id(), r]))
-        : results.features) as Map<string, Feature>,
+      features: reducedFeatures
+        ? new Map<string, Feature>(
+            reducedFeatures.map((r: Feature) => [r.id(), r]),
+          )
+        : results.features,
       height,
       width,
       containsNoTransferables: true,
@@ -91,3 +82,10 @@ export default abstract class WiggleBaseRenderer extends FeatureRendererType {
     props: T,
   ): Promise<Record<string, unknown> | void>
 }
+
+export {
+  type RenderArgsSerialized,
+  type RenderResults,
+  type ResultsDeserialized,
+  type ResultsSerialized,
+} from '@jbrowse/core/pluggableElementTypes/renderers/FeatureRendererType'

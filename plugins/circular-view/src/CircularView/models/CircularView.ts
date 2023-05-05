@@ -1,3 +1,4 @@
+import React from 'react'
 import PluginManager from '@jbrowse/core/PluginManager'
 import {
   cast,
@@ -10,21 +11,37 @@ import {
 } from 'mobx-state-tree'
 import { Region } from '@jbrowse/core/util/types/mst'
 import { transaction } from 'mobx'
+import { saveAs } from 'file-saver'
+import { renderToSvg } from '../svgcomponents/SVGCircularView'
 import {
   AnyConfigurationModel,
   readConfObject,
 } from '@jbrowse/core/configuration'
-
+import { MenuItem } from '@jbrowse/core/ui'
 import {
   getSession,
   clamp,
   isSessionModelWithWidgets,
-  Region as IRegion,
 } from '@jbrowse/core/util'
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes/models'
-import { calculateStaticSlices, sliceIsVisible } from './slices'
 
+// icons
+import { TrackSelector as TrackSelectorIcon } from '@jbrowse/core/ui/Icons'
+import FolderOpenIcon from '@mui/icons-material/FolderOpen'
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'
+
+// locals
+import ExportSvgDlg from '../components/ExportSvgDialog'
+import { calculateStaticSlices, sliceIsVisible, SliceRegion } from './slices'
 import { viewportVisibleSection } from './viewportVisibleRegion'
+
+export interface ExportSvgOptions {
+  rasterizeLayers?: boolean
+  filename?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Wrapper?: React.FC<any>
+  themeName?: string
+}
 
 /**
  * #stateModel CircularView
@@ -120,12 +137,6 @@ function stateModelFactory(pluginManager: PluginManager) {
           )
         }
         return self.volatileWidth
-      },
-      /**
-       * #getter
-       */
-      get staticSlices() {
-        return calculateStaticSlices(self)
       },
 
       /**
@@ -262,20 +273,7 @@ function stateModelFactory(pluginManager: PluginManager) {
        * elide regions that are too small to see reasonably
        */
       get elidedRegions() {
-        const visible: (
-          | {
-              elided: true
-              widthBp: number
-              regions: IRegion[]
-            }
-          | {
-              elided: false
-              widthBp: number
-              start: number
-              end: number
-              refName: string
-            }
-        )[] = []
+        const visible: SliceRegion[] = []
         self.displayedRegions.forEach(region => {
           const widthBp = region.end - region.start
           const widthPx = widthBp / self.bpPerPx
@@ -328,6 +326,14 @@ function stateModelFactory(pluginManager: PluginManager) {
           self.volatileWidth !== undefined &&
           this.assemblyNames.every(a => assemblyManager.get(a)?.initialized)
         )
+      },
+    }))
+    .views(self => ({
+      /**
+       * #getter
+       */
+      get staticSlices() {
+        return calculateStaticSlices(self)
       },
     }))
     .views(self => ({
@@ -501,9 +507,11 @@ function stateModelFactory(pluginManager: PluginManager) {
           throw new Error(`unknown track type ${conf.type}`)
         }
         const viewType = pluginManager.getViewType(self.type)
-        const supportedDisplays = viewType.displayTypes.map(d => d.name)
+        const supportedDisplays = new Set(
+          viewType.displayTypes.map(d => d.name),
+        )
         const displayConf = conf.displays.find((d: AnyConfigurationModel) =>
-          supportedDisplays.includes(d.type),
+          supportedDisplays.has(d.type),
         )
         const track = trackType.stateModel.create({
           ...initialSnapshot,
@@ -522,21 +530,24 @@ function stateModelFactory(pluginManager: PluginManager) {
         const name = readConfObject(configuration, 'name')
         const trackType = pluginManager.getTrackType(type)
         if (!trackType) {
-          throw new Error(`unknown track type ${configuration.type}`)
+          throw new Error(`unknown track type ${type}`)
         }
         const viewType = pluginManager.getViewType(self.type)
-        const supportedDisplays = viewType.displayTypes.map(d => d.name)
-        const displayConf = configuration.displays.find(
-          (d: AnyConfigurationModel) => supportedDisplays.includes(d.type),
+        const supportedDisplays = new Set(
+          viewType.displayTypes.map(d => d.name),
         )
-        const track = trackType.stateModel.create({
-          ...initialSnapshot,
-          name,
-          type,
-          configuration,
-          displays: [{ type: displayConf.type, configuration: displayConf }],
-        })
-        self.tracks.push(track)
+        const displayConf = configuration.displays.find(
+          (d: AnyConfigurationModel) => supportedDisplays.has(d.type),
+        )
+        self.tracks.push(
+          trackType.stateModel.create({
+            ...initialSnapshot,
+            name,
+            type,
+            configuration,
+            displays: [{ type: displayConf.type, configuration: displayConf }],
+          }),
+        )
       },
 
       /**
@@ -560,19 +571,50 @@ function stateModelFactory(pluginManager: PluginManager) {
         this.setModelViewWhenAdjust(self.atMinBpPerPx)
         return self.lockedFitToWindow
       },
+      /**
+       * #action
+       * creates an svg export and save using FileSaver
+       */
+      async exportSvg(opts: ExportSvgOptions = {}) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const html = await renderToSvg(self as any, opts)
+        const blob = new Blob([html], { type: 'image/svg+xml' })
+        saveAs(blob, opts.filename || 'image.svg')
+      },
+    }))
+    .views(self => ({
+      /**
+       * #method
+       * return the view menu items
+       */
+      menuItems(): MenuItem[] {
+        return [
+          {
+            label: 'Return to import form',
+            onClick: () => self.setDisplayedRegions([]),
+            icon: FolderOpenIcon,
+          },
+          {
+            label: 'Export SVG',
+            icon: PhotoCameraIcon,
+            onClick: () => {
+              getSession(self).queueDialog(handleClose => [
+                ExportSvgDlg,
+                { model: self, handleClose },
+              ])
+            },
+          },
+          {
+            label: 'Open track selector',
+            onClick: self.activateTrackSelector,
+            icon: TrackSelectorIcon,
+          },
+        ]
+      },
     }))
 }
 
 export type CircularViewStateModel = ReturnType<typeof stateModelFactory>
 export type CircularViewModel = Instance<CircularViewStateModel>
-
-/**
-PLANS
-
-- tracks
-- ruler tick marks
-- set viewport scroll from state snapshot
-
-*/
 
 export default stateModelFactory

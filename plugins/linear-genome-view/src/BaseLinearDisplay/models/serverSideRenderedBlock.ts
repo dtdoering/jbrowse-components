@@ -28,6 +28,7 @@ import {
   getRpcSessionId,
 } from '@jbrowse/core/util/tracks'
 
+// locals
 import ServerSideRenderedBlockContent from '../components/ServerSideRenderedBlockContent'
 
 // the MST state of a single server-side-rendered block in a display
@@ -61,28 +62,35 @@ const blockState = types
       },
       afterAttach() {
         const display = getContainingDisplay(self)
-        makeAbortableReaction(
-          self as any,
-          renderBlockData,
-          renderBlockEffect as any, // reaction doesn't expect async here
-          {
-            name: `${display.id}/${assembleLocString(self.region)} rendering`,
-            delay: display.renderDelay,
-            fireImmediately: true,
-          },
-          this.setLoading,
-          this.setRendered,
-          this.setError,
-        )
+        setTimeout(() => {
+          if (isAlive(self)) {
+            makeAbortableReaction(
+              self as any,
+              renderBlockData,
+              renderBlockEffect, // reaction doesn't expect async here
+              {
+                name: `${display.id}/${assembleLocString(
+                  self.region,
+                )} rendering`,
+                delay: display.renderDelay,
+                fireImmediately: true,
+              },
+              this.setLoading,
+              this.setRendered,
+              this.setError,
+            )
+          }
+        }, display.renderDelay)
       },
       setStatus(message: string) {
         self.status = message
       },
       setLoading(abortController: AbortController) {
-        if (renderInProgress !== undefined) {
-          if (!renderInProgress.signal.aborted) {
-            renderInProgress.abort()
-          }
+        if (
+          renderInProgress !== undefined &&
+          !renderInProgress.signal.aborted
+        ) {
+          renderInProgress.abort()
         }
         self.filled = false
         self.message = undefined
@@ -139,7 +147,7 @@ const blockState = types
         self.renderProps = renderProps
         renderInProgress = undefined
       },
-      setError(error: Error | unknown) {
+      setError(error: unknown) {
         console.error(error)
         if (renderInProgress && !renderInProgress.signal.aborted) {
           renderInProgress.abort()
@@ -213,7 +221,7 @@ export function renderBlockData(
     const regionAsm = self.region.assemblyName
     if (
       !assemblyNames.includes(regionAsm) &&
-      !assemblyNames.find(name => assemblyManager.get(name)?.hasName(regionAsm))
+      !assemblyNames.some(name => assemblyManager.get(name)?.hasName(regionAsm))
     ) {
       throw new Error(
         `region assembly (${regionAsm}) does not match track assemblies (${assemblyNames})`,
@@ -259,24 +267,14 @@ export function renderBlockData(
   }
 }
 
-interface RenderProps {
-  displayError: Error
-  rendererType: any
-  renderProps: { [key: string]: any }
-  rpcManager: { call: Function }
-  cannotBeRenderedReason: string
-  renderArgs: { [key: string]: any }
-}
-
-interface ErrorProps {
-  displayError: string
-}
-
 async function renderBlockEffect(
-  props: RenderProps | ErrorProps,
+  props: ReturnType<typeof renderBlockData> | undefined,
   signal: AbortSignal,
   self: BlockModel,
 ) {
+  if (!props) {
+    return
+  }
   const {
     rendererType,
     renderProps,
@@ -284,7 +282,7 @@ async function renderBlockEffect(
     renderArgs,
     cannotBeRenderedReason,
     displayError,
-  } = props as RenderProps
+  } = props
   if (!isAlive(self)) {
     return undefined
   }
@@ -314,5 +312,6 @@ async function renderBlockEffect(
     features,
     layout,
     maxHeightReached,
+    renderProps,
   }
 }

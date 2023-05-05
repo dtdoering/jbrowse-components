@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
+// icons
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd'
 import DeleteIcon from '@mui/icons-material/Delete'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
@@ -96,7 +97,7 @@ function RecentSessionCard({
                 setMenuAnchorEl(event.currentTarget)
               }}
             >
-              <MoreVertIcon color="secondary" />
+              <MoreVertIcon />
             </IconButton>
           }
           disableTypography
@@ -135,7 +136,7 @@ function RecentSessionCard({
           }}
         >
           <ListItemIcon>
-            <TextFieldsIcon color="secondary" />
+            <TextFieldsIcon />
           </ListItemIcon>
           <Typography variant="inherit">Rename</Typography>
         </MenuItem>
@@ -146,7 +147,7 @@ function RecentSessionCard({
           }}
         >
           <ListItemIcon>
-            <DeleteIcon color="secondary" />
+            <DeleteIcon />
           </ListItemIcon>
           <Typography variant="inherit">Delete</Typography>
         </MenuItem>
@@ -157,7 +158,7 @@ function RecentSessionCard({
           }}
         >
           <ListItemIcon>
-            <PlaylistAddIcon color="secondary" />
+            <PlaylistAddIcon />
           </ListItemIcon>
           <Typography variant="inherit">Add to quickstart list</Typography>
         </MenuItem>

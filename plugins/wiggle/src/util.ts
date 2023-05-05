@@ -5,7 +5,7 @@ import {
   getSession,
   getContainingView,
 } from '@jbrowse/core/util'
-import { FeatureStats } from '@jbrowse/core/util/stats'
+import { QuantitativeStats } from '@jbrowse/core/util/stats'
 import { getRpcSessionId } from '@jbrowse/core/util/tracks'
 import { addDisposer, isAlive } from 'mobx-state-tree'
 
@@ -168,16 +168,18 @@ export function getNiceDomain({
 }
 
 export function groupBy<T>(array: T[], predicate: (v: T) => string) {
-  return array.reduce((acc, value) => {
-    const entry = (acc[predicate(value)] ||= [])
+  const result = {} as { [key: string]: T[] }
+  for (const value of array) {
+    const entry = (result[predicate(value)] ||= [])
     entry.push(value)
-    return acc
-  }, {} as { [key: string]: T[] })
+  }
+  return result
 }
 
-export async function getStats(
+export async function getQuantitativeStats(
   self: {
     adapterConfig: AnyConfigurationModel
+    configuration: AnyConfigurationModel
     autoscaleType: string
     setMessage: (str: string) => void
   },
@@ -186,7 +188,7 @@ export async function getStats(
     signal?: AbortSignal
     filters?: string[]
   },
-): Promise<FeatureStats> {
+): Promise<QuantitativeStats> {
   const { rpcManager } = getSession(self)
   const nd = getConf(self, 'numStdDev') || 3
   const { adapterConfig, autoscaleType } = self
@@ -203,11 +205,11 @@ export async function getStats(
   }
 
   if (autoscaleType === 'global' || autoscaleType === 'globalsd') {
-    const results: FeatureStats = (await rpcManager.call(
+    const results: QuantitativeStats = (await rpcManager.call(
       sessionId,
-      'WiggleGetGlobalStats',
+      'WiggleGetGlobalQuantitativeStats',
       params,
-    )) as FeatureStats
+    )) as QuantitativeStats
     const { scoreMin, scoreMean, scoreStdDev } = results
     // globalsd uses heuristic to avoid unnecessary scoreMin<0
     // if the scoreMin is never less than 0
@@ -224,7 +226,7 @@ export async function getStats(
     const { dynamicBlocks, bpPerPx } = getContainingView(self) as LGV
     const results = (await rpcManager.call(
       sessionId,
-      'WiggleGetMultiRegionStats',
+      'WiggleGetMultiRegionQuantitativeStats',
       {
         ...params,
         regions: dynamicBlocks.contentBlocks.map(region => {
@@ -237,7 +239,7 @@ export async function getStats(
         }),
         bpPerPx,
       },
-    )) as FeatureStats
+    )) as QuantitativeStats
     const { scoreMin, scoreMean, scoreStdDev } = results
 
     // localsd uses heuristic to avoid unnecessary scoreMin<0 if the
@@ -254,20 +256,25 @@ export async function getStats(
   if (autoscaleType === 'zscale') {
     return rpcManager.call(
       sessionId,
-      'WiggleGetGlobalStats',
+      'WiggleGetGlobalQuantitativeStats',
       params,
-    ) as Promise<FeatureStats>
+    ) as Promise<QuantitativeStats>
   }
   throw new Error(`invalid autoscaleType '${autoscaleType}'`)
 }
 
-export function statsAutorun(self: {
-  estimatedStatsReady: boolean
+export function quantitativeStatsAutorun(self: {
+  featureDensityStatsReady: boolean
   regionTooLarge: boolean
+  error: unknown
   setLoading: (aborter: AbortController) => void
   setError: (error: unknown) => void
-  updateStats: (stats: FeatureStats, statsRegion: string) => void
+  updateQuantitativeStats: (
+    stats: QuantitativeStats,
+    statsRegion: string,
+  ) => void
   renderProps: () => Record<string, unknown>
+  configuration: AnyConfigurationModel
   adapterConfig: AnyConfigurationModel
   autoscaleType: string
   setMessage: (str: string) => void
@@ -283,20 +290,21 @@ export function statsAutorun(self: {
 
           if (
             !view.initialized ||
-            !self.estimatedStatsReady ||
-            self.regionTooLarge
+            !self.featureDensityStatsReady ||
+            self.regionTooLarge ||
+            self.error
           ) {
             return
           }
           const statsRegion = JSON.stringify(view.dynamicBlocks)
 
-          const wiggleStats = await getStats(self, {
+          const wiggleStats = await getQuantitativeStats(self, {
             signal: aborter.signal,
             ...self.renderProps(),
           })
 
           if (isAlive(self)) {
-            self.updateStats(wiggleStats, statsRegion)
+            self.updateQuantitativeStats(wiggleStats, statsRegion)
           }
         } catch (e) {
           if (!isAbortException(e) && isAlive(self)) {

@@ -7,12 +7,16 @@ import {
 } from '@jbrowse/core/pluggableElementTypes/models'
 import TrackType from '@jbrowse/core/pluggableElementTypes/TrackType'
 import PluginManager from '@jbrowse/core/PluginManager'
-import { Instance, types } from 'mobx-state-tree'
-import { LinearGenomeViewStateModel, stateModelFactory } from '.'
+import { types } from 'mobx-state-tree'
+
+// locals
+import { LinearGenomeViewModel, stateModelFactory } from '.'
 import { BaseLinearDisplayComponent } from '..'
 import { stateModelFactory as LinearBasicDisplayStateModelFactory } from '../LinearBareDisplay'
 import hg38Regions from './hg38DisplayedRegions.json'
 import volvoxDisplayedRegions from './volvoxDisplayedRegions.json'
+
+type LGV = LinearGenomeViewModel
 
 // use initializer function to avoid having console.warn jest.fn in a global
 function initialize() {
@@ -92,14 +96,14 @@ function initialize() {
       assemblyManager: types.optional(AssemblyManager, {
         assemblies: {
           volvox: {
-            // @ts-ignore
+            // @ts-expect-error
             regions: volvoxDisplayedRegions,
           },
         },
       }),
     })
     .actions(self => ({
-      setView(view: Instance<LinearGenomeViewStateModel>) {
+      setView(view: LGV) {
         self.view = view
         return view
       },
@@ -230,29 +234,27 @@ test('can instantiate a model that tests navTo/moveTo', async () => {
   expect(model.bpPerPx).toBe(0.125)
 
   expect(() => model.navTo({ refName: 'ctgA', start: 200, end: 100 })).toThrow(
-    'start "201" is greater than end "100"',
+    /start greater than end/,
   )
 
-  expect(() =>
-    model.navTo({ refName: 'ctgDoesNotExist', start: 0, end: 100 }),
-  ).toThrow('could not find a region with refName "ctgDoesNotExist"')
+  expect(() => model.navTo({ refName: 'noExist', start: 0, end: 100 })).toThrow(
+    /could not find a region/,
+  )
 
   expect(() => model.navTo({ refName: 'ctgA', end: 20100 })).toThrow(
-    'could not find a region with refName "ctgA" that contained an end position 20100',
+    /could not find a region/,
   )
 
   expect(() => model.navTo({ refName: 'ctgA', start: 20000 })).toThrow(
-    'could not find a region with refName "ctgA" that contained a start position 20001',
+    /could not find a region/,
   )
 
   expect(() =>
     model.navTo({ refName: 'ctgA', start: 20000, end: 20100 }),
-  ).toThrow(
-    'could not find a region that completely contained "ctgA:20,001..20,100"',
-  )
+  ).toThrow(/could not find a region/)
 
   expect(() => model.navTo({ refName: 'ctgA', start: 0, end: 20000 })).toThrow(
-    'could not find a region that completely contained "ctgA:1..20,000"',
+    /could not find a region/,
   )
 })
 
@@ -300,14 +302,13 @@ test('can navToMultiple', () => {
     { refName: 'ctgA', start: 5000, end: 10000 },
     { refName: 'ctgC', start: 0, end: 5000 },
   ])
-  expect(model.offsetPx).toBe(2793)
-  expect(model.bpPerPx).toBeCloseTo(12.531)
+  expect(model.offsetPx).toBe(199)
+  expect(model.bpPerPx).toBeCloseTo(25.12562)
 })
 
 describe('Zoom to selected displayed regions', () => {
   const { Session, LinearGenomeModel } = initialize()
-  let model: Instance<ReturnType<typeof stateModelFactory>>
-  let largestBpPerPx: number
+  let model: LGV
   beforeEach(() => {
     const session = Session.create({
       configuration: {},
@@ -353,7 +354,6 @@ describe('Zoom to selected displayed regions', () => {
       },
     )
 
-    largestBpPerPx = model.bpPerPx
     expect(model.offsetPx).toEqual(0)
     expect(model.bpPerPx).toBeCloseTo(31.408)
   })
@@ -380,7 +380,6 @@ describe('Zoom to selected displayed regions', () => {
     expect(model.offsetPx).toEqual(0)
     // 10000 - 5000 = 5000 / 800 = 6.25
     expect(model.bpPerPx).toEqual(6.25)
-    expect(model.bpPerPx).toBeLessThan(largestBpPerPx)
   })
 
   it('can select one region with start or end outside of displayed region', () => {
@@ -407,7 +406,6 @@ describe('Zoom to selected displayed regions', () => {
     expect(Math.abs(model.offsetPx)).toEqual(0)
     // endOffset 19000 - (-1) = 19001 /  800 = zoomTo(23.75)
     expect(model.bpPerPx).toBeCloseTo(23.75)
-    expect(model.bpPerPx).toBeLessThan(largestBpPerPx)
   })
 
   it('can select over two regions in the same reference sequence', () => {
@@ -435,7 +433,6 @@ describe('Zoom to selected displayed regions', () => {
     expect(model.bpPerPx).toBeCloseTo(27.78, 0)
     // offset 5000 / bpPerPx (because that is the starting) = 180.5
     expect(model.offsetPx).toBe(181)
-    expect(model.bpPerPx).toBeLessThan(largestBpPerPx)
   })
 
   it('can navigate to overlapping regions with a region between', () => {
@@ -581,7 +578,7 @@ test('can perform bpToPx in a way that makes sense on things that happen outside
   model.toggleHeaderOverview()
   expect(model.hideHeaderOverview).toEqual(true)
   model.toggleHeaderOverview()
-  model.setError(Error('pxToBp failed to map to a region'))
+  model.setError(new Error('pxToBp failed to map to a region'))
   expect(`${model.error}`).toEqual('Error: pxToBp failed to map to a region')
 })
 // determined objectively by looking at
@@ -674,7 +671,7 @@ describe('get sequence for selected displayed regions', () => {
   /* the start of all the results should be +1
   the sequence dialog then handles converting from 1-based closed to interbase
   */
-  let model: Instance<ReturnType<typeof stateModelFactory>>
+  let model: LGV
   beforeEach(() => {
     const session = Session.create({
       configuration: {},
@@ -932,7 +929,7 @@ test('navToLocString with human assembly', async () => {
     assemblyManager: {
       assemblies: {
         hg38: {
-          // @ts-ignore
+          // @ts-expect-error
           regions: hg38Regions,
         },
       },

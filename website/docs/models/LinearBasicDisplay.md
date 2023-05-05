@@ -9,6 +9,10 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[plugins/linear-genome-view/src/LinearBasicDisplay/model.ts](https://github.com/GMOD/jbrowse-components/blob/main/plugins/linear-genome-view/src/LinearBasicDisplay/model.ts)
+
 ## Docs
 
 used by `FeatureTrack`, has simple settings like "show/hide feature labels",
@@ -65,7 +69,7 @@ trackMaxHeight: types.maybe(types.number)
 
 ```js
 // type signature
-ITypeUnion<any, any, any>
+AnyConfigurationSchemaType
 // code
 configuration: ConfigurationReference(configSchema)
 ```
@@ -157,5 +161,5 @@ setDisplayMode: (val: string) => void
 
 ```js
 // type signature
-setMaxHeight: (val: number) => void
+setMaxHeight: (val?: number) => void
 ```

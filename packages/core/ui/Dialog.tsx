@@ -6,12 +6,18 @@ import {
   Divider,
   DialogProps,
   ScopedCssBaseline,
+  createTheme,
+  ThemeProvider,
+  useTheme,
 } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
+import { ErrorBoundary } from 'react-error-boundary'
 
 // icons
 import CloseIcon from '@mui/icons-material/Close'
+// locals
+import ErrorMessage from './ErrorMessage'
 
 const useStyles = makeStyles()(theme => ({
   closeButton: {
@@ -22,9 +28,18 @@ const useStyles = makeStyles()(theme => ({
   },
 }))
 
+function DialogError({ error }: { error: unknown }) {
+  return (
+    <div style={{ width: 800, margin: 40 }}>
+      <ErrorMessage error={error} />
+    </div>
+  )
+}
+
 function JBrowseDialog(props: DialogProps & { title: string }) {
   const { classes } = useStyles()
   const { title, children, onClose } = props
+  const theme = useTheme()
 
   return (
     <Dialog {...props}>
@@ -35,7 +50,7 @@ function JBrowseDialog(props: DialogProps & { title: string }) {
             <IconButton
               className={classes.closeButton}
               onClick={() => {
-                // @ts-ignore
+                // @ts-expect-error
                 onClose()
               }}
             >
@@ -44,7 +59,25 @@ function JBrowseDialog(props: DialogProps & { title: string }) {
           ) : null}
         </DialogTitle>
         <Divider />
-        {children}
+
+        <ErrorBoundary FallbackComponent={DialogError}>
+          <ThemeProvider
+            theme={createTheme(theme, {
+              components: {
+                MuiInputBase: {
+                  styleOverrides: {
+                    input: {
+                      // xref https://github.com/GMOD/jbrowse-components/pull/3666
+                      boxSizing: 'content-box!important' as 'content-box',
+                    },
+                  },
+                },
+              },
+            })}
+          >
+            {children}
+          </ThemeProvider>
+        </ErrorBoundary>
       </ScopedCssBaseline>
     </Dialog>
   )

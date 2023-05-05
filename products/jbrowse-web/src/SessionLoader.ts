@@ -11,7 +11,7 @@ import PluginLoader, {
 import { fromUrlSafeB64 } from './util'
 import { readSessionFromDynamo } from './sessionSharing'
 import { openLocation } from '@jbrowse/core/util/io'
-import { AnyConfigurationModel } from '@jbrowse/core/configuration/configurationSchema'
+import { AnyConfigurationModel } from '@jbrowse/core/configuration'
 import shortid from 'shortid'
 
 type Config = SnapshotOut<AnyConfigurationModel>
@@ -28,13 +28,11 @@ function addRelativeUris(config: Config, base: URL) {
   }
 }
 
+type Root = { configuration?: Config }
+
 // raw readConf alternative for before conf is initialized
-function readConf(
-  { configuration = {} }: { configuration?: Config },
-  attr: string,
-  def: string,
-) {
-  return configuration[attr] || def
+function readConf({ configuration }: Root, attr: string, def: string) {
+  return configuration?.[attr] || def
 }
 
 async function fetchPlugins() {
@@ -48,31 +46,28 @@ async function fetchPlugins() {
 }
 
 async function checkPlugins(pluginsToCheck: PluginDefinition[]) {
+  if (pluginsToCheck.length === 0) {
+    return true
+  }
   const storePlugins = await fetchPlugins()
   return pluginsToCheck.every(p => {
     if (isUMDPluginDefinition(p)) {
-      return Boolean(
-        storePlugins.plugins.find(
-          pp =>
-            isUMDPluginDefinition(p) &&
-            (('url' in pp && 'url' in p && p.url === pp.url) ||
-              ('umdUrl' in pp && 'umdUrl' in p && p.umdUrl === pp.umdUrl)),
-        ),
+      return storePlugins.plugins.some(
+        pp =>
+          isUMDPluginDefinition(p) &&
+          (('url' in pp && 'url' in p && p.url === pp.url) ||
+            ('umdUrl' in pp && 'umdUrl' in p && p.umdUrl === pp.umdUrl)),
       )
     }
     if (isESMPluginDefinition(p)) {
-      return Boolean(
-        storePlugins.plugins.find(
-          pp =>
-            isESMPluginDefinition(p) && 'esmUrl' in p && p.esmUrl === pp.esmUrl,
-        ),
+      return storePlugins.plugins.some(
+        pp =>
+          isESMPluginDefinition(p) && 'esmUrl' in p && p.esmUrl === pp.esmUrl,
       )
     }
     if (isCJSPluginDefinition(p)) {
-      return Boolean(
-        storePlugins.plugins.find(
-          pp => isCJSPluginDefinition(p) && p.cjsUrl === pp.cjsUrl,
-        ),
+      return storePlugins.plugins.some(
+        pp => isCJSPluginDefinition(p) && p.cjsUrl === pp.cjsUrl,
       )
     }
     return false
@@ -253,7 +248,7 @@ const SessionLoader = types
     async fetchConfig() {
       let { configPath = 'config.json' } = self
 
-      // @ts-ignore
+      // @ts-expect-error
       // eslint-disable-next-line no-underscore-dangle
       if (window.__jbrowseCacheBuster) {
         configPath += `?rand=${Math.random()}`
@@ -331,7 +326,7 @@ const SessionLoader = types
 
     async decodeEncodedUrlSession() {
       const session = JSON.parse(
-        // @ts-ignore
+        // @ts-expect-error
         await fromUrlSafeB64(self.sessionQuery.replace('encoded-', '')),
       )
       await this.setSessionSnapshot({ ...session, id: shortid() })
@@ -363,7 +358,7 @@ const SessionLoader = types
     },
 
     async decodeJsonUrlSession() {
-      // @ts-ignore
+      // @ts-expect-error
       const session = JSON.parse(self.sessionQuery.replace('json-', ''))
       await this.setSessionSnapshot({ ...session.session, id: shortid() })
     },
@@ -476,12 +471,12 @@ export function loadSessionSpec(
       throw new Error('rootModel not initialized')
     }
     try {
-      // @ts-ignore
+      // @ts-expect-error
       rootModel.setSession({
         name: `New session ${new Date().toLocaleString()}`,
       })
 
-      // @ts-ignore
+      // @ts-expect-error
       sessionTracks.forEach(track => rootModel.session.addTrackConf(track))
 
       await Promise.all(

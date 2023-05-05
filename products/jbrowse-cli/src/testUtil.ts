@@ -1,5 +1,5 @@
 import { test as oclifTest } from '@oclif/test'
-import del from 'del'
+import { rimrafSync } from 'rimraf'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
@@ -82,8 +82,8 @@ export const setup = test
     await mkdir(jbrowseTmpDir, { recursive: true })
     return mkdtemp(path.join(jbrowseTmpDir, path.sep))
   })
-  .finally(async ctx => {
-    await del([`${ctx.dir}/**`, ctx.dir], { force: true })
+  .finally(ctx => {
+    rimrafSync(`${ctx.dir}`)
     process.chdir(ctx.originalDir)
   })
   .do(async ctx => {

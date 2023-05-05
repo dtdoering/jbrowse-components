@@ -175,7 +175,28 @@
       }
     }
   ],
-  "configuration": {},
+  "configuration": {
+    "extraThemes": {
+      "darkForest": {
+        "name": "Dark (forest, from config file)",
+        "palette": {
+          "primary": {
+            "main": "#464"
+          },
+          "secondary": {
+            "main": "#376"
+          },
+          "tertiary": {
+            "main": "#253"
+          },
+          "quaternary": {
+            "main": "#6a4"
+          },
+          "mode": "dark"
+        }
+      }
+    }
+  },
   "connections": [],
   "defaultSession": {
     "name": "Integration test example",
@@ -211,7 +232,8 @@
     {
       "type": "VariantTrack",
       "trackId": "volvox_sv_test",
-      "name": "volvox structural variant test",
+      "description": "A uniquely interesting track",
+      "name": "volvox structural variant test (<i>HTML italic</i>)",
       "category": ["VCF"],
       "assemblyNames": ["volvox"],
       "adapter": {
@@ -276,10 +298,13 @@
     {
       "type": "AlignmentsTrack",
       "trackId": "volvox_cram_pileup",
-      "name": "volvox-sorted.cram (contigA, LinearPileupDisplay)",
+      "name": "volvox-sorted.cram (contigA, LinearPileupDisplay, large height)",
       "category": ["Integration test"],
       "metadata": {
-        "source": "We generated 150bp paired end reads from a <i>Volvox mythicus</i>, an imaginary species, for this jbrowse demo"
+        "source": "We generated 150bp paired end reads from a <i>Volvox mythicus</i>, an imaginary species, for this jbrowse demo. See <a href=https://google.com>Google</a>",
+        "sub": {
+          "subkey": "wow"
+        }
       },
       "assemblyNames": ["volvox"],
       "adapter": {
@@ -304,7 +329,8 @@
       "displays": [
         {
           "type": "LinearPileupDisplay",
-          "displayId": "volvox_cram_pileup_pileup"
+          "displayId": "volvox_cram_pileup_pileup",
+          "height": 400
         }
       ]
     },
@@ -429,7 +455,7 @@
     {
       "type": "AlignmentsTrack",
       "trackId": "volvox_alignments",
-      "name": "volvox-sorted.bam (ctgA)",
+      "name": "volvox-sorted.bam (ctgA, larger default height)",
       "category": ["Integration test"],
       "assemblyNames": ["volvox", "volvox2"],
       "adapter": {
@@ -448,6 +474,7 @@
       "displays": [
         {
           "type": "LinearAlignmentsDisplay",
+          "height": 400,
           "displayId": "volvox_alignments_alignments",
           "pileupDisplay": {
             "type": "LinearPileupDisplay",
@@ -1061,7 +1088,8 @@
       "assemblyNames": ["volvox"],
       "name": "GFF3Tabix genes",
       "formatDetails": {
-        "feature": "jexl:{name:'<a href=https://google.com/?q='+feature.name+'>'+feature.name+'</a>',extrafield:'Field added with custom callback:' + feature.name,phase:undefined,type:undefined}"
+        "feature": "jexl:{name:'<a href=https://google.com/?q='+feature.name+'>'+feature.name+'</a>',extrafield:'Field added with custom callback:' + feature.name,phase:undefined,type:undefined}",
+        "subfeatures": "jexl:{name:'<a href=https://google.com/?q='+feature.name+'>Subfeature: '+(!feature.name?'No name':feature.name)+'</a>'}"
       },
       "category": ["Miscellaneous"],
       "adapter": {
@@ -2044,7 +2072,6 @@
       },
       "assemblyNames": ["volvox"]
     },
-
     {
       "type": "SyntenyTrack",
       "trackId": "volvox_inv_indels",

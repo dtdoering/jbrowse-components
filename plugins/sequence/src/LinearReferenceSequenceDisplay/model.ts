@@ -10,6 +10,8 @@ import {
 import { getContainingView } from '@jbrowse/core/util'
 import { autorun } from 'mobx'
 
+type LGV = LinearGenomeViewModel
+
 /**
  * #stateModel LinearReferenceSequenceDisplay
  * base model `BaseLinearDisplay`
@@ -49,11 +51,12 @@ export function modelFactory(configSchema: AnyConfigurationSchemaType) {
          * #method
          */
         renderProps() {
-          const { showForward, showReverse, showTranslation } = self
+          const { showForward, rpcDriverName, showReverse, showTranslation } =
+            self
           return {
             ...superRenderProps(),
-            rpcDriverName: self.rpcDriverName,
             config: self.configuration.renderer,
+            rpcDriverName,
             showForward,
             showReverse,
             showTranslation,
@@ -66,7 +69,7 @@ export function modelFactory(configSchema: AnyConfigurationSchemaType) {
        * #method
        */
       regionCannotBeRendered(/* region */) {
-        const view = getContainingView(self) as LinearGenomeViewModel
+        const view = getContainingView(self) as LGV
         return view?.bpPerPx >= 1 ? 'Zoom in to see sequence' : undefined
       },
       /**
@@ -96,17 +99,21 @@ export function modelFactory(configSchema: AnyConfigurationSchemaType) {
         self.showTranslation = !self.showTranslation
       },
       afterAttach() {
-        // auto-adjust height depending on settings
         addDisposer(
           self,
           autorun(() => {
-            const { showTranslation, showReverse, showForward } = self
-            const r1 = showReverse && showTranslation ? 60 : 0
-            const r2 = showForward && showTranslation ? 60 : 0
-            const t = r1 + r2
-            const r = showReverse ? 20 : 0
-            const s = showForward ? 20 : 0
-            self.setHeight(t + r + s)
+            const view = getContainingView(self) as LGV
+            if (view?.bpPerPx >= 1) {
+              self.setHeight(50)
+            } else {
+              const { showTranslation, showReverse, showForward } = self
+              const r1 = showReverse && showTranslation ? 60 : 0
+              const r2 = showForward && showTranslation ? 60 : 0
+              const t = r1 + r2
+              const r = showReverse ? 20 : 0
+              const s = showForward ? 20 : 0
+              self.setHeight(t + r + s)
+            }
           }),
         )
       },

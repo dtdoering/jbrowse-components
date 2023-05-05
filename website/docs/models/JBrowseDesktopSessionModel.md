@@ -9,6 +9,10 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[products/jbrowse-desktop/src/sessionModelFactory.ts](https://github.com/GMOD/jbrowse-components/blob/main/products/jbrowse-desktop/src/sessionModelFactory.ts)
+
 ## Docs
 
 inherits SnackbarModel
@@ -124,11 +128,32 @@ IOptionalIType<ISimpleType<string>, [undefined]>
 // code
 drawerPosition: types.optional(
         types.string,
-        localStorage.getItem('drawerPosition') || 'right',
+        () => localStorageGetItem('drawerPosition') || 'right',
       )
 ```
 
 ### JBrowseDesktopSessionModel - Getters
+
+#### getter: jbrowse
+
+```js
+// type
+any
+```
+
+#### getter: themeName
+
+```js
+// type
+string
+```
+
+#### getter: theme
+
+```js
+// type
+Theme
+```
 
 #### getter: DialogComponent
 
@@ -155,28 +180,28 @@ any
 
 ```js
 // type
-any
+{ [x: string]: any; } & NonEmptyObject & { setSubschema(slotName: string, data: unknown): any; } & IStateTreeNode<AnyConfigurationSchemaType>
 ```
 
 #### getter: assemblies
 
 ```js
 // type
-any
+({ [x: string]: any; } & NonEmptyObject & { setSubschema(slotName: string, data: unknown): any; } & IStateTreeNode<AnyConfigurationSchemaType>)[]
 ```
 
 #### getter: assemblyNames
 
 ```js
 // type
-any
+string[]
 ```
 
 #### getter: tracks
 
 ```js
 // type
-any
+({ [x: string]: any; } & NonEmptyObject & { setSubschema(slotName: string, data: unknown): any; } & IStateTreeNode<AnyConfigurationSchemaType>)[]
 ```
 
 #### getter: textSearchManager
@@ -251,6 +276,13 @@ boolean
 
 ### JBrowseDesktopSessionModel - Methods
 
+#### method: allThemes
+
+```js
+// type signature
+allThemes: () => ThemeMap
+```
+
 #### method: renderProps
 
 ```js
@@ -277,6 +309,13 @@ getTrackActionMenuItems: (config: any) => ({ label: string; onClick: () => void;
 ```
 
 ### JBrowseDesktopSessionModel - Actions
+
+#### action: setThemeName
+
+```js
+// type signature
+setThemeName: (name: string) => void
+```
 
 #### action: moveViewUp
 
@@ -481,12 +520,8 @@ addViewFromAnotherView: (
 
 ```js
 // type signature
-addWidget: (
-  typeName: string,
-  id: string,
-  initialState?: {},
-  configuration?: { type: string },
-) => any
+addWidget: (typeName: string, id: string, initialState?: {}, conf?: unknown) =>
+  any
 ```
 
 #### action: showWidget

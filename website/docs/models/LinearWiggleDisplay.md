@@ -9,6 +9,10 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[plugins/wiggle/src/LinearWiggleDisplay/models/model.tsx](https://github.com/GMOD/jbrowse-components/blob/main/plugins/wiggle/src/LinearWiggleDisplay/models/model.tsx)
+
 ## Docs
 
 Extends `BaseLinearDisplay`
@@ -28,7 +32,7 @@ type: types.literal('LinearWiggleDisplay')
 
 ```js
 // type signature
-ITypeUnion<any, any, any>
+AnyConfigurationSchemaType
 // code
 configuration: ConfigurationReference(configSchema)
 ```
@@ -320,7 +324,7 @@ boolean
 
 ```js
 // type
-;1 | 0 | 2
+;0 | 1 | 2
 ```
 
 ### LinearWiggleDisplay - Methods
@@ -341,11 +345,11 @@ trackMenuItems: () => (MenuDivider | MenuSubHeader | NormalMenuItem | CheckboxMe
 
 ### LinearWiggleDisplay - Actions
 
-#### action: updateStats
+#### action: updateQuantitativeStats
 
 ```js
 // type signature
-updateStats: (stats: { scoreMin: number; scoreMax: number; }) => void
+updateQuantitativeStats: (stats: { scoreMin: number; scoreMax: number; }) => void
 ```
 
 #### action: setColor
@@ -477,5 +481,5 @@ reload: () => Promise<void>
 
 ```js
 // type signature
-renderSvg: (opts: ExportSvgOptions & { overrideHeight: number; }) => Promise<Element>
+renderSvg: (opts: ExportSvgOptions & { overrideHeight: number; theme: ThemeOptions; }) => Promise<Element>
 ```

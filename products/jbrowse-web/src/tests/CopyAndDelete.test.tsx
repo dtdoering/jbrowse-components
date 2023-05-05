@@ -19,7 +19,7 @@ const delay = { timeout: 40000 }
 
 test('copy and delete track in admin mode', async () => {
   const { view, findByTestId, queryByText, findAllByTestId, findByText } =
-    createView(undefined, true)
+    await createView(undefined, true)
 
   await findByText('Help')
   view.setNewView(0.05, 5000)
@@ -30,7 +30,7 @@ test('copy and delete track in admin mode', async () => {
   fireEvent.click(await findByText('volvox filtered vcf (copy)'))
   expect(queryByText(/Session tracks/)).toBeNull()
   await waitFor(() => expect(view.tracks.length).toBe(1))
-  await findAllByTestId('box-test-vcf-604452', {}, delay)
+  await findAllByTestId('box-test-vcf-604453', {}, delay)
   fireEvent.click(await findByTestId('track_menu_icon'))
   fireEvent.click(await findByText('Delete track'))
   await waitFor(() => expect(view.tracks.length).toBe(0))
@@ -38,16 +38,16 @@ test('copy and delete track in admin mode', async () => {
 
 test('copy and delete reference sequence track disabled', async () => {
   const { view, rootModel, session, queryByText, findByTestId, findByText } =
-    createView(undefined, true)
+    await createView(undefined, true)
 
-  // @ts-ignore
+  // @ts-expect-error
   const { assemblyManager } = rootModel
 
   await findByText('Help')
   view.setNewView(0.05, 5000)
   const trackConf = getConf(assemblyManager.get('volvox'), 'sequence')
 
-  // @ts-ignore
+  // @ts-expect-error
   const trackMenuItems = session.getTrackActionMenuItems(trackConf)
 
   // copy ref seq track disabled
@@ -63,7 +63,7 @@ test('copy and delete reference sequence track disabled', async () => {
 }, 40000)
 
 test('copy and delete track to session tracks', async () => {
-  const { view, findByTestId, findAllByTestId, findByText } = createView(
+  const { view, findByTestId, findAllByTestId, findByText } = await createView(
     undefined,
     false,
   )
@@ -77,7 +77,7 @@ test('copy and delete track to session tracks', async () => {
   fireEvent.click(await findByText('volvox filtered vcf (copy)'))
   await findByText(/Session tracks/)
   await waitFor(() => expect(view.tracks.length).toBe(1))
-  await findAllByTestId('box-test-vcf-604452', {}, delay)
+  await findAllByTestId('box-test-vcf-604453', {}, delay)
   fireEvent.click(await findByTestId('track_menu_icon'))
   fireEvent.click(await findByText('Delete track'))
   await waitFor(() => expect(view.tracks.length).toBe(0))

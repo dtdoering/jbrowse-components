@@ -25,7 +25,7 @@ exports[`open up a widget 1`] = `
     >
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-125qixp-MuiSvgIcon-root-expandIcon"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-ymsoo8-MuiSvgIcon-root-expandIcon"
         data-testid="ExpandMoreIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -62,7 +62,7 @@ exports[`open up a widget 1`] = `
               class="css-1m8nxnb-field"
             >
               <div
-                class="css-1y9c7n2-fieldName"
+                class="css-1q83rf3-fieldName"
               >
                 Position
               </div>
@@ -76,16 +76,16 @@ exports[`open up a widget 1`] = `
               class="css-1m8nxnb-field"
             >
               <div
-                class="css-1y9c7n2-fieldName"
+                class="css-1q83rf3-fieldName"
               >
                 Length
               </div>
               <div
                 class="css-1omt041-fieldValue"
               >
-                <div>
+                <span>
                   100
-                </div>
+                </span>
               </div>
             </div>
             <hr
@@ -100,7 +100,7 @@ exports[`open up a widget 1`] = `
               class="css-1m8nxnb-field"
             >
               <div
-                class="css-1y9c7n2-fieldName"
+                class="css-1q83rf3-fieldName"
                 style="width: 40px;"
               >
                 score
@@ -108,13 +108,13 @@ exports[`open up a widget 1`] = `
               <div
                 class="css-1omt041-fieldValue"
               >
-                <div>
+                <span>
                   37
-                </div>
+                </span>
               </div>
             </div>
             <div
-              class="css-1upvn7b-container2"
+              class="css-1lttu3w-container"
             >
               <button
                 class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-sghohy-MuiButtonBase-root-MuiButton-root"
@@ -150,7 +150,6 @@ exports[`open up a widget 1`] = `
                   />
                 </button>
               </div>
-              <br />
             </div>
           </div>
         </div>

@@ -1,13 +1,18 @@
 import domLoadScript from 'load-script2'
 
-import { PluginConstructor } from './Plugin'
+// locals
+import Plugin, { PluginConstructor } from './Plugin'
 import ReExports from './ReExports'
 import { isElectron } from './util'
 
 export interface UMDLocPluginDefinition {
-  umdLoc: { uri: string; baseUri?: string }
+  umdLoc: {
+    uri: string
+    baseUri?: string
+  }
   name: string
 }
+
 export interface UMDUrlPluginDefinition {
   umdUrl: string
   name: string
@@ -78,36 +83,36 @@ export interface LoadedPlugin {
   default: PluginConstructor
 }
 
-export function getWindowPath(windowHref: string) {
-  return window.location.href + windowHref
+function pluginDescriptionString(pluginDefinition: PluginDefinition) {
+  if (isUMDPluginDefinition(pluginDefinition)) {
+    return `UMD plugin ${pluginDefinition.name}`
+  }
+  if (isESMPluginDefinition(pluginDefinition)) {
+    return `ESM plugin ${
+      (pluginDefinition as ESMUrlPluginDefinition).esmUrl ||
+      (pluginDefinition as ESMLocPluginDefinition).esmLoc?.uri
+    }`
+  }
+  if (isCJSPluginDefinition(pluginDefinition)) {
+    return `CJS plugin ${pluginDefinition.cjsUrl}`
+  }
+  return 'unknown plugin'
 }
 
-function getGlobalObject(): Window {
-  // Based on window-or-global
-  // https://github.com/purposeindustries/window-or-global/blob/322abc71de0010c9e5d9d0729df40959e1ef8775/lib/index.js
-  return (
-    // eslint-disable-next-line no-restricted-globals
-    (typeof self === 'object' && self.self === self && self) ||
-    (typeof global === 'object' && global.global === global && global) ||
-    // @ts-ignore
-    this
-  )
-}
-
-function isInWebWorker(globalObject: ReturnType<typeof getGlobalObject>) {
-  return Boolean('WorkerGlobalScope' in globalObject)
+function isInWebWorker() {
+  return Boolean('WorkerGlobalScope' in globalThis)
 }
 
 export default class PluginLoader {
   definitions: PluginDefinition[] = []
 
-  fetchESM?: (url: string) => Promise<unknown>
+  fetchESM?: (url: string) => Promise<LoadedPlugin>
   fetchCJS?: (url: string) => Promise<LoadedPlugin>
 
   constructor(
     defs: PluginDefinition[] = [],
     args?: {
-      fetchESM?: (url: string) => Promise<unknown>
+      fetchESM?: (url: string) => Promise<LoadedPlugin>
       fetchCJS?: (url: string) => Promise<LoadedPlugin>
     },
   ) {
@@ -116,16 +121,15 @@ export default class PluginLoader {
     this.definitions = JSON.parse(JSON.stringify(defs))
   }
 
-  async loadScript(scriptUrl: string): Promise<void> {
-    const globalObject = getGlobalObject()
-    if (!isInWebWorker(globalObject)) {
+  async loadScript(scriptUrl: string) {
+    if (!isInWebWorker()) {
       return domLoadScript(scriptUrl)
     }
 
-    // @ts-ignore
-    if (globalObject?.importScripts) {
-      // @ts-ignore
-      await globalObject.importScripts(scriptUrl)
+    // @ts-expect-error
+    if (globalThis?.importScripts) {
+      // @ts-expect-error
+      await globalThis.importScripts(scriptUrl)
       return
     }
     throw new Error(
@@ -133,8 +137,8 @@ export default class PluginLoader {
     )
   }
 
-  async loadCJSPlugin(def: CJSPluginDefinition, windowHref: string) {
-    const parsedUrl = new URL(def.cjsUrl, windowHref)
+  async loadCJSPlugin(def: CJSPluginDefinition, baseUri?: string) {
+    const parsedUrl = new URL(def.cjsUrl, baseUri)
     if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
       throw new Error(
         `Cannot load plugins using protocol "${parsedUrl.protocol}"`,
@@ -147,10 +151,10 @@ export default class PluginLoader {
     return this.fetchCJS(parsedUrl.href)
   }
 
-  async loadESMPlugin(def: ESMPluginDefinition, windowHref: string) {
+  async loadESMPlugin(def: ESMPluginDefinition, baseUri?: string) {
     const parsedUrl =
       'esmUrl' in def
-        ? new URL(def.esmUrl, windowHref)
+        ? new URL(def.esmUrl, baseUri)
         : new URL(def.esmLoc.uri, def.esmLoc.baseUri)
 
     if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
@@ -158,9 +162,11 @@ export default class PluginLoader {
         `cannot load plugins using protocol "${parsedUrl.protocol}"`,
       )
     }
-    const plugin = (await this.fetchESM?.(parsedUrl.href)) as
-      | LoadedPlugin
-      | undefined
+
+    if (!this.fetchESM) {
+      throw new Error(`No ESM fetcher installed`)
+    }
+    const plugin = await this.fetchESM(parsedUrl.href)
 
     if (!plugin) {
       throw new Error(`Could not load ESM plugin: ${parsedUrl}`)
@@ -170,13 +176,13 @@ export default class PluginLoader {
 
   async loadUMDPlugin(
     def: UMDPluginDefinition | LegacyUMDPluginDefinition,
-    windowHref: string,
+    baseUri?: string,
   ) {
     const parsedUrl =
       'url' in def
-        ? new URL(def.url, windowHref)
+        ? new URL(def.url, baseUri)
         : 'umdUrl' in def
-        ? new URL(def.umdUrl, windowHref)
+        ? new URL(def.umdUrl, baseUri)
         : new URL(def.umdLoc.uri, def.umdLoc.baseUri)
 
     if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
@@ -184,30 +190,35 @@ export default class PluginLoader {
         `cannot load plugins using protocol "${parsedUrl.protocol}"`,
       )
     }
-    await this.loadScript(parsedUrl.href)
     const moduleName = def.name
     const umdName = `JBrowsePlugin${moduleName}`
-    const globalObject = getGlobalObject()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const plugin = (globalObject as any)[umdName] as
+    if (typeof jest === 'undefined') {
+      await this.loadScript(parsedUrl.href)
+    } else {
+      // @ts-expect-error
+      globalThis[umdName] = { default: Plugin }
+    }
+
+    // @ts-expect-error
+    const plugin = globalThis[umdName] as
       | { default: PluginConstructor }
       | undefined
     if (!plugin) {
       throw new Error(
-        `Failed to load UMD bundle for ${moduleName}, ${globalObject.constructor.name}.${umdName} is undefined`,
+        `Failed to load UMD bundle for ${moduleName}, ${umdName} is undefined`,
       )
     }
     return plugin
   }
 
-  async loadPlugin(def: PluginDefinition, windowHref: string) {
+  async loadPlugin(def: PluginDefinition, baseUri?: string) {
     let plugin: LoadedPlugin
     if (isElectron && isCJSPluginDefinition(def)) {
-      plugin = await this.loadCJSPlugin(def, windowHref)
+      plugin = await this.loadCJSPlugin(def, baseUri)
     } else if (isESMPluginDefinition(def)) {
-      plugin = await this.loadESMPlugin(def, windowHref)
+      plugin = await this.loadESMPlugin(def, baseUri)
     } else if (isUMDPluginDefinition(def)) {
-      plugin = await this.loadUMDPlugin(def, windowHref)
+      plugin = await this.loadUMDPlugin(def, baseUri)
     } else if (!isElectron && isCJSPluginDefinition(def)) {
       throw new Error(
         `CommonJS plugin found, but not in a NodeJS environment: ${JSON.stringify(
@@ -217,11 +228,18 @@ export default class PluginLoader {
     } else {
       throw new Error(`Could not determine plugin type: ${JSON.stringify(def)}`)
     }
+    if (!plugin.default) {
+      throw new Error(
+        `${pluginDescriptionString(
+          def,
+        )} does not have a default export, cannot load`,
+      )
+    }
     return plugin.default
   }
 
   installGlobalReExports(target: WindowOrWorkerGlobalScope) {
-    // @ts-ignore
+    // @ts-expect-error
     target.JBrowseExports = Object.fromEntries(
       Object.entries(ReExports).map(([moduleName, module]) => {
         return [moduleName, module]
@@ -229,10 +247,10 @@ export default class PluginLoader {
     )
   }
 
-  async load(windowHref = '') {
+  async load(baseUri?: string) {
     return Promise.all(
       this.definitions.map(async definition => ({
-        plugin: await this.loadPlugin(definition, windowHref),
+        plugin: await this.loadPlugin(definition, baseUri),
         definition,
       })),
     )

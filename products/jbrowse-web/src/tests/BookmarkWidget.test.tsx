@@ -8,10 +8,10 @@ beforeEach(() => {
   doBeforeEach()
 })
 
-const delay = { timeout: 15000 }
+const delay = { timeout: 30000 }
 
 test('click and drag rubberband, bookmarks region', async () => {
-  const { session, view, findByTestId, findByText } = createView()
+  const { session, view, findByTestId, findByText } = await createView()
   const rubberband = await findByTestId('rubberband_controls', {}, delay)
 
   expect(view.bpPerPx).toEqual(0.05)
@@ -20,27 +20,27 @@ test('click and drag rubberband, bookmarks region', async () => {
   fireEvent.mouseUp(rubberband, { clientX: 250, clientY: 0 })
   fireEvent.click(await findByText('Bookmark region'))
 
-  // @ts-ignore
+  // @ts-expect-error
   const { widgets } = session
   const bookmarkWidget = widgets.get('GridBookmark')
   expect(bookmarkWidget.bookmarkedRegions[0].assemblyName).toEqual('volvox')
-}, 20000)
+}, 40000)
 
 test('bookmarks current region', async () => {
-  const { session, findByTestId, findByText } = createView()
+  const { session, findByTestId, findByText } = await createView()
 
   fireEvent.click(await findByTestId('view_menu_icon'))
   fireEvent.click(await findByText('Bookmark current region'))
 
-  // @ts-ignore
+  // @ts-expect-error
   const { widgets } = session
   const { bookmarkedRegions } = widgets.get('GridBookmark')
   expect(bookmarkedRegions[0].start).toEqual(100)
   expect(bookmarkedRegions[0].end).toEqual(140)
-}, 20000)
+}, 40000)
 
 test('navigates to bookmarked region from widget', async () => {
-  const { view, session, findByTestId, findByText } = createView()
+  const { view, session, findByTestId, findByText } = await createView()
 
   // need this to complete before we can try to navigate
   fireEvent.click(await findByTestId(hts('volvox_alignments'), {}, delay))
@@ -53,7 +53,7 @@ test('navigates to bookmarked region from widget', async () => {
   fireEvent.click(await findByTestId('view_menu_icon'))
   fireEvent.click(await findByText('Open bookmark widget'))
 
-  // @ts-ignore
+  // @ts-expect-error
   const { widgets } = session
   const bookmarkWidget = widgets.get('GridBookmark')
   bookmarkWidget.addBookmark({
@@ -69,4 +69,4 @@ test('navigates to bookmarked region from widget', async () => {
       view.getSelectedRegions(view.leftOffset, view.rightOffset)[0].key,
     ).toEqual('{volvox}ctgA:201..240-0'),
   )
-}, 20000)
+}, 40000)

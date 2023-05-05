@@ -29,7 +29,7 @@ exports[`renders with just the required model elements 1`] = `
       >
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-125qixp-MuiSvgIcon-root-expandIcon"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-ymsoo8-MuiSvgIcon-root-expandIcon"
           data-testid="ExpandMoreIcon"
           focusable="false"
           viewBox="0 0 24 24"
@@ -66,7 +66,7 @@ exports[`renders with just the required model elements 1`] = `
                 class="css-1m8nxnb-field"
               >
                 <div
-                  class="css-1y9c7n2-fieldName"
+                  class="css-1q83rf3-fieldName"
                 >
                   Position
                 </div>
@@ -80,32 +80,32 @@ exports[`renders with just the required model elements 1`] = `
                 class="css-1m8nxnb-field"
               >
                 <div
-                  class="css-1y9c7n2-fieldName"
+                  class="css-1q83rf3-fieldName"
                 >
                   Name
                 </div>
                 <div
                   class="css-1omt041-fieldValue"
                 >
-                  <div>
+                  <span>
                     rs123
-                  </div>
+                  </span>
                 </div>
               </div>
               <div
                 class="css-1m8nxnb-field"
               >
                 <div
-                  class="css-1y9c7n2-fieldName"
+                  class="css-1q83rf3-fieldName"
                 >
                   Length
                 </div>
                 <div
                   class="css-1omt041-fieldValue"
                 >
-                  <div>
+                  <span>
                     1
-                  </div>
+                  </span>
                 </div>
               </div>
               <hr
@@ -121,7 +121,7 @@ exports[`renders with just the required model elements 1`] = `
               >
                 <div
                   aria-label="reference base(s): Each base must be one of A,C,G,T,N (case insensitive)."
-                  class="css-1qe2j6j-fieldDescription-fieldName"
+                  class="css-18vnxxj-fieldDescription-fieldName"
                   data-mui-internal-clone-element="true"
                 >
                   REF
@@ -129,9 +129,9 @@ exports[`renders with just the required model elements 1`] = `
                 <div
                   class="css-1omt041-fieldValue"
                 >
-                  <div>
+                  <span>
                     A
-                  </div>
+                  </span>
                 </div>
               </div>
               <div
@@ -139,7 +139,7 @@ exports[`renders with just the required model elements 1`] = `
               >
                 <div
                   aria-label="alternate base(s): Comma-separated list of alternate non-reference alleles"
-                  class="css-1qe2j6j-fieldDescription-fieldName"
+                  class="css-18vnxxj-fieldDescription-fieldName"
                   data-mui-internal-clone-element="true"
                 >
                   ALT
@@ -147,9 +147,9 @@ exports[`renders with just the required model elements 1`] = `
                 <div
                   class="css-1omt041-fieldValue"
                 >
-                  <div>
+                  <span>
                     &lt;TRA&gt;
-                  </div>
+                  </span>
                 </div>
               </div>
               <div
@@ -157,7 +157,7 @@ exports[`renders with just the required model elements 1`] = `
               >
                 <div
                   aria-label="quality: Phred-scaled quality score for the assertion made in ALT"
-                  class="css-1qe2j6j-fieldDescription-fieldName"
+                  class="css-18vnxxj-fieldDescription-fieldName"
                   data-mui-internal-clone-element="true"
                 >
                   QUAL
@@ -165,16 +165,16 @@ exports[`renders with just the required model elements 1`] = `
                 <div
                   class="css-1omt041-fieldValue"
                 >
-                  <div>
+                  <span>
                     10.4
-                  </div>
+                  </span>
                 </div>
               </div>
               <div
                 class="css-1m8nxnb-field"
               >
                 <div
-                  class="css-1y9c7n2-fieldName"
+                  class="css-1q83rf3-fieldName"
                   style="width: 62px;"
                 >
                   INFO.MQ
@@ -182,13 +182,13 @@ exports[`renders with just the required model elements 1`] = `
                 <div
                   class="css-1omt041-fieldValue"
                 >
-                  <div>
+                  <span>
                     5
-                  </div>
+                  </span>
                 </div>
               </div>
               <div
-                class="css-1upvn7b-container2"
+                class="css-1lttu3w-container"
               >
                 <button
                   class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-sghohy-MuiButtonBase-root-MuiButton-root"
@@ -224,7 +224,6 @@ exports[`renders with just the required model elements 1`] = `
                     />
                   </button>
                 </div>
-                <br />
               </div>
             </div>
           </div>

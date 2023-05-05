@@ -129,6 +129,11 @@ export default function SetColorDialog({
   )
 }
 
+interface SortField {
+  idx: number
+  field: string | null
+}
+
 function SourcesGrid({
   rows,
   onChange,
@@ -141,55 +146,13 @@ function SourcesGrid({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [selected, setSelected] = useState([] as string[])
 
-  // @ts-ignore
+  // @ts-expect-error
   const { name: _name, color: _color, baseUri: _baseUri, ...rest } = rows[0]
-
-  // similar to BaseFeatureDetail data-grid for auto-measuring columns
-  const columns = [
-    {
-      field: 'color',
-      headerName: 'Color',
-      renderCell: (params: GridCellParams) => {
-        const { value, id } = params
-        return (
-          <ColorPicker
-            color={value || 'blue'}
-            onChange={c => {
-              const elt = rows.find(f => f.name === id)
-              if (elt) {
-                elt.color = c
-              }
-              onChange([...rows])
-            }}
-          />
-        )
-      },
-    },
-    {
-      field: 'name',
-      sortingOrder: [null],
-      headerName: 'Name',
-      width: measureGridWidth(rows.map(r => r.name)),
-    },
-    ...Object.keys(rest).map(val => ({
-      field: val,
-      sortingOrder: [null],
-      renderCell: (params: GridCellParams) => {
-        const { value } = params
-        return isUriLocation(value) ? <UriLink value={value} /> : getStr(value)
-      },
-      // @ts-ignore
-      width: measureGridWidth(rows.map(r => r[val])),
-    })),
-  ]
-
-  // this helps keep track of the selection, even though it is not used
-  // anywhere except inside the picker
   const [widgetColor, setWidgetColor] = useState('blue')
-  const [currSort, setCurrSort] = useState<{
-    idx: number
-    field: string | null
-  }>({ idx: 0, field: null })
+  const [currSort, setCurrSort] = useState<SortField>({
+    idx: 0,
+    field: null,
+  })
 
   return (
     <div>
@@ -247,12 +210,52 @@ function SourcesGrid({
         <DataGrid
           getRowId={row => row.name}
           checkboxSelection
-          disableSelectionOnClick
-          onSelectionModelChange={arg => setSelected(arg as string[])}
+          disableRowSelectionOnClick
+          onRowSelectionModelChange={arg => setSelected(arg as string[])}
           rows={rows}
           rowHeight={25}
-          headerHeight={33}
-          columns={columns}
+          columnHeaderHeight={33}
+          columns={[
+            {
+              field: 'color',
+              headerName: 'Color',
+              renderCell: params => {
+                const { value, id } = params
+                return (
+                  <ColorPicker
+                    color={value || 'blue'}
+                    onChange={c => {
+                      const elt = rows.find(f => f.name === id)
+                      if (elt) {
+                        elt.color = c
+                      }
+                      onChange([...rows])
+                    }}
+                  />
+                )
+              },
+            },
+            {
+              field: 'name',
+              sortingOrder: [null],
+              headerName: 'Name',
+              width: measureGridWidth(rows.map(r => r.name)),
+            },
+            ...Object.keys(rest).map(val => ({
+              field: val,
+              sortingOrder: [null],
+              renderCell: (params: GridCellParams) => {
+                const { value } = params
+                return isUriLocation(value) ? (
+                  <UriLink value={value} />
+                ) : (
+                  getStr(value)
+                )
+              },
+              // @ts-ignore
+              width: measureGridWidth(rows.map(r => r[val])),
+            })),
+          ]}
           sortModel={
             [
               /* we control the sort as a controlled component using onSortModelChange */
@@ -266,9 +269,9 @@ function SourcesGrid({
             onChange(
               field
                 ? [...rows].sort((a, b) => {
-                    // @ts-ignore
+                    // @ts-expect-error
                     const aa = getStr(a[field])
-                    // @ts-ignore
+                    // @ts-expect-error
                     const bb = getStr(b[field])
                     return idx === 1
                       ? aa.localeCompare(bb)

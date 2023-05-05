@@ -53,8 +53,11 @@ class GenericFilehandleWrapper {
     return b.buffer.slice(b.byteOffset, b.byteOffset + bytesRead)
   }
 }
-export function openFilehandleWrapper(location: FileLocation) {
-  return new GenericFilehandleWrapper(openLocation(location))
+export function openFilehandleWrapper(
+  location: FileLocation,
+  pluginManager?: PluginManager,
+) {
+  return new GenericFilehandleWrapper(openLocation(location, pluginManager))
 }
 
 interface HicParser {
@@ -79,7 +82,7 @@ export default class HicAdapter extends BaseFeatureDataAdapter {
     super(config, getSubAdapter, pluginManager)
     const hicLocation = this.getConf('hicLocation')
     this.hic = new HicStraw({
-      file: openFilehandleWrapper(hicLocation),
+      file: openFilehandleWrapper(hicLocation, this.pluginManager),
     })
   }
 
@@ -139,7 +142,7 @@ export default class HicAdapter extends BaseFeatureDataAdapter {
   }
 
   // don't do feature stats estimation, similar to bigwigadapter
-  async estimateRegionsStats(_regions: Region[]) {
+  async getMultiRegionFeatureDensityStats(_regions: Region[]) {
     return { featureDensity: 0 }
   }
 

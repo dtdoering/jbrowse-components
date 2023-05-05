@@ -7,6 +7,10 @@ toplevel: true
 Note: this document is automatically generated from configuration objects in our
 source code. See [Config guide](/docs/config_guide) for more info
 
+## Source file
+
+[plugins/alignments/src/LinearAlignmentsDisplay/models/configSchema.ts](https://github.com/GMOD/jbrowse-components/blob/main/plugins/alignments/src/LinearAlignmentsDisplay/models/configSchema.ts)
+
 ## Docs
 
 has a "pileup" sub-display, where you can see individual reads and a
@@ -24,6 +28,15 @@ pileupDisplay: pm.getDisplayType('LinearPileupDisplay').configSchema
 
 ```js
 snpCoverageDisplay: pm.getDisplayType('LinearSNPCoverageDisplay').configSchema
+```
+
+#### slot: height
+
+```js
+height: {
+        type: 'number',
+        defaultValue: 250,
+      }
 ```
 
 ## LinearAlignmentsDisplay - Derives from

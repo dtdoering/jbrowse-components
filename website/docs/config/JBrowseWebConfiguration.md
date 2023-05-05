@@ -7,118 +7,178 @@ toplevel: true
 Note: this document is automatically generated from configuration objects in our
 source code. See [Config guide](/docs/config_guide) for more info
 
+## Source file
+
+[products/jbrowse-web/src/jbrowseConfig.ts](https://github.com/GMOD/jbrowse-components/blob/main/products/jbrowse-web/src/jbrowseConfig.ts)
+
 ## Docs
 
-configuration here appears as a "configuration" object on the root of
-config.json
+configuration in a config.json
 
 ### JBrowseWebConfiguration - Slots
 
-#### slot: rpc
+#### slot: configuration.rpc
 
 ```js
 rpc: RpcManager.configSchema
 ```
 
-#### slot: highResolutionScaling
+#### slot: configuration.highResolutionScaling
 
 ```js
 highResolutionScaling: {
-          type: 'number',
-          defaultValue: 2,
-        }
+        type: 'number',
+        defaultValue: 2,
+      }
 ```
 
-#### slot: shareURL
+#### slot: configuration.shareURL
 
 ```js
 shareURL: {
-          type: 'string',
-          defaultValue: 'https:
-        }
+        type: 'string',
+        defaultValue: 'https:
+      }
 ```
 
-#### slot: featureDetails.sequenceTypes
-
-```js
-sequenceTypes: {
-            type: 'stringArray',
-            defaultValue: ['mRNA', 'transcript', 'gene', 'CDS'],
-          }
-```
-
-#### slot: formatDetails.feature
+#### slot: configuration.formatDetails.feature
 
 ```js
 feature: {
-            type: 'frozen',
-            description: 'adds extra fields to the feature details',
-            defaultValue: {},
-            contextVariable: ['feature'],
-          }
+          type: 'frozen',
+          description: 'adds extra fields to the feature details',
+          defaultValue: {},
+          contextVariable: ['feature'],
+        }
 ```
 
-#### slot: formatDetails.subfeatures
+#### slot: configuration.formatDetails.subfeatures
 
 ```js
 subfeatures: {
-            type: 'frozen',
-            description: 'adds extra fields to the subfeatures of a feature',
-            defaultValue: {},
-            contextVariable: ['feature'],
-          }
+          type: 'frozen',
+          description: 'adds extra fields to the subfeatures of a feature',
+          defaultValue: {},
+          contextVariable: ['feature'],
+        }
 ```
 
-#### slot: formatDetails.depth
+#### slot: configuration.formatDetails.depth
 
 ```js
 depth: {
-            type: 'number',
-            defaultValue: 2,
-            description: 'depth to iterate on subfeatures',
-          }
+          type: 'number',
+          defaultValue: 2,
+          description: 'depth to iterate on subfeatures',
+        }
 ```
 
-#### slot: formatAbout.conf
+#### slot: configuration.formatAbout.conf
 
 ```js
 config: {
-            type: 'frozen',
-            description: 'formats configuration object in about dialog',
-            defaultValue: {},
-            contextVariable: ['config'],
-          }
+          type: 'frozen',
+          description: 'formats configuration object in about dialog',
+          defaultValue: {},
+          contextVariable: ['config'],
+        }
 ```
 
-#### slot: formatAbout.hideUris
+#### slot: configuration.formatAbout.hideUris
 
 ```js
 hideUris: {
-            type: 'boolean',
-            defaultValue: false,
-          }
-```
-
-#### slot: disableAnalytics
-
-```js
-disableAnalytics: {
           type: 'boolean',
           defaultValue: false,
         }
 ```
 
-#### slot: theme
+#### slot: configuration.disableAnalytics
 
 ```js
-theme: { type: 'frozen', defaultValue: {} }
+disableAnalytics: {
+        type: 'boolean',
+        defaultValue: false,
+      }
 ```
 
-#### slot: logoPath
+#### slot: configuration.theme
+
+```js
+theme: {
+        type: 'frozen',
+        defaultValue: {},
+      }
+```
+
+#### slot: configuration.extraThemes
+
+```js
+extraThemes: {
+        type: 'frozen',
+        defaultValue: {},
+      }
+```
+
+#### slot: configuration.logoPath
 
 ```js
 logoPath: {
-          type: 'fileLocation',
-          defaultValue: { uri: '', locationType: 'UriLocation' },
-        }
+        type: 'fileLocation',
+        defaultValue: { uri: '', locationType: 'UriLocation' },
+      }
+```
+
+#### slot: plugins
+
+defines plugins of the format
+
+```typescript
+type PluginDefinition=
+   { umdUrl: string, name:string } |
+   { url: string, name: string } |
+   { esmUrl: string } |
+   { cjsUrl: string } |
+   { umdLoc: { uri: string } } |
+   { esmLoc: { uri: string } } |
+```
+
+```js
+plugins: types.array(types.frozen<PluginDefinition>())
+```
+
+#### slot: assemblies
+
+```js
+assemblies: types.array(assemblyConfigSchemasType)
+```
+
+#### slot: internetAccounts
+
+```js
+internetAccounts: types.array(
+  pluginManager.pluggableConfigSchemaType('internet account'),
+)
+```
+
+#### slot: aggregateTextSearchAdapters
+
+```js
+aggregateTextSearchAdapters: types.array(
+  pluginManager.pluggableConfigSchemaType('text search adapter'),
+)
+```
+
+#### slot: connections
+
+```js
+connections: types.array(pluginManager.pluggableConfigSchemaType('connection'))
+```
+
+#### slot: defaultSession
+
+```js
+defaultSession: types.optional(types.frozen(Session), {
+  name: `New session`,
+})
 ```

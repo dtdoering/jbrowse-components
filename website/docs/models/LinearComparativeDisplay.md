@@ -9,6 +9,10 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[plugins/linear-comparative-view/src/LinearComparativeDisplay/stateModelFactory.ts](https://github.com/GMOD/jbrowse-components/blob/main/plugins/linear-comparative-view/src/LinearComparativeDisplay/stateModelFactory.ts)
+
 ## Docs
 
 ### LinearComparativeDisplay - Properties
@@ -26,7 +30,7 @@ type: types.literal('LinearComparativeDisplay')
 
 ```js
 // type signature
-ITypeUnion<any, any, any>
+AnyConfigurationSchemaType
 // code
 configuration: ConfigurationReference(configSchema)
 ```
@@ -46,7 +50,7 @@ height: 100
 
 ```js
 // type
-() => { rpcDriverName: string; displayModel: { id: string; type: "LinearComparativeDisplay"; rpcDriverName: string; configuration: any; height: number; } & NonEmptyObject & ... 4 more ... & IStateTreeNode<...>; highResolutionScaling: number; }
+() => { rpcDriverName: string; displayModel: { id: string; type: "LinearComparativeDisplay"; rpcDriverName: string; configuration: { [x: string]: any; } & NonEmptyObject & { ...; } & IStateTreeNode<...>; height: number; } & ... 5 more ... & IStateTreeNode<...>; highResolutionScaling: number; }
 ```
 
 ### LinearComparativeDisplay - Actions

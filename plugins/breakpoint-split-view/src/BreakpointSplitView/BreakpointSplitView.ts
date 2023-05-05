@@ -1,6 +1,5 @@
 import { getSession, Feature } from '@jbrowse/core/util'
 import ViewType from '@jbrowse/core/pluggableElementTypes/ViewType'
-import { Assembly } from '@jbrowse/core/assemblyManager/assembly'
 import { parseBreakend } from '@gmod/vcf'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
@@ -25,7 +24,7 @@ export default class BreakpointSplitViewType extends ViewType {
     if (!assembly.regions) {
       throw new Error(`assembly ${assemblyName} regions not loaded`)
     }
-    const { getCanonicalRefName } = assembly as Assembly
+    const { getCanonicalRefName } = assembly
     const featureRefName = getCanonicalRefName(feature.get('refName'))
     const topRegion = assembly.regions.find(f => f.refName === featureRefName)
 

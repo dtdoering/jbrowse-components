@@ -4,6 +4,7 @@ import { observer } from 'mobx-react'
 import { getSnapshot } from 'mobx-state-tree'
 import { getTickDisplayStr } from '@jbrowse/core/util'
 import { bpToPx } from '@jbrowse/core/util/Base1DUtils'
+import { useTheme } from '@mui/material'
 
 // locals
 import { getBlockLabelKeysToHide } from './util'
@@ -29,11 +30,25 @@ export const HorizontalAxis = observer(function ({
 }: {
   model: DotplotViewModel
 }) {
+  const { viewWidth, borderY } = model
   const { classes } = useStyles()
+  return (
+    <svg width={viewWidth} height={borderY} className={classes.htext}>
+      <HorizontalAxisRaw model={model} />
+    </svg>
+  )
+})
+
+export const HorizontalAxisRaw = observer(function ({
+  model,
+}: {
+  model: DotplotViewModel
+}) {
   const { viewWidth, borderX, borderY, hview, htextRotation, hticks } = model
   const { offsetPx, width, dynamicBlocks, bpPerPx } = hview
   const dblocks = dynamicBlocks.contentBlocks
   const hide = getBlockLabelKeysToHide(dblocks, viewWidth, offsetPx)
+  const theme = useTheme()
   const hviewSnap = {
     ...getSnapshot(hview),
     width,
@@ -41,7 +56,7 @@ export const HorizontalAxis = observer(function ({
   }
 
   return (
-    <svg width={viewWidth} height={borderY} className={classes.htext}>
+    <>
       {dblocks
         .filter(region => !hide.has(region.key))
         .map(region => {
@@ -55,18 +70,12 @@ export const HorizontalAxis = observer(function ({
               key={JSON.stringify(region)}
               x={xoff}
               y={y + 1}
-              fill="black"
+              fill={theme.palette.text.primary}
+              fontSize={11}
               dominantBaseline="hanging"
               textAnchor="end"
             >
-              {[
-                region.refName,
-                region.start !== 0
-                  ? Math.floor(region.start).toLocaleString('en-US')
-                  : '',
-              ]
-                .filter(f => !!f)
-                .join(':')}
+              {region.refName}
             </text>
           )
         })}
@@ -85,8 +94,7 @@ export const HorizontalAxis = observer(function ({
             y1={0}
             y2={tick.type === 'major' ? 6 : 4}
             strokeWidth={1}
-            stroke={tick.type === 'major' ? '#555' : '#999'}
-            data-bp={tick.base}
+            stroke={theme.palette.divider}
           />
         )
       })}
@@ -106,7 +114,7 @@ export const HorizontalAxis = observer(function ({
               y={y}
               transform={`rotate(${htextRotation},${x},${y})`}
               key={`text-${JSON.stringify(tick)}`}
-              fill="black"
+              fill={theme.palette.text.primary}
               fontSize={11}
               dominantBaseline="middle"
               textAnchor="end"
@@ -118,32 +126,48 @@ export const HorizontalAxis = observer(function ({
       <text
         y={borderY - 12}
         x={(viewWidth - borderX) / 2}
-        fill="black"
+        fill={theme.palette.text.primary}
         textAnchor="middle"
+        fontSize={11}
         dominantBaseline="hanging"
       >
         {hview.assemblyNames.join(',')}
       </text>
-    </svg>
+    </>
   )
 })
+
 export const VerticalAxis = observer(function ({
   model,
 }: {
   model: DotplotViewModel
 }) {
+  const { borderX, viewHeight } = model
   const { classes } = useStyles()
-  const { borderX, viewHeight, borderY, vview, vtextRotation, vticks } = model
+  return (
+    <svg className={classes.vtext} width={borderX} height={viewHeight}>
+      <VerticalAxisRaw model={model} />
+    </svg>
+  )
+})
+
+export const VerticalAxisRaw = observer(function ({
+  model,
+}: {
+  model: DotplotViewModel
+}) {
+  const { viewHeight, borderX, borderY, vview, vtextRotation, vticks } = model
   const { offsetPx, width, dynamicBlocks, bpPerPx } = vview
   const dblocks = dynamicBlocks.contentBlocks
   const hide = getBlockLabelKeysToHide(dblocks, viewHeight, offsetPx)
+  const theme = useTheme()
   const vviewSnap = {
     ...getSnapshot(vview),
     width,
     staticBlocks: vview.staticBlocks,
   }
   return (
-    <svg className={classes.vtext} width={borderX} height={viewHeight}>
+    <>
       {dblocks
         .filter(region => !hide.has(region.key))
         .map(region => {
@@ -157,17 +181,11 @@ export const VerticalAxis = observer(function ({
               key={JSON.stringify(region)}
               x={x}
               y={yoff}
-              fill="black"
+              fill={theme.palette.text.primary}
+              fontSize={11}
               textAnchor="end"
             >
-              {[
-                region.refName,
-                region.start !== 0
-                  ? Math.floor(region.start).toLocaleString('en-US')
-                  : '',
-              ]
-                .filter(f => !!f)
-                .join(':')}
+              {region.refName}
             </text>
           )
         })}
@@ -186,8 +204,7 @@ export const VerticalAxis = observer(function ({
             x1={borderX}
             x2={borderX - (tick.type === 'major' ? 6 : 4)}
             strokeWidth={1}
-            stroke={tick.type === 'major' ? '#555' : '#999'}
-            data-bp={tick.base}
+            stroke={theme.palette.divider}
           />
         )
       })}
@@ -206,7 +223,7 @@ export const VerticalAxis = observer(function ({
               x={borderX - 7}
               key={`text-${JSON.stringify(tick)}`}
               textAnchor="end"
-              fill="black"
+              fill={theme.palette.text.primary}
               dominantBaseline="hanging"
               fontSize={11}
             >
@@ -217,12 +234,13 @@ export const VerticalAxis = observer(function ({
       <text
         y={(viewHeight - borderY) / 2}
         x={12}
-        fill="black"
+        fill={theme.palette.text.primary}
         transform={`rotate(-90,12,${(viewHeight - borderY) / 2})`}
         textAnchor="middle"
+        fontSize={11}
       >
         {vview.assemblyNames.join(',')}
       </text>
-    </svg>
+    </>
   )
 })

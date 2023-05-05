@@ -12,19 +12,21 @@ function InstalledPluginsList({
   pluginManager: PluginManager
   model: PluginStoreModel
 }) {
-  const { plugins } = pluginManager as PluginManager
+  const { plugins } = pluginManager
 
-  const corePlugins = plugins
-    .filter(p => pluginManager.pluginMetadata[p.name]?.isCore)
-    .map(p => p.name)
+  const corePlugins = new Set(
+    plugins
+      .filter(p => pluginManager.pluginMetadata[p.name]?.isCore)
+      .map(p => p.name),
+  )
 
   const externalPlugins = plugins.filter(
-    plugin => !corePlugins.includes(plugin.name),
+    plugin => !corePlugins.has(plugin.name),
   )
 
   return (
     <List>
-      {externalPlugins.length ? (
+      {externalPlugins.length > 0 ? (
         externalPlugins
           .filter(plugin =>
             plugin.name.toLowerCase().includes(model.filterText.toLowerCase()),

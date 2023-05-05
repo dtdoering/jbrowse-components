@@ -31,7 +31,7 @@ export default function UCSCTrackHubConnection(pluginManager: PluginManager) {
       async connect() {
         const session = getSession(self)
         try {
-          const connectionName = getConf(self, 'name')
+          const connectionName = getConf(self, 'name') // NOTE: name comes from the base configuration
           const hubFileLocation = getConf(self, 'hubTxtLocation')
           const hubFile = await fetchHubFile(hubFileLocation)
           const genomeFile = hubFile.get('genomesFile')
@@ -59,9 +59,8 @@ export default function UCSCTrackHubConnection(pluginManager: PluginManager) {
             ) {
               continue
             }
-            const conf = session.assemblies.find(
-              a => readConfObject(a, 'name') === genomeName,
-            )
+
+            const conf = session.assemblyManager.get(genomeName)?.configuration
             if (!conf) {
               throw new Error(
                 `Cannot find assembly for "${genomeName}" from the genomes file for connection "${connectionName}"`,

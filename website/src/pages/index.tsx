@@ -16,11 +16,11 @@ import OpenInBrowserIcon from '@mui/icons-material/OpenInBrowser'
 function Home() {
   const context = useDocusaurusContext()
   const { siteConfig = {} } = context
-  // @ts-ignore
+  // @ts-expect-error
   const { currentVersion } = siteConfig.customFields
 
   return (
-    // @ts-ignore
+    // @ts-expect-error
     <Layout title={`${siteConfig.title}`}>
       <Box sx={{ margin: { xs: '0.5em', sm: '0.5em', md: '3em' } }}>
         <Box
@@ -177,10 +177,10 @@ function Home() {
               publish, please cite the most recent JBrowse paper:
             </p>
             <cite>
-              JBrowse 2: A modular genome browser with views of synteny and
-              structural variation (2022). bioRxiv.{' '}
-              <a href="https://doi.org/10.1101/2022.07.28.501447">
-                https://doi.org/10.1101/2022.07.28.501447
+              JBrowse 2: a modular genome browser with views of synteny and
+              structural variation. Genome Biology (2023).{' '}
+              <a href="https://doi.org/10.1186/s13059-023-02914-z">
+                https://doi.org/10.1186/s13059-023-02914-z
               </a>
             </cite>
           </Typography>

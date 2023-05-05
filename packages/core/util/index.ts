@@ -12,9 +12,10 @@ import {
   hasParent,
   IAnyStateTreeNode,
   IStateTreeNode,
+  Instance,
 } from 'mobx-state-tree'
 import { reaction, IReactionPublic, IReactionOptions } from 'mobx'
-import SimpleFeature, { Feature, isFeature } from './simpleFeature'
+import { Feature } from './simpleFeature'
 import {
   isSessionModel,
   isDisplayModel,
@@ -24,17 +25,17 @@ import {
   Region,
   TypeTestedByPredicate,
 } from './types'
+import { Region as MUIRegion } from './types/mst'
 import { isAbortException, checkAbortSignal } from './aborting'
 import { BaseBlock } from './blockTypes'
 import { isUriLocation } from './types'
+import useMeasure from '@jbrowse/core/util/useMeasure'
 
-export type { Feature }
 export * from './types'
 export * from './aborting'
 export * from './when'
 export * from './range'
 export * from './dedupe'
-export { SimpleFeature, isFeature }
 
 export * from './offscreenCanvasPonyfill'
 export * from './offscreenCanvasUtils'
@@ -45,7 +46,7 @@ export const inDevelopment =
   process.env.NODE_ENV === 'development'
 export const inProduction = !inDevelopment
 
-export function useDebounce<T>(value: T, delay: number): T {
+export function useDebounce<T>(value: T, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value)
 
   useEffect(() => {
@@ -60,13 +61,32 @@ export function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue
 }
 
+// used in ViewContainer files to get the width
+export function useWidthSetter(
+  view: { setWidth: (arg: number) => void },
+  padding: string,
+) {
+  const [ref, { width }] = useMeasure()
+  useEffect(() => {
+    if (width && isAlive(view)) {
+      // sets after a requestAnimationFrame
+      // https://stackoverflow.com/a/58701523/2129219
+      // avoids ResizeObserver loop error being shown during development
+      requestAnimationFrame(() =>
+        view.setWidth(width - Number.parseInt(padding, 10) * 2),
+      )
+    }
+  }, [padding, view, width])
+  return ref
+}
+
 // https://stackoverflow.com/questions/56283920/
-export function useDebouncedCallback<A extends any[]>(
-  callback: (...args: A) => void,
+export function useDebouncedCallback<T>(
+  callback: (...args: T[]) => void,
   wait = 400,
 ) {
   // track args & timeout handle between calls
-  const argsRef = useRef<A>()
+  const argsRef = useRef<T[]>()
   const timeout = useRef<ReturnType<typeof setTimeout>>()
 
   function cleanup() {
@@ -78,7 +98,7 @@ export function useDebouncedCallback<A extends any[]>(
   // make sure our timeout gets cleared if our consuming component gets unmounted
   useEffect(() => cleanup, [])
 
-  return function debouncedCallback(...args: A) {
+  return function debouncedCallback(...args: T[]) {
     // capture latest args
     argsRef.current = args
 
@@ -182,15 +202,12 @@ export function springAnimate(
   ]
 }
 
-/** find the first node in the hierarchy that matches the given 'is' typescript type guard predicate */
-export function findParentThatIs<
-  PREDICATE extends (thing: IAnyStateTreeNode) => boolean,
->(
+// find the first node in the hierarchy that matches the given 'is' typescript type guard predicate
+export function findParentThatIs<T extends (a: IAnyStateTreeNode) => boolean>(
   node: IAnyStateTreeNode,
-  predicate: PREDICATE,
-): TypeTestedByPredicate<PREDICATE> & IAnyStateTreeNode {
-  return findParentThat(node, predicate) as TypeTestedByPredicate<PREDICATE> &
-    IAnyStateTreeNode
+  predicate: T,
+): TypeTestedByPredicate<T> & IAnyStateTreeNode {
+  return findParentThat(node, predicate)
 }
 
 /** get the current JBrowse session model, starting at any node in the state tree */
@@ -314,12 +331,12 @@ export function parseLocStringOneBased(
   let reversed = false
   if (locString.endsWith('[rev]')) {
     reversed = true
-    locString = locString.replace(/\[rev\]$/, '')
+    locString = locString.replace(/\[rev]$/, '')
   }
   // remove any whitespace
   locString = locString.replace(/\s/, '')
   // refNames can have colons, ref https://samtools.github.io/hts-specs/SAMv1.pdf Appendix A
-  const assemblyMatch = locString.match(/(\{(.+)\})?(.+)/)
+  const assemblyMatch = locString.match(/({(.+)})?(.+)/)
   if (!assemblyMatch) {
     throw new Error(`invalid location string: "${locString}"`)
   }
@@ -522,8 +539,8 @@ export function bpToPx(
   return roundToNearestPointOne((reversed ? end - bp : bp - start) / bpPerPx)
 }
 
-const oneEightyOverPi = 180.0 / Math.PI
-const piOverOneEighty = Math.PI / 180.0
+const oneEightyOverPi = 180 / Math.PI
+const piOverOneEighty = Math.PI / 180
 export function radToDeg(radians: number) {
   return (radians * oneEightyOverPi) % 360
 }
@@ -570,13 +587,13 @@ export function bpSpanPx(
 
 // do an array map of an iterable
 export function iterMap<T, U>(
-  iterable: Iterable<T>,
-  func: (item: T) => U,
+  iter: Iterable<T>,
+  func: (arg: T) => U,
   sizeHint?: number,
-): U[] {
-  const results = sizeHint ? new Array(sizeHint) : []
+) {
+  const results = Array.from<U>({ length: sizeHint || 0 })
   let counter = 0
-  for (const item of iterable) {
+  for (const item of iter) {
     results[counter] = func(item)
     counter += 1
   }
@@ -606,6 +623,19 @@ export function findLastIndex<T>(
   return -1
 }
 
+export function findLast<T>(
+  array: Array<T>,
+  predicate: (value: T, index: number, obj: T[]) => boolean,
+): T | undefined {
+  let l = array.length
+  while (l--) {
+    if (predicate(array[l], l, array)) {
+      return array[l]
+    }
+  }
+  return undefined
+}
+
 /**
  * makes a mobx reaction with the given functions, that calls actions on the
  * model for each stage of execution, and to abort the reaction function when
@@ -632,7 +662,7 @@ export function makeAbortableReaction<T, U, V>(
     model: T,
     handle: IReactionPublic,
   ) => Promise<V>,
-  // @ts-ignore
+  // @ts-expect-error
   reactionOptions: IReactionOptions,
   startedFunction: (aborter: AbortController) => void,
   successFunction: (arg: V) => void,
@@ -678,7 +708,7 @@ export function makeAbortableReaction<T, U, V>(
             data,
             thisInProgress.signal,
             self,
-            // @ts-ignore
+            // @ts-expect-error
             mobxReactionHandle,
           )
           checkAbortSignal(thisInProgress.signal)
@@ -704,20 +734,17 @@ export function makeAbortableReaction<T, U, V>(
 
 export function renameRegionIfNeeded(
   refNameMap: Record<string, string>,
-  region: Region,
+  region: Region | Instance<typeof MUIRegion>,
 ): Region & { originalRefName?: string } {
   if (isStateTreeNode(region) && !isAlive(region)) {
     return region
   }
 
-  if (region && refNameMap && refNameMap[region.refName]) {
+  if (region && refNameMap?.[region.refName]) {
     // clone the region so we don't modify it
-    if (isStateTreeNode(region)) {
-      // @ts-ignore
-      region = { ...getSnapshot(region) }
-    } else {
-      region = { ...region }
-    }
+    region = isStateTreeNode(region)
+      ? { ...getSnapshot(region) }
+      : { ...region }
 
     // modify it directly in the container
     const newRef = refNameMap[region.refName]
@@ -746,7 +773,7 @@ export async function renameRegionsIfNeeded<
   const assemblyNames = regions.map(region => region.assemblyName)
   const assemblyMaps = Object.fromEntries(
     await Promise.all(
-      assemblyNames.map(async assemblyName => {
+      [...new Set(assemblyNames)].map(async assemblyName => {
         return [
           assemblyName,
           await assemblyManager.getRefNameMapForAdapter(
@@ -792,8 +819,10 @@ export function stringify({
     : ''
 }
 
-// this is recommended in a later comment in https://github.com/electron/electron/issues/2288
-// for detecting electron in a renderer process, which is the one that has node enabled for us
+// this is recommended in a later comment in
+// https://github.com/electron/electron/issues/2288 for detecting electron in a
+// renderer process, which is the one that has node enabled for us
+//
 // const isElectron = process.versions.electron
 // const i2 = process.versions.hasOwnProperty('electron')
 export const isElectron = /electron/i.test(
@@ -873,10 +902,8 @@ export function blobToDataURL(blob: Blob): Promise<string> {
 // get the contents of the canvas
 export const rIC =
   typeof jest === 'undefined'
-    ? // @ts-ignore
-      typeof window !== 'undefined' && window.requestIdleCallback
-      ? // @ts-ignore
-        window.requestIdleCallback
+    ? typeof window !== 'undefined' && window.requestIdleCallback
+      ? window.requestIdleCallback
       : (cb: Function) => setTimeout(() => cb(), 1)
     : (cb: Function) => cb()
 
@@ -965,8 +992,8 @@ export const defaultCodonTable = {
 }
 
 /**
- *  take CodonTable above and generate larger codon table that includes
- *  all permutations of upper and lower case nucleotides
+ * take CodonTable above and generate larger codon table that includes all
+ * permutations of upper and lower case nucleotides
  */
 export function generateCodonTable(table: any) {
   const tempCodonTable: { [key: string]: string } = {}
@@ -998,7 +1025,7 @@ export function generateCodonTable(table: any) {
 export async function updateStatus<U>(
   msg: string,
   cb: (arg: string) => void,
-  fn: () => U,
+  fn: () => U | Promise<U>,
 ) {
   cb(msg)
   const res = await fn()
@@ -1084,9 +1111,9 @@ export function supportedIndexingAdapters(type: string) {
 export function getBpDisplayStr(totalBp: number) {
   let str
   if (Math.floor(totalBp / 1_000_000) > 0) {
-    str = `${parseFloat((totalBp / 1_000_000).toPrecision(3))}Mbp`
+    str = `${Number.parseFloat((totalBp / 1_000_000).toPrecision(3))}Mbp`
   } else if (Math.floor(totalBp / 1_000) > 0) {
-    str = `${parseFloat((totalBp / 1_000).toPrecision(3))}Kbp`
+    str = `${Number.parseFloat((totalBp / 1_000).toPrecision(3))}Kbp`
   } else {
     str = `${toLocale(Math.floor(totalBp))}bp`
   }
@@ -1098,17 +1125,12 @@ export function toLocale(n: number) {
 }
 
 export function getTickDisplayStr(totalBp: number, bpPerPx: number) {
-  let str
-  if (Math.floor(bpPerPx / 1_000) > 0) {
-    str = `${toLocale(parseFloat((totalBp / 1_000_000).toFixed(2)))}M`
-  } else {
-    str = `${toLocale(Math.floor(totalBp))}`
-  }
-  return str
+  return Math.floor(bpPerPx / 1_000) > 0
+    ? `${toLocale(Number.parseFloat((totalBp / 1_000_000).toFixed(2)))}M`
+    : `${toLocale(Math.floor(totalBp))}`
 }
 
 export function getViewParams(model: IAnyStateTreeNode, exportSVG?: boolean) {
-  // @ts-ignore
   const { dynamicBlocks, staticBlocks, offsetPx } = getContainingView(model)
   const b = dynamicBlocks?.contentBlocks[0] || {}
   const staticblock = staticBlocks?.contentBlocks[0] || {}
@@ -1116,8 +1138,8 @@ export function getViewParams(model: IAnyStateTreeNode, exportSVG?: boolean) {
   return {
     offsetPx: exportSVG ? 0 : offsetPx - staticblock.offsetPx,
     offsetPx1: exportSVG ? 0 : offsetPx - staticblock1.offsetPx,
-    start: b.start,
-    end: b.end,
+    start: b.start as number,
+    end: b.end as number,
   }
 }
 
@@ -1179,12 +1201,35 @@ export function getStr(obj: unknown) {
     : String(obj)
 }
 
+// tries to measure grid width without HTML tags included
+function coarseStripHTML(s: string) {
+  return s.replace(/(<([^>]+)>)/gi, '')
+}
+
 // heuristic measurement for a column of a @mui/x-data-grid, pass in values from a column
-export function measureGridWidth(elements: string[]) {
+export function measureGridWidth(
+  elements: unknown[],
+  args?: {
+    minWidth?: number
+    fontSize?: number
+    maxWidth?: number
+    padding?: number
+    stripHTML?: boolean
+  },
+) {
+  const {
+    padding = 30,
+    minWidth = 80,
+    fontSize = 12,
+    maxWidth = 1000,
+    stripHTML = false,
+  } = args || {}
   return max(
-    elements.map(element =>
-      Math.min(Math.max(measureText(getStr(element), 14) + 50, 80), 1000),
-    ),
+    elements
+      .map(element => getStr(element))
+      .map(str => (stripHTML ? coarseStripHTML(str) : str))
+      .map(str => measureText(str, fontSize))
+      .map(n => Math.min(Math.max(n + padding, minWidth), maxWidth)),
   )
 }
 
@@ -1198,16 +1243,22 @@ export function localStorageGetItem(item: string) {
     : undefined
 }
 
-export function max(arr: number[]) {
-  let max = -Infinity
+export function localStorageSetItem(str: string, item: string) {
+  return typeof localStorage !== 'undefined'
+    ? localStorage.setItem(str, item)
+    : undefined
+}
+
+export function max(arr: number[], init = -Infinity) {
+  let max = init
   for (let i = 0; i < arr.length; i++) {
     max = arr[i] > max ? arr[i] : max
   }
   return max
 }
 
-export function min(arr: number[]) {
-  let min = Infinity
+export function min(arr: number[], init = Infinity) {
+  let min = init
   for (let i = 0; i < arr.length; i++) {
     min = arr[i] < min ? arr[i] : min
   }
@@ -1225,3 +1276,10 @@ export function sum(arr: number[]) {
 export function avg(arr: number[]) {
   return sum(arr) / arr.length
 }
+
+export {
+  default as SimpleFeature,
+  type Feature,
+  type SimpleFeatureSerialized,
+  isFeature,
+} from './simpleFeature'

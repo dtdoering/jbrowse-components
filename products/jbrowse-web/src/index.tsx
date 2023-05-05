@@ -5,6 +5,14 @@ import Loading from './Loading'
 const Main = lazy(() => import('./Loader'))
 const initialTimeStamp = Date.now()
 
+// this should be able to be removed after @mui/x-data-grid updates
+// window.addEventListener('error', event => {
+//   console.log(event.message, event.message.match(/ResizeObserver/))
+//   event.preventDefault()
+//   event.stopPropagation()
+//   event.stopImmediatePropagation()
+// })
+
 if (window?.name.startsWith('JBrowseAuthWindow')) {
   const parent = window.opener
   if (parent) {

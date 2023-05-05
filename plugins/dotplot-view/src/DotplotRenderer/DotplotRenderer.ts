@@ -18,6 +18,7 @@ import { MismatchParser } from '@jbrowse/plugin-alignments'
 
 // locals
 import { Dotplot1DView, Dotplot1DViewModel } from '../DotplotView/model'
+import { createJBrowseTheme } from '@jbrowse/core/ui'
 
 const { parseCigar } = MismatchParser
 
@@ -50,7 +51,10 @@ function drawCir(ctx: CanvasRenderingContext2D, x: number, y: number, r = 1) {
   ctx.arc(x, y, r / 2, 0, 2 * Math.PI)
   ctx.fill()
 }
+
 export default class DotplotRenderer extends ComparativeRenderer {
+  supportsSVG = true
+
   async renameRegionsIfNeeded(args: DotplotRenderArgs) {
     const pm = this.pluginManager
     const assemblyManager = pm.rootModel?.session?.assemblyManager
@@ -79,7 +83,7 @@ export default class DotplotRenderer extends ComparativeRenderer {
     ctx: CanvasRenderingContext2D,
     props: DotplotRenderArgsDeserialized & { views: Dotplot1DViewModel[] },
   ) {
-    const { config, views, height, drawCigar } = props
+    const { config, views, height, drawCigar, theme } = props
     const color = readConfObject(config, 'color')
     const posColor = readConfObject(config, 'posColor')
     const negColor = readConfObject(config, 'negColor')
@@ -176,6 +180,7 @@ export default class DotplotRenderer extends ComparativeRenderer {
       staticBlocks: vview.staticBlocks,
       width: vview.width,
     }
+    const t = createJBrowseTheme(theme)
     hview.features?.forEach(feature => {
       const strand = feature.get('strand') || 1
       const start = strand === 1 ? feature.get('start') : feature.get('end')
@@ -200,7 +205,11 @@ export default class DotplotRenderer extends ComparativeRenderer {
       } else if (colorBy === 'strand') {
         r = strand === -1 ? negColor : posColor
       } else if (colorBy === 'default') {
-        r = isCallback ? readConfObject(config, 'color', { feature }) : color
+        r = isCallback
+          ? readConfObject(config, 'color', { feature })
+          : color === '#f0f'
+          ? t.palette.text.primary
+          : color
       }
       ctx.fillStyle = r
       ctx.strokeStyle = r
@@ -310,8 +319,10 @@ export default class DotplotRenderer extends ComparativeRenderer {
       ...ret,
       height,
       width,
-      offsetX: views[0].dynamicBlocks.blocks[0].offsetPx,
-      offsetY: views[1].dynamicBlocks.blocks[0].offsetPx,
+      offsetX: views[0].dynamicBlocks.blocks[0]?.offsetPx || 0,
+      offsetY: views[1].dynamicBlocks.blocks[0]?.offsetPx || 0,
+      bpPerPxX: views[0].bpPerPx,
+      bpPerPxY: views[1].bpPerPx,
     }
   }
 }

@@ -9,6 +9,10 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[plugins/linear-comparative-view/src/LGVSyntenyDisplay/model.ts](https://github.com/GMOD/jbrowse-components/blob/main/plugins/linear-comparative-view/src/LGVSyntenyDisplay/model.ts)
+
 ## Docs
 
 extends `LinearPileupDisplay`, displays location of "synteny" feature in a plain
@@ -29,7 +33,7 @@ type: types.literal('LGVSyntenyDisplay')
 
 ```js
 // type signature
-ITypeUnion<any, any, any>
+AnyConfigurationSchemaType
 // code
 configuration: ConfigurationReference(schema)
 ```

@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import {
   addDisposer,
   cast,
@@ -37,6 +38,8 @@ import OpenSequenceDialog from './OpenSequenceDialog'
 
 const { ipcRenderer } = window.require('electron')
 
+const PreferencesDialog = lazy(() => import('./PreferencesDialog'))
+
 function getSaveSession(model: RootModel) {
   return {
     ...getSnapshot(model.jbrowse),
@@ -49,25 +52,61 @@ interface Menu {
   menuItems: MenuItem[]
 }
 
+/**
+ * #stateModel JBrowseDesktopRootModel
+ * note that many properties of the root model are available through the session, which
+ * may be preferable since using getSession() is better relied on than getRoot()
+ */
 export default function rootModelFactory(pluginManager: PluginManager) {
   const assemblyConfigSchema = assemblyConfigSchemaFactory(pluginManager)
   const Session = sessionModelFactory(pluginManager, assemblyConfigSchema)
   const JobsManager = jobsModelFactory(pluginManager)
   return types
     .model('Root', {
+      /**
+       * #property
+       * `jbrowse` is a mapping of the config.json into the in-memory state tree
+       */
       jbrowse: JBrowseDesktop(pluginManager, Session, assemblyConfigSchema),
+      /**
+       * #property
+       * `session` encompasses the currently active state of the app, including
+       * views open, tracks open in those views, etc.
+       */
       session: types.maybe(Session),
+      /**
+       * #property
+       */
       jobsManager: types.maybe(JobsManager),
+      /**
+       * #property
+       */
       assemblyManager: assemblyManagerFactory(
         assemblyConfigSchema,
         pluginManager,
       ),
+      /**
+       * #property
+       */
       savedSessionNames: types.maybe(types.array(types.string)),
+      /**
+       * #property
+       */
       version: types.maybe(types.string),
+      /**
+       * #property
+       */
       internetAccounts: types.array(
         pluginManager.pluggableMstType('internet account', 'stateModel'),
       ),
+      /**
+       * #property
+       */
       sessionPath: types.optional(types.string, ''),
+      /**
+       * #property
+       * used for undo/redo
+       */
       history: types.optional(TimeTraveller, { targetPath: '../session' }),
     })
     .volatile(() => ({
@@ -80,38 +119,67 @@ export default function rootModelFactory(pluginManager: PluginManager) {
       pluginManager,
     }))
     .actions(self => ({
+      /**
+       * #action
+       */
       async saveSession(val: unknown) {
         if (self.sessionPath) {
           await ipcRenderer.invoke('saveSession', self.sessionPath, val)
         }
       },
+      /**
+       * #action
+       */
       setOpenNewSessionCallback(cb: (arg: string) => Promise<void>) {
         self.openNewSessionCallback = cb
       },
+      /**
+       * #action
+       */
       setSavedSessionNames(sessionNames: string[]) {
         self.savedSessionNames = cast(sessionNames)
       },
+      /**
+       * #action
+       */
       setSessionPath(path: string) {
         self.sessionPath = path
       },
+      /**
+       * #action
+       */
       setSession(sessionSnapshot?: SnapshotIn<typeof Session>) {
         self.session = cast(sessionSnapshot)
       },
+      /**
+       * #action
+       */
       setError(error: unknown) {
         self.error = error
       },
+      /**
+       * #action
+       */
       setDefaultSession() {
         this.setSession(self.jbrowse.defaultSession)
       },
+      /**
+       * #action
+       */
       setAssemblyEditing(flag: boolean) {
         self.isAssemblyEditing = flag
       },
-
+      /**
+       * #action
+       */
       async renameCurrentSession(newName: string) {
         if (self.session) {
           this.setSession({ ...getSnapshot(self.session), name: newName })
         }
       },
+      /**
+       * #action
+       */
       duplicateCurrentSession() {
         if (self.session) {
           const snapshot = JSON.parse(JSON.stringify(getSnapshot(self.session)))
@@ -127,6 +195,9 @@ export default function rootModelFactory(pluginManager: PluginManager) {
           this.setSession(snapshot)
         }
       },
+      /**
+       * #action
+       */
       initializeInternetAccount(
         internetAccountConfig: AnyConfigurationModel,
         initialSnapshot = {},
@@ -147,6 +218,9 @@ export default function rootModelFactory(pluginManager: PluginManager) {
         })
         return self.internetAccounts[length - 1]
       },
+      /**
+       * #action
+       */
       createEphemeralInternetAccount(
         internetAccountId: string,
         initialSnapshot = {},
@@ -179,6 +253,9 @@ export default function rootModelFactory(pluginManager: PluginManager) {
         self.internetAccounts.push(internetAccount)
         return internetAccount
       },
+      /**
+       * #action
+       */
       findAppropriateInternetAccount(location: UriLocation) {
         // find the existing account selected from menu
         const selectedId = location.internetAccountId
@@ -290,7 +367,7 @@ export default function rootModelFactory(pluginManager: PluginManager) {
               onClick: (session: any) => {
                 if (session.views.length === 0) {
                   session.notify('Please open a view to add a track first')
-                } else if (session.views.length >= 1) {
+                } else if (session.views.length > 0) {
                   const widget = session.addWidget(
                     'AddTrackWidget',
                     'addTrackWidget',
@@ -377,6 +454,21 @@ export default function rootModelFactory(pluginManager: PluginManager) {
               },
             },
             {
+              label: 'Preferences',
+              icon: SettingsIcon,
+              onClick: () => {
+                if (self.session) {
+                  self.session.queueDialog(handleClose => [
+                    PreferencesDialog,
+                    {
+                      session: self.session,
+                      handleClose,
+                    },
+                  ])
+                }
+              },
+            },
+            {
               label: 'Open assembly manager',
               icon: SettingsIcon,
               onClick: () => {
@@ -399,9 +491,15 @@ export default function rootModelFactory(pluginManager: PluginManager) {
       adminMode: true,
     }))
     .actions(self => ({
+      /**
+       * #action
+       */
       activateSession(sessionSnapshot: SnapshotIn<typeof Session>) {
         self.setSession(sessionSnapshot)
       },
+      /**
+       * #action
+       */
       setMenus(newMenus: Menu[]) {
         self.menus = newMenus
       },
@@ -412,6 +510,7 @@ export default function rootModelFactory(pluginManager: PluginManager) {
         await self.openNewSessionCallback(self.sessionPath)
       },
       /**
+       * #action
        * Add a top-level menu
        * @param menuName - Name of the menu to insert.
        * @returns The new length of the top-level menus array
@@ -420,6 +519,7 @@ export default function rootModelFactory(pluginManager: PluginManager) {
         return self.menus.push({ label: menuName, menuItems: [] })
       },
       /**
+       * #action
        * Insert a top-level menu
        * @param menuName - Name of the menu to insert.
        * @param position - Position to insert menu. If negative, counts from th
@@ -434,6 +534,7 @@ export default function rootModelFactory(pluginManager: PluginManager) {
         return self.menus.length
       },
       /**
+       * #action
        * Add a menu item to a top-level menu
        * @param menuName - Name of the top-level menu to append to.
        * @param menuItem - Menu item to append.
@@ -448,6 +549,7 @@ export default function rootModelFactory(pluginManager: PluginManager) {
         return menu.menuItems.push(menuItem)
       },
       /**
+       * #action
        * Insert a menu item into a top-level menu
        * @param menuName - Name of the top-level menu to insert into
        * @param menuItem - Menu item to insert
@@ -468,6 +570,7 @@ export default function rootModelFactory(pluginManager: PluginManager) {
         return menu.menuItems.length
       },
       /**
+       * #action
        * Add a menu item to a sub-menu
        * @param menuPath - Path to the sub-menu to add to, starting with the
        * top-level menu (e.g. `['File', 'Insert']`).
@@ -500,6 +603,7 @@ export default function rootModelFactory(pluginManager: PluginManager) {
       },
 
       /**
+       * #action
        * Insert a menu item into a sub-menu
        * @param menuPath - Path to the sub-menu to add to, starting with the
        * top-level menu (e.g. `['File', 'Insert']`).
@@ -541,25 +645,23 @@ export default function rootModelFactory(pluginManager: PluginManager) {
 
       afterCreate() {
         document.addEventListener('keydown', e => {
-          if (self.history.canRedo) {
-            if (
-              // ctrl+shift+z or cmd+shift+z
-              ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === 'KeyZ') ||
+          if (
+            self.history.canRedo &&
+            // ctrl+shift+z or cmd+shift+z
+            (((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === 'KeyZ') ||
               // ctrl+y
-              (e.ctrlKey && !e.shiftKey && e.code === 'KeyY')
-            ) {
-              self.history.redo()
-            }
+              (e.ctrlKey && !e.shiftKey && e.code === 'KeyY'))
+          ) {
+            self.history.redo()
           }
-          if (self.history.canUndo) {
-            if (
-              // ctrl+z or cmd+z
-              (e.ctrlKey || e.metaKey) &&
-              !e.shiftKey &&
-              e.code === 'KeyZ'
-            ) {
-              self.history.undo()
-            }
+          if (
+            self.history.canUndo &&
+            // ctrl+z or cmd+z
+            (e.ctrlKey || e.metaKey) &&
+            !e.shiftKey &&
+            e.code === 'KeyZ'
+          ) {
+            self.history.undo()
           }
         })
         addDisposer(

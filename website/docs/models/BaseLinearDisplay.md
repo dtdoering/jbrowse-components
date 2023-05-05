@@ -9,25 +9,28 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[plugins/linear-genome-view/src/BaseLinearDisplay/models/BaseLinearDisplayModel.tsx](https://github.com/GMOD/jbrowse-components/blob/main/plugins/linear-genome-view/src/BaseLinearDisplay/models/BaseLinearDisplayModel.tsx)
+
 ## Docs
 
 extends `BaseDisplay`
 
 ### BaseLinearDisplay - Properties
 
-#### property: height
+#### property: heightPreConfig
 
 ```js
 // type signature
-IOptionalIType<ISimpleType<number>, [undefined]>
+IMaybe<ISimpleType<number>>
 // code
-height: types.optional(
+heightPreConfig: types.maybe(
           types.refinement(
             'displayHeight',
             types.number,
             n => n >= minDisplayHeight,
           ),
-          defaultDisplayHeight,
         )
 ```
 
@@ -58,6 +61,15 @@ userBpPerPxLimit: types.maybe(types.number)
 IMaybe<ISimpleType<number>>
 // code
 userByteSizeLimit: types.maybe(types.number)
+```
+
+#### property: configuration
+
+```js
+// type signature
+ConfigurationSchemaType<{ maxFeatureScreenDensity: { type: string; description: string; defaultValue: number; }; fetchSizeLimit: { type: string; defaultValue: number; description: string; }; height: { type: string; defaultValue: number; description: string; }; mouseover: { ...; }; }, ConfigurationSchemaOptions<...>>
+// code
+configuration: ConfigurationReference(configSchema)
 ```
 
 ### BaseLinearDisplay - Getters
@@ -134,7 +146,7 @@ any
 
 ```js
 // type
-;(blockKey: string, x: number, y: number) => any
+;(blockKey: string, x: number, y: number) => string
 ```
 
 #### getter: getFeatureByID
@@ -172,7 +184,7 @@ number
 any
 ```
 
-#### getter: estimatedStatsReady
+#### getter: featureDensityStatsReady
 
 ```js
 // type
@@ -238,7 +250,7 @@ trackMenuItems: () => MenuItem[]
 
 ```js
 // type signature
-contextMenuItems: () => { label: string; icon: OverridableComponent<SvgIconTypeMap<{}, "svg">> & { muiName: string; }; onClick: () => void; }[]
+contextMenuItems: () => MenuItem[]
 ```
 
 #### method: renderProps
@@ -252,7 +264,7 @@ renderProps: () => any
 
 ```js
 // type signature
-renderSvg: (opts: ExportSvgOptions & { overrideHeight: number; }) => Promise<Element>
+renderSvg: (opts: ExportSvgOptions & { overrideHeight: number; theme: ThemeOptions; }) => Promise<Element>
 ```
 
 ### BaseLinearDisplay - Actions
@@ -264,32 +276,32 @@ renderSvg: (opts: ExportSvgOptions & { overrideHeight: number; }) => Promise<Ele
 setMessage: (message: string) => void
 ```
 
-#### action: estimateRegionsStats
+#### action: getFeatureDensityStats
 
 ```js
 // type signature
-estimateRegionsStats: (regions: Region[], opts: { headers?: Record<string, string>; signal?: AbortSignal; filters?: string[]; }) => Promise<{}>
+getFeatureDensityStats: () => Promise<FeatureDensityStats>
 ```
 
-#### action: setRegionStatsP
+#### action: setFeatureDensityStatsP
 
 ```js
 // type signature
-setRegionStatsP: (p?: Promise<Stats>) => void
+setFeatureDensityStatsP: (arg: any) => void
 ```
 
-#### action: setRegionStats
+#### action: setFeatureDensityStats
 
 ```js
 // type signature
-setRegionStats: (estimatedRegionStats?: Stats) => void
+setFeatureDensityStats: (featureDensityStats?: FeatureDensityStats) => void
 ```
 
-#### action: clearRegionStats
+#### action: clearFeatureDensityStats
 
 ```js
 // type signature
-clearRegionStats: () => void
+clearFeatureDensityStats: () => void
 ```
 
 #### action: setHeight
@@ -313,11 +325,11 @@ resizeHeight: (distance: number) => number
 setScrollTop: (scrollTop: number) => void
 ```
 
-#### action: updateStatsLimit
+#### action: setFeatureDensityStatsLimit
 
 ```js
 // type signature
-updateStatsLimit: (stats: Stats) => void
+setFeatureDensityStatsLimit: (stats?: FeatureDensityStats) => void
 ```
 
 #### action: addBlock
@@ -359,7 +371,7 @@ clearFeatureSelection: () => void
 
 ```js
 // type signature
-setFeatureIdUnderMouse: (feature: string) => void
+setFeatureIdUnderMouse: (feature?: string) => void
 ```
 
 #### action: reload

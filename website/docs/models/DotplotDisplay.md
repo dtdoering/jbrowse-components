@@ -9,6 +9,10 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[plugins/dotplot-view/src/DotplotDisplay/stateModelFactory.tsx](https://github.com/GMOD/jbrowse-components/blob/main/plugins/dotplot-view/src/DotplotDisplay/stateModelFactory.tsx)
+
 ## Docs
 
 ### DotplotDisplay - Properties
@@ -26,7 +30,7 @@ type: types.literal('DotplotDisplay')
 
 ```js
 // type signature
-ITypeUnion<any, any, any>
+AnyConfigurationSchemaType
 // code
 configuration: ConfigurationReference(configSchema)
 ```
@@ -47,6 +51,13 @@ any
 ```js
 // type signature
 renderProps: () => any
+```
+
+#### method: renderSvg
+
+```js
+// type signature
+renderSvg: (opts: ExportSvgOptions & { theme: ThemeOptions; }) => Promise<Element>
 ```
 
 ### DotplotDisplay - Actions

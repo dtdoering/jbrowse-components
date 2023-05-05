@@ -9,6 +9,10 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[plugins/alignments/src/LinearReadArcsDisplay/model.tsx](https://github.com/GMOD/jbrowse-components/blob/main/plugins/alignments/src/LinearReadArcsDisplay/model.tsx)
+
 ## Docs
 
 extends `BaseLinearDisplay`
@@ -28,7 +32,7 @@ type: types.literal('LinearReadArcsDisplay')
 
 ```js
 // type signature
-ITypeUnion<any, any, any>
+AnyConfigurationSchemaType
 // code
 configuration: ConfigurationReference(configSchema)
 ```
@@ -129,7 +133,7 @@ trackMenuItems: () => (MenuDivider | MenuSubHeader | NormalMenuItem | CheckboxMe
 
 ```js
 // type signature
-renderSvg: (opts: ExportSvgOptions) => Promise<Element>
+renderSvg: (opts: { rasterizeLayers?: boolean; }) => Promise<Element>
 ```
 
 ### LinearReadArcsDisplay - Actions

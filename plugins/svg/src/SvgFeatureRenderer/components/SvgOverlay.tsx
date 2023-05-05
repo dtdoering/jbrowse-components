@@ -1,7 +1,4 @@
-
-import { bpSpanPx } from '@jbrowse/core/util'
-import { Feature } from '@jbrowse/core/util/simpleFeature'
-import { Region } from '@jbrowse/core/util/types'
+import { bpSpanPx, Feature, Region } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 
 type LayoutRecord = [number, number, number, number]

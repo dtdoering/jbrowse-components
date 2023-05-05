@@ -1,5 +1,6 @@
 // this is all the stuff that the pluginManager re-exports for plugins to use
 import React, { lazy, LazyExoticComponent, Suspense } from 'react'
+import * as ReactJSXRuntime from 'react/jsx-runtime'
 import * as ReactDom from 'react-dom'
 import * as mobx from 'mobx'
 import * as mst from 'mobx-state-tree'
@@ -215,11 +216,6 @@ const DataGridEntries: Record<string, LazyExoticComponent<any>> = {
   GridArrowUpwardIcon: lazy(() =>
     import('@mui/x-data-grid').then(module => ({
       default: module.GridArrowUpwardIcon,
-    })),
-  ),
-  GridAutoSizer: lazy(() =>
-    import('@mui/x-data-grid').then(module => ({
-      default: module.GridAutoSizer,
     })),
   ),
   GridCellCheckboxForwardRef: lazy(() =>
@@ -503,6 +499,7 @@ const libs = {
   mobx,
   'mobx-state-tree': mst,
   react: React,
+  'react/jsx-runtime': ReactJSXRuntime,
   'react-dom': ReactDom,
   'mobx-react': mxreact,
   '@mui/x-data-grid': {
@@ -527,7 +524,11 @@ const libs = {
       return () => useStyles().classes
     },
   },
-  '@mui/material': LazyMUICore,
+  '@mui/material': {
+    ...LazyMUICore,
+    alpha: MUIStyles.alpha,
+    useTheme: MUIStyles.useTheme,
+  },
   'prop-types': PropTypes,
 
   // end special case
@@ -586,12 +587,12 @@ const libs = {
   '@jbrowse/core/data_adapters/BaseAdapter': BaseAdapterExports,
 }
 
-const libsList = Array.from(Object.keys(libs))
+const libsList = Object.keys(libs)
 
 // make sure that all the items in the ReExports/list array (used by build
 // systems and such) are included here, and vice versa
 const inLibsOnly = libsList.filter(mod => !reExportsList.includes(mod))
-if (inLibsOnly.length) {
+if (inLibsOnly.length > 0) {
   throw new Error(
     `The following modules are in the re-exports list, but not the modules libs: ${inLibsOnly.join(
       ', ',

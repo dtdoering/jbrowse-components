@@ -1,27 +1,29 @@
-import  { useEffect, useState } from 'react'
+import { useEffect, useState, CSSProperties } from 'react'
 import { makeStyles } from 'tss-react/mui'
 import { Typography } from '@mui/material'
 import { LoadingEllipses } from '@jbrowse/core/ui'
 import { observer } from 'mobx-react'
 
-const useStyles = makeStyles()({
-  loading: {
-    paddingLeft: '0.6em',
-    backgroundColor: '#f1f1f1',
-    backgroundImage:
-      'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,.5) 5px, rgba(255,255,255,.5) 10px)',
-    textAlign: 'center',
-  },
+const useStyles = makeStyles()(theme => {
+  const bg = theme.palette.action.disabledBackground
+  return {
+    loading: {
+      paddingLeft: '0.6em',
+      backgroundColor: theme.palette.background.default,
+      backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 5px, ${bg} 5px, ${bg} 10px)`,
+      textAlign: 'center',
+    },
 
-  blockMessage: {
-    background: '#f1f1f1',
-    padding: '10px',
-  },
-  blockError: {
-    background: '#f1f1f1',
-    padding: '10px',
-    color: 'red',
-  },
+    blockMessage: {
+      backgroundColor: bg,
+      padding: '10px',
+    },
+    blockError: {
+      backgroundColor: bg,
+      padding: '10px',
+      color: 'red',
+    },
+  }
 })
 
 function LoadingMessage() {
@@ -44,34 +46,41 @@ function BlockMessage({ messageText }: { messageText: string }) {
   const { classes } = useStyles()
   return (
     <div className={classes.blockMessage}>
-      <Typography>{messageText}</Typography>
+      <Typography>{`${messageText}`}</Typography>
     </div>
   )
 }
 
-function BlockError({ error }: { error: Error }) {
+function BlockError({ error }: { error: unknown }) {
   const { classes } = useStyles()
   return (
     <div className={classes.blockError}>
-      <Typography>{error.message}</Typography>
+      <Typography>{`${error}`}</Typography>
     </div>
   )
 }
 
-const ServerSideRenderedBlockContent = observer(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ({ model, style }: { model: any; style: any }) => {
-    if (model.error) {
-      return <BlockError error={model.error} data-testid="reload_button" />
-    }
-    if (model.message) {
-      return <BlockMessage messageText={model.message} />
-    }
-    if (!model.filled) {
-      return <LoadingMessage />
-    }
+export default observer(function ({
+  model,
+  style,
+}: {
+  model: {
+    error?: unknown
+    message?: string
+    filled?: boolean
+    shouldDisplay?: boolean
+    reactElement?: React.ReactElement
+  }
+  style: CSSProperties
+}) {
+  if (model.error) {
+    return <BlockError error={model.error} data-testid="reload_button" />
+  } else if (model.message) {
+    return <BlockMessage messageText={model.message} />
+  } else if (!model.filled) {
+    return <LoadingMessage />
+  } else if (model.shouldDisplay) {
     return <div style={style}>{model.reactElement}</div>
-  },
-)
-
-export default ServerSideRenderedBlockContent
+  }
+  return null
+})

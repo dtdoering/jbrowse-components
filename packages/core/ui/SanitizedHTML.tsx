@@ -30,6 +30,8 @@ const htmlTags = [
   'strong',
   'table',
   'tbody',
+  'sup',
+  'sub',
   'td',
   'tfoot',
   'th',
@@ -48,6 +50,12 @@ export function isHTML(str: string) {
   return full.test(str)
 }
 
+// note this is mocked during testing, see
+// packages/__mocks__/@jbrowse/core/ui/SanitizedHTML something about dompurify
+// behavior causes errors during tests, was seen in
+// products/jbrowse-web/src/tests/Connection.test.tsx test (can delete mock to
+// see)
+//
 export default function SanitizedHTML({ html }: { html: string }) {
   const value = isHTML(html) ? html : escapeHTML(html)
   if (!added) {
@@ -70,7 +78,7 @@ export default function SanitizedHTML({ html }: { html: string }) {
   }
 
   return (
-    <div
+    <span
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{
         __html: dompurify.sanitize(value),

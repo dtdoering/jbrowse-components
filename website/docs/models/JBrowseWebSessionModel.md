@@ -9,6 +9,10 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[products/jbrowse-web/src/sessionModelFactory.ts](https://github.com/GMOD/jbrowse-components/blob/main/products/jbrowse-web/src/sessionModelFactory.ts)
+
 ## Docs
 
 inherits SnackbarModel
@@ -164,11 +168,32 @@ IOptionalIType<ISimpleType<string>, [undefined]>
 // code
 drawerPosition: types.optional(
         types.string,
-        localStorage.getItem('drawerPosition') || 'right',
+        () => localStorageGetItem('drawerPosition') || 'right',
       )
 ```
 
 ### JBrowseWebSessionModel - Getters
+
+#### getter: jbrowse
+
+```js
+// type
+any
+```
+
+#### getter: themeName
+
+```js
+// type
+string
+```
+
+#### getter: theme
+
+```js
+// type
+Theme
+```
 
 #### getter: DialogComponent
 
@@ -305,6 +330,13 @@ any
 
 ### JBrowseWebSessionModel - Methods
 
+#### method: allThemes
+
+```js
+// type signature
+allThemes: () => ThemeMap
+```
+
 #### method: renderProps
 
 ```js
@@ -331,6 +363,13 @@ getTrackActionMenuItems: (config: { [x: string]: any; } & NonEmptyObject & { set
 ```
 
 ### JBrowseWebSessionModel - Actions
+
+#### action: setThemeName
+
+```js
+// type signature
+setThemeName: (name: string) => void
+```
 
 #### action: moveViewUp
 
@@ -545,12 +584,8 @@ addViewFromAnotherView: (
 
 ```js
 // type signature
-addWidget: (
-  typeName: string,
-  id: string,
-  initialState?: {},
-  configuration?: { type: string },
-) => any
+addWidget: (typeName: string, id: string, initialState?: {}, conf?: unknown) =>
+  any
 ```
 
 #### action: showWidget

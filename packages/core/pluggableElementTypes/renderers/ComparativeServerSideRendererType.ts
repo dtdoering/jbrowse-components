@@ -6,14 +6,13 @@ import ServerSideRenderer, {
   RenderArgs as ServerSideRenderArgs,
   RenderArgsSerialized as ServerSideRenderArgsSerialized,
   RenderArgsDeserialized as ServerSideRenderArgsDeserialized,
-  RenderResults,
   ResultsSerialized as ServerSideResultsSerialized,
   ResultsDeserialized as ServerSideResultsDeserialized,
 } from './ServerSideRendererType'
 import RpcManager from '../../rpc/RpcManager'
 import { getAdapter } from '../../data_adapters/dataAdapterCache'
 import { BaseFeatureDataAdapter } from '../../data_adapters/BaseAdapter'
-import { dedupe } from '../../util'
+import { dedupe, getSerializedSvg } from '../../util'
 import { firstValueFrom } from 'rxjs'
 
 export interface RenderArgs extends ServerSideRenderArgs {
@@ -32,12 +31,21 @@ export interface RenderArgsDeserialized
   blockKey: string
 }
 
-export type { RenderResults }
-
 export type ResultsSerialized = ServerSideResultsSerialized
 
 export interface ResultsDeserialized extends ServerSideResultsDeserialized {
   blockKey: string
+}
+
+export interface ResultsSerializedSvgExport extends ResultsSerialized {
+  canvasRecordedData: unknown
+  width: number
+  height: number
+  reactElement: unknown
+}
+
+function isSvgExport(e: ResultsSerialized): e is ResultsSerializedSvgExport {
+  return 'canvasRecordedData' in e
 }
 
 export default class ComparativeServerSideRenderer extends ServerSideRenderer {
@@ -82,11 +90,17 @@ export default class ComparativeServerSideRenderer extends ServerSideRenderer {
    * calls `render` with the RPC manager.
    */
   async renderInClient(rpcManager: RpcManager, args: RenderArgs) {
-    return rpcManager.call(
+    const results = (await rpcManager.call(
       args.sessionId,
       'ComparativeRender',
       args,
-    ) as Promise<ResultsSerialized>
+    )) as ResultsSerialized
+
+    if (isSvgExport(results)) {
+      results.html = await getSerializedSvg(results)
+      delete results.reactElement
+    }
+    return results
   }
 
   /**
@@ -104,12 +118,7 @@ export default class ComparativeServerSideRenderer extends ServerSideRenderer {
     const pm = this.pluginManager
     const { sessionId, adapterConfig } = renderArgs
     const { dataAdapter } = await getAdapter(pm, sessionId, adapterConfig)
-
-    let regions = [] as Region[]
-
-    // @ts-ignore this is instantiated by the getFeatures call
-    regions = renderArgs.regions
-
+    const regions = renderArgs.regions as Region[]
     if (!regions || regions.length === 0) {
       console.warn('no regions supplied to comparative renderer')
       return []
@@ -142,3 +151,5 @@ export default class ComparativeServerSideRenderer extends ServerSideRenderer {
     return dedupe(res, f => f.id())
   }
 }
+
+export { type RenderResults } from './ServerSideRendererType'

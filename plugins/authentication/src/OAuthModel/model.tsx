@@ -22,18 +22,6 @@ function fixup(buf: string) {
   return buf.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
 
-function getGlobalObject(): Window {
-  // Based on window-or-global
-  // https://github.com/purposeindustries/window-or-global/blob/322abc71de0010c9e5d9d0729df40959e1ef8775/lib/index.js
-  return (
-    // eslint-disable-next-line no-restricted-globals
-    (typeof self === 'object' && self.self === self && self) ||
-    (typeof global === 'object' && global.global === global && global) ||
-    // @ts-ignore
-    this
-  )
-}
-
 const stateModelFactory = (configSchema: OAuthInternetAccountConfigModel) => {
   return InternetAccount.named('OAuthInternetAccount')
     .props({
@@ -47,9 +35,8 @@ const stateModelFactory = (configSchema: OAuthInternetAccountConfigModel) => {
           if (codeVerifier) {
             return codeVerifier
           }
-          const global = getGlobalObject()
           const array = new Uint8Array(32)
-          global.crypto.getRandomValues(array)
+          globalThis.crypto.getRandomValues(array)
           codeVerifier = fixup(Buffer.from(array).toString('base64'))
           return codeVerifier
         },
@@ -237,11 +224,9 @@ const stateModelFactory = (configSchema: OAuthInternetAccountConfigModel) => {
               self.storeToken(token)
               return resolve(token)
             } catch (error) {
-              if (error instanceof Error) {
-                return reject(error)
-              } else {
-                return reject(new Error(String(error)))
-              }
+              return error instanceof Error
+                ? reject(error)
+                : reject(new Error(String(error)))
             }
           }
           if (redirectUriWithInfo.includes('access_denied')) {
@@ -334,7 +319,7 @@ const stateModelFactory = (configSchema: OAuthInternetAccountConfigModel) => {
           location: UriLocation,
         ): Promise<string> {
           const decoded = jwtDecode<JwtPayload>(token)
-          if (decoded.exp && decoded.exp < new Date().getTime() / 1000) {
+          if (decoded.exp && decoded.exp < Date.now() / 1000) {
             const refreshToken =
               self.hasRefreshToken && self.retrieveRefreshToken()
             if (refreshToken) {

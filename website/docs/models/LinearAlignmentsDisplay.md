@@ -9,6 +9,10 @@ our source code. See
 [Core concepts and intro to pluggable elements](/docs/developer_guide/) for more
 info
 
+## Source file
+
+[plugins/alignments/src/LinearAlignmentsDisplay/models/model.tsx](https://github.com/GMOD/jbrowse-components/blob/main/plugins/alignments/src/LinearAlignmentsDisplay/models/model.tsx)
+
 ## Docs
 
 extends `BaseDisplay`
@@ -61,18 +65,18 @@ type: types.literal('LinearAlignmentsDisplay')
 
 ```js
 // type signature
-ITypeUnion<any, any, any>
+AnyConfigurationSchemaType
 // code
 configuration: ConfigurationReference(configSchema)
 ```
 
-#### property: height
+#### property: heightPreConfig
 
 ```js
 // type signature
-number
+IMaybe<ISimpleType<number>>
 // code
-height: 250
+heightPreConfig: types.maybe(types.number)
 ```
 
 #### property: userFeatureScreenDensity
@@ -94,6 +98,13 @@ lowerPanelType: 'LinearPileupDisplay'
 ```
 
 ### LinearAlignmentsDisplay - Getters
+
+#### getter: height
+
+```js
+// type
+any
+```
 
 #### getter: pileupConf
 
@@ -176,11 +187,11 @@ setSNPCoverageHeight: (n: number) => void
 setSNPCoverageDisplay: (configuration: { [x: string]: any; } & NonEmptyObject & { setSubschema(slotName: string, data: unknown): any; } & IStateTreeNode<AnyConfigurationSchemaType>) => void
 ```
 
-#### action: updateStatsLimit
+#### action: setFeatureDensityStatsLimit
 
 ```js
 // type signature
-updateStatsLimit: (stats: unknown) => void
+setFeatureDensityStatsLimit: (stats?: FeatureDensityStats) => void
 ```
 
 #### action: setPileupDisplay

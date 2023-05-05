@@ -32,7 +32,7 @@ const useStyles = makeStyles()(theme => ({
     margin: theme.spacing(1),
   },
   expandIcon: {
-    color: '#fff',
+    color: theme.palette.tertiary.contrastText,
   },
   adminBadge: {
     margin: '0.5em',
@@ -106,7 +106,6 @@ function PluginStoreWidget({ model }: { model: PluginStoreModel }) {
           <div className={classes.customPluginButton}>
             <Button
               variant="contained"
-              color="primary"
               onClick={() => setCustomPluginFormOpen(true)}
             >
               Add custom plugin
@@ -127,10 +126,7 @@ function PluginStoreWidget({ model }: { model: PluginStoreModel }) {
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton
-                color="secondary"
-                onClick={() => model.clearFilterText()}
-              >
+              <IconButton onClick={() => model.clearFilterText()}>
                 <ClearIcon />
               </IconButton>
             </InputAdornment>
@@ -158,20 +154,17 @@ function PluginStoreWidget({ model }: { model: PluginStoreModel }) {
         ) : pluginArray ? (
           pluginArray
             .filter(plugin => {
-              // If pugin only has cjsUrl, don't display outside desktop
-              if (
-                !isElectron &&
-                !(plugin.esmUrl || plugin.url || plugin.umdUrl)
-              ) {
-                return false
-              }
-              return plugin.name
-                .toLowerCase()
-                .includes(model.filterText.toLowerCase())
+              // If plugin only has cjsUrl, don't display outside desktop
+              return (
+                !(isElectron && plugin.cjsUrl) &&
+                plugin.name
+                  .toLowerCase()
+                  .includes(model.filterText.toLowerCase())
+              )
             })
             .map(plugin => (
               <PluginCard
-                key={(plugin as JBrowsePlugin).name}
+                key={plugin.name}
                 plugin={plugin}
                 model={model}
                 adminMode={!!adminMode}

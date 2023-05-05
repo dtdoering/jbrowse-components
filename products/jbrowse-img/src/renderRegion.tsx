@@ -24,7 +24,7 @@ export interface Opts {
   aliases?: string
   cytobands?: string
   defaultSession?: string
-  trackList: Entry[]
+  trackList?: Entry[]
   tracks?: string
 }
 
@@ -367,7 +367,7 @@ function process(
     else if (opt.startsWith('force:')) {
       const [, force] = opt.split(':')
       if (force) {
-        display.updateStatsLimit({ bytes: Number.MAX_VALUE })
+        display.setFeatureDensityStatsLimit({ bytes: Number.MAX_VALUE })
       }
     }
 

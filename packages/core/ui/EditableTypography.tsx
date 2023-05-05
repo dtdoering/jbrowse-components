@@ -37,7 +37,10 @@ interface Props {
 }
 
 // using forwardRef so that MUI Tooltip can wrap this component
-const EditableTypography = forwardRef<HTMLDivElement, Props>((props, ref) => {
+const EditableTypography = forwardRef<HTMLDivElement, Props>(function (
+  props,
+  ref,
+) {
   const { value, setValue, variant, ...other } = props
   const [editedValue, setEditedValue] = useState<string>()
   const [sizerNode, setSizerNode] = useState<HTMLSpanElement | null>(null)
@@ -53,7 +56,7 @@ const EditableTypography = forwardRef<HTMLDivElement, Props>((props, ref) => {
 
   // possibly tss-react does not understand the passing of props to
   // useStyles, but it appears to work
-  // @ts-ignore
+  // @ts-expect-error
   const { classes } = useStyles(props, { props })
   const theme = useTheme()
 
@@ -101,7 +104,7 @@ const EditableTypography = forwardRef<HTMLDivElement, Props>((props, ref) => {
           }
         }}
         onBlur={() => {
-          setValue(editedValue || '')
+          setValue(editedValue || value || '')
           setEditedValue(undefined)
         }}
       />

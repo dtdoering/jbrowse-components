@@ -5,7 +5,7 @@ exports[`<AboutWidget /> renders 1`] = `
   class="css-1a8qml5-root"
 >
   <h4
-    class="MuiTypography-root MuiTypography-h4 MuiTypography-alignCenter css-1oih086-MuiTypography-root"
+    class="MuiTypography-root MuiTypography-h4 MuiTypography-alignCenter css-149xwtl-MuiTypography-root"
   >
     JBrowse 2
   </h4>
@@ -18,7 +18,7 @@ exports[`<AboutWidget /> renders 1`] = `
     JBrowse is a
      
     <a
-      class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-1ps4owl-MuiTypography-root-MuiLink-root"
+      class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-1bhi0za-MuiTypography-root-MuiLink-root"
       href="http://gmod.org/"
       rel="noopener noreferrer"
       target="_blank"
@@ -45,7 +45,7 @@ exports[`<AboutWidget /> renders 1`] = `
     <ul>
       <li>
         <a
-          class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-1ps4owl-MuiTypography-root-MuiLink-root"
+          class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-1bhi0za-MuiTypography-root-MuiLink-root"
           href="http://google.com"
           rel="noopener noreferrer"
           target="_blank"
