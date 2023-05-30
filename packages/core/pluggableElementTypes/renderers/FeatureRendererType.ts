@@ -139,32 +139,28 @@ export default class FeatureRendererType extends ServerSideRendererType {
    * @param renderArgs -
    * @returns Map of features as `{ id => feature, ... }`
    */
-  async getFeatures(
-    renderArgs: RenderArgsDeserialized,
-  ): Promise<Map<string, Feature>> {
+
+  /**
+   * use the dataAdapter to fetch the features to be rendered
+   *
+   * @param renderArgs -
+   * @returns Map of features as `{ id => feature, ... }`
+   */
+  async getFeatures(renderArgs: RenderArgsDeserialized) {
     const pm = this.pluginManager
-    const { signal, regions, sessionId, adapterConfig } = renderArgs
+    const { regions, sessionId, adapterConfig } = renderArgs
     const { dataAdapter } = await getAdapter(pm, sessionId, adapterConfig)
     if (!isFeatureAdapter(dataAdapter)) {
       throw new Error('Adapter does not support retrieving features')
     }
-    const features = new Map()
 
-    if (!regions || regions.length === 0) {
-      return features
-    }
     // make sure the requested region's start and end are integers, if
     // there is a region specification.
-    const requestRegions = regions.map((r: Region) => {
-      const requestRegion = { ...r }
-      if (requestRegion.start) {
-        requestRegion.start = Math.floor(requestRegion.start)
-      }
-      if (requestRegion.end) {
-        requestRegion.end = Math.ceil(requestRegion.end)
-      }
-      return requestRegion
-    })
+    const requestRegions = regions.map(r => ({
+      ...r,
+      start: Math.floor(r.start),
+      end: Math.ceil(r.end),
+    }))
 
     const region = requestRegions[0]
 
@@ -177,7 +173,6 @@ export default class FeatureRendererType extends ServerSideRendererType {
         : dataAdapter.getFeaturesInMultipleRegions(requestRegions, renderArgs)
 
     const feats = await firstValueFrom(featureObservable.pipe(toArray()))
-    checkAbortSignal(signal)
     return new Map<string, Feature>(
       feats
         .filter(feat => this.featurePassesFilters(renderArgs, feat))

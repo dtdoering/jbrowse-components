@@ -7,9 +7,7 @@ import { hasPairedReads } from '../shared/util'
 import { drawPairChains } from './drawPairChains'
 import { drawLongReadChains } from './drawLongReadChains'
 
-type LGV = LinearGenomeViewModel
-
-export function drawFeats(
+export function drawReadCloud(
   self: LinearReadCloudDisplayModel,
   ctx: CanvasRenderingContext2D,
 ) {
@@ -18,16 +16,14 @@ export function drawFeats(
     return
   }
   const { assemblyManager } = getSession(self)
-  const view = getContainingView(self) as LGV
+  const view = getContainingView(self) as LinearGenomeViewModel
   const assemblyName = view.assemblyNames[0]
   const asm = assemblyManager.get(assemblyName)
   if (!asm) {
     return
   }
 
-  const hasPaired = hasPairedReads(chainData)
-
-  if (hasPaired) {
+  if (hasPairedReads(chainData)) {
     drawPairChains({ self, view, asm, ctx, chainData })
   } else {
     drawLongReadChains({ self, view, asm, ctx, chainData })

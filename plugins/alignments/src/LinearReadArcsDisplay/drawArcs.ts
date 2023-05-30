@@ -39,7 +39,7 @@ function drawLineAtOffset(
   ctx.stroke()
 }
 
-export function drawFeats(
+export function drawArcs(
   self: LinearReadArcsDisplayModel,
   ctx: CanvasRenderingContext2D,
   width: number,

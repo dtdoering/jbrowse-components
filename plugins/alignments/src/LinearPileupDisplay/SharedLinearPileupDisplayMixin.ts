@@ -21,8 +21,10 @@ import {
 
 import {
   LinearGenomeViewModel,
-  BaseLinearDisplay,
+  TrackHeightMixin,
+  FeatureDensityMixin,
 } from '@jbrowse/plugin-linear-genome-view'
+import { BaseDisplay } from '@jbrowse/core/pluggableElementTypes'
 
 // icons
 import { ContentCopy as ContentCopyIcon } from '@jbrowse/core/ui/Icons'
@@ -67,7 +69,9 @@ export function SharedLinearPileupDisplayMixin(
 ) {
   return types
     .compose(
-      BaseLinearDisplay,
+      BaseDisplay,
+      TrackHeightMixin(),
+      FeatureDensityMixin(),
       types.model({
         /**
          * #property
@@ -103,6 +107,14 @@ export function SharedLinearPileupDisplayMixin(
       colorTagMap: observable.map<string, string>({}),
       featureUnderMouseVolatile: undefined as undefined | Feature,
       tagsReady: false,
+
+      contextMenuFeature: undefined as Feature | undefined,
+      featureIdUnderMouse: undefined as string | undefined,
+      ref: null as HTMLCanvasElement | null,
+
+      loading: false,
+      lastDrawnOffsetPx: undefined as number | undefined,
+      lastDrawnBpPerPx: 0,
     }))
     .views(self => ({
       get autorunReady() {
@@ -115,6 +127,34 @@ export function SharedLinearPileupDisplayMixin(
       },
     }))
     .actions(self => ({
+      /**
+       * #action
+       * internal, a reference to a HTMLCanvas because we use a autorun to draw
+       * the canvas
+       */
+      setRef(ref: HTMLCanvasElement | null) {
+        self.ref = ref
+      },
+      /**
+       * #action
+       */
+      setContextMenuFeature(feature: Feature) {
+        self.contextMenuFeature = feature
+      },
+
+      /**
+       * #action
+       */
+      clearFeatureSelection() {
+        // self.selection = undefined
+      },
+      /**
+       * #action
+       */
+      setLastDrawn(offsetPx: number, bpPerPx: number) {
+        self.lastDrawnOffsetPx = offsetPx
+        self.lastDrawnBpPerPx = bpPerPx
+      },
       /**
        * #action
        */
@@ -452,9 +492,9 @@ export function SharedLinearPileupDisplayMixin(
             {
               label: 'Color by tag...',
               onClick: () => {
-                getSession(self).queueDialog(doneCallback => [
+                getSession(self).queueDialog(handleClose => [
                   ColorByTagDlg,
-                  { model: self, handleClose: doneCallback },
+                  { model: self, handleClose },
                 ])
               },
             },
@@ -471,9 +511,9 @@ export function SharedLinearPileupDisplayMixin(
               label: 'Filter by',
               icon: FilterListIcon,
               onClick: () => {
-                getSession(self).queueDialog(doneCallback => [
+                getSession(self).queueDialog(handleClose => [
                   FilterByTagDlg,
-                  { model: self, handleClose: doneCallback },
+                  { model: self, handleClose },
                 ])
               },
             },
@@ -497,9 +537,9 @@ export function SharedLinearPileupDisplayMixin(
                 {
                   label: 'Manually set height',
                   onClick: () => {
-                    getSession(self).queueDialog(doneCallback => [
+                    getSession(self).queueDialog(handleClose => [
                       SetFeatureHeightDlg,
-                      { model: self, handleClose: doneCallback },
+                      { model: self, handleClose },
                     ])
                   },
                 },
@@ -508,9 +548,9 @@ export function SharedLinearPileupDisplayMixin(
             {
               label: 'Set max height...',
               onClick: () => {
-                getSession(self).queueDialog(doneCallback => [
+                getSession(self).queueDialog(handleClose => [
                   SetMaxHeightDlg,
-                  { model: self, handleClose: doneCallback },
+                  { model: self, handleClose },
                 ])
               },
             },
@@ -525,66 +565,16 @@ export function SharedLinearPileupDisplayMixin(
     }))
     .actions(self => ({
       afterAttach() {
-        createAutorun(
-          self,
-          async () => {
-            const view = getContainingView(self) as LGV
-            if (!self.autorunReady) {
-              return
-            }
-
-            const { colorBy } = self
-            const { staticBlocks } = view
-            if (colorBy?.tag) {
-              const vals = await getUniqueTagValues(self, colorBy, staticBlocks)
-              self.updateColorTagMap(vals)
-            }
-            self.setTagsReady(true)
-          },
-          { delay: 1000 },
-        )
-
-        // autorun synchronizes featureUnderMouse with featureIdUnderMouse
-        // asynchronously. this is needed due to how we do not serialize all
-        // features from the BAM/CRAM over the rpc
-        addDisposer(
-          self,
-          autorun(async () => {
-            const session = getSession(self)
-            try {
-              const featureId = self.featureIdUnderMouse
-              if (self.featureUnderMouse?.id() !== featureId) {
-                if (!featureId) {
-                  self.setFeatureUnderMouse(undefined)
-                } else {
-                  const sessionId = getRpcSessionId(self)
-                  const view = getContainingView(self)
-                  const { feature } = (await session.rpcManager.call(
-                    sessionId,
-                    'CoreGetFeatureDetails',
-                    {
-                      featureId,
-                      sessionId,
-                      layoutId: view.id,
-                      rendererType: 'PileupRenderer',
-                    },
-                  )) as { feature: SimpleFeatureSerialized }
-
-                  // check featureIdUnderMouse is still the same as the
-                  // feature.id that was returned e.g. that the user hasn't
-                  // moused over to a new position during the async operation
-                  // above
-                  if (self.featureIdUnderMouse === feature.uniqueId) {
-                    self.setFeatureUnderMouse(new SimpleFeature(feature))
-                  }
-                }
-              }
-            } catch (e) {
-              console.error(e)
-              session.notify(`${e}`, 'error')
-            }
-          }),
-        )
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        ;(async () => {
+          try {
+            const { linearPileupAfterAttach } = await import('./afterAttach')
+            linearPileupAfterAttach(self)
+          } catch (e) {
+            self.setError(e)
+            console.error(e)
+          }
+        })()
       },
     }))
 }

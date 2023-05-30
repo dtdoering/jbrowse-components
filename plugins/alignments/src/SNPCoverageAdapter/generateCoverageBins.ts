@@ -38,7 +38,7 @@ export default async function generateCoverageBins(
   features: Feature[],
   region: Region,
   opts: { bpPerPx?: number; colorBy?: { type: string; tag?: string } },
-  fetchSequence: (arg: Region) => Promise<string>,
+  fetchSequence: (arg: Region) => Promise<string | undefined>,
 ) {
   const { colorBy } = opts
   const extendedRegion = {

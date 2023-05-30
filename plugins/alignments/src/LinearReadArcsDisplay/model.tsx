@@ -100,14 +100,9 @@ function stateModelFactory(configSchema: AnyConfigurationSchemaType) {
       /**
        * #action
        */
-      setLastDrawnOffsetPx(n: number) {
-        self.lastDrawnOffsetPx = n
-      },
-      /**
-       * #action
-       */
-      setLastDrawnBpPerPx(n: number) {
-        self.lastDrawnBpPerPx = n
+      setLastDrawn(offsetPx: number, bpPerPx: number) {
+        self.lastDrawnOffsetPx = offsetPx
+        self.lastDrawnBpPerPx = bpPerPx
       },
       /**
        * #action
@@ -325,8 +320,8 @@ function stateModelFactory(configSchema: AnyConfigurationSchemaType) {
         rasterizeLayers?: boolean
       }): Promise<React.ReactNode> {
         const { renderSvg } = await import('../shared/renderSvg')
-        const { drawFeats } = await import('./drawFeats')
-        return renderSvg(self as LinearReadArcsDisplayModel, opts, drawFeats)
+        const { drawArcs } = await import('./drawArcs')
+        return renderSvg(self as LinearReadArcsDisplayModel, opts, drawArcs)
       },
     }))
     .actions(self => ({
@@ -334,9 +329,8 @@ function stateModelFactory(configSchema: AnyConfigurationSchemaType) {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         ;(async () => {
           try {
-            const { doAfterAttach } = await import('../shared/afterAttach')
-            const { drawFeats } = await import('./drawFeats')
-            doAfterAttach(self, drawFeats)
+            const { doArcsAfterAttach } = await import('./doArcsAfterAttach')
+            doArcsAfterAttach(self)
           } catch (e) {
             console.error(e)
             self.setError(e)

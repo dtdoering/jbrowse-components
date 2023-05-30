@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import { clamp } from '@jbrowse/core/util'
+import { Feature, clamp, getSession } from '@jbrowse/core/util'
 
 // locals
-import { LayoutRecord } from './model'
+import { BreakpointViewModel, LayoutRecord } from './model'
+import { AnyConfigurationModel, getConf } from '@jbrowse/core/configuration'
 
 type LGV = LinearGenomeViewModel
 
@@ -86,4 +87,29 @@ export function intersect<T>(
   const ids = new Set(a2.map(elt => cb(elt)))
   const a12 = a1.filter(value => ids.has(cb(value)))
   return rest.length === 0 ? a12 : intersect(cb, a12, ...rest)
+}
+
+export async function getBlockFeatures(
+  model: BreakpointViewModel,
+  track: { configuration: AnyConfigurationModel },
+) {
+  const { views } = model
+  const { rpcManager, assemblyManager } = getSession(model)
+  const assemblyName = model.views[0].assemblyNames[0]
+  const assembly = await assemblyManager.waitForAssembly(assemblyName)
+  if (!assembly) {
+    return undefined // throw new Error(`assembly not found: "${assemblyName}"`)
+  }
+  const sessionId = track.configuration.trackId
+  return Promise.all(
+    views.map(async view =>
+      (
+        (await rpcManager.call(sessionId, 'CoreGetFeatures', {
+          adapterConfig: getConf(track, ['adapter']),
+          sessionId,
+          regions: view.staticBlocks.contentBlocks,
+        })) as Feature[][]
+      ).flat(),
+    ),
+  )
 }

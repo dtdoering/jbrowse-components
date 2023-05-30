@@ -2,7 +2,7 @@ import { BaseFeatureDataAdapter } from '@jbrowse/core/data_adapters/BaseAdapter'
 import { Feature, AugmentedRegion } from '@jbrowse/core/util'
 import { toArray } from 'rxjs/operators'
 import { firstValueFrom } from 'rxjs'
-import { IAnyStateTreeNode, addDisposer, isAlive } from 'mobx-state-tree'
+import { addDisposer, isAlive } from 'mobx-state-tree'
 import { IAutorunOptions, autorun } from 'mobx'
 
 // get tag from BAM or CRAM feature, where CRAM uses feature.get('tags') and
@@ -108,7 +108,7 @@ export async function fetchSequence(
       })
       .pipe(toArray()),
   )
-  return feats[0]?.get('seq')
+  return feats[0]?.get('seq') as string | undefined
 }
 
 // has to check underlying C-G (aka CpG) on the reference sequence
@@ -129,7 +129,9 @@ export const modificationColors = {
   b: 'rgb(202, 71, 47)',
 } as Record<string, string | undefined>
 
-type DisplayModel = IAnyStateTreeNode & { setError: (arg: unknown) => void }
+interface DisplayModel {
+  setError: (arg: unknown) => void
+}
 
 export function createAutorun(
   self: DisplayModel,

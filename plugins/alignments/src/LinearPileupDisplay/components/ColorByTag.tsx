@@ -9,7 +9,7 @@ import {
 } from '@mui/material'
 import { Dialog } from '@jbrowse/core/ui'
 
-function ColorByTagDlg(props: {
+const ColorByTagDialog = observer(function (props: {
   model: { setColorScheme: Function }
   handleClose: () => void
 }) {
@@ -56,6 +56,6 @@ function ColorByTagDlg(props: {
       </DialogContent>
     </Dialog>
   )
-}
+})
 
-export default observer(ColorByTagDlg)
+export default ColorByTagDialog

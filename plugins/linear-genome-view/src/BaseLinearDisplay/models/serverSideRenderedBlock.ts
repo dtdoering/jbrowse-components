@@ -234,8 +234,8 @@ export function renderBlockData(
     const renderProps = display.renderProps()
     const { config } = renderProps
 
-    // This line is to trigger the mobx reaction when the config changes
-    // It won't trigger the reaction if it doesn't think we're accessing it
+    // This line is to trigger the mobx reaction when the config changes. It
+    // won't trigger the reaction if it doesn't think we're accessing it
     readConfObject(config)
 
     const sessionId = getRpcSessionId(display)

@@ -8,6 +8,12 @@ import { observer } from 'mobx-react'
 import { LinearReadCloudDisplayModel } from '../LinearReadCloudDisplay/model'
 import { LinearReadArcsDisplayModel } from '../LinearReadArcsDisplay/model'
 import { getContainingView } from '@jbrowse/core/util'
+import { LinearPileupDisplayModel } from '../LinearPileupDisplay/model'
+
+type AlignmentsModel =
+  | LinearReadArcsDisplayModel
+  | LinearReadCloudDisplayModel
+  | LinearPileupDisplayModel
 
 const useStyles = makeStyles()(theme => {
   const bg = theme.palette.action.disabledBackground
@@ -30,7 +36,7 @@ export default observer(function ({
   model,
   children,
 }: {
-  model: LinearReadArcsDisplayModel | LinearReadCloudDisplayModel
+  model: AlignmentsModel
   children?: React.ReactNode
 }) {
   const { error, regionTooLarge } = model
@@ -39,7 +45,7 @@ export default observer(function ({
       message={`${error}`}
       severity="error"
       buttonText="Reload"
-      action={model.reload}
+      action={() => model.reload()}
     />
   ) : regionTooLarge ? (
     model.regionCannotBeRendered()
@@ -52,27 +58,23 @@ const DataDisplay = observer(function ({
   model,
   children,
 }: {
-  model: LinearReadArcsDisplayModel | LinearReadCloudDisplayModel
+  model: AlignmentsModel
   children?: React.ReactNode
 }) {
-  const { drawn, loading } = model
+  const { drawn, loading, lastDrawnOffsetPx } = model
   const view = getContainingView(model)
-  const left = (model.lastDrawnOffsetPx || 0) - view.offsetPx
+  const left = Math.max(0, lastDrawnOffsetPx || 0) - view.offsetPx
   return (
     // this data-testid is located here because changing props on the canvas
     // itself is very sensitive to triggering ref invalidation
     <div data-testid={`drawn-${drawn}`}>
       <div style={{ position: 'absolute', left }}>{children}</div>
-      {left !== 0 || loading ? <LoadingBar model={model} /> : null}
+      {loading ? <LoadingBar model={model} /> : null}
     </div>
   )
 })
 
-const LoadingBar = observer(function ({
-  model,
-}: {
-  model: LinearReadArcsDisplayModel | LinearReadCloudDisplayModel
-}) {
+const LoadingBar = observer(function ({ model }: { model: AlignmentsModel }) {
   const { classes } = useStyles()
   const { message } = model
   return (

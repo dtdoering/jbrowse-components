@@ -1,12 +1,22 @@
 import { getContainingView } from '@jbrowse/core/util'
-import { createAutorun } from '../util'
-import { fetchChains } from './fetchChains'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import { IAnyStateTreeNode } from 'mobx-state-tree'
+
+// locals
+import { createAutorun } from '../util'
 
 type LGV = LinearGenomeViewModel
 
-export function doAfterAttach<T extends IAnyStateTreeNode>(
+interface AnyDisplay {
+  ref: HTMLCanvasElement | null
+  loading: boolean
+  height: number
+  lastDrawnBpPerPx: number | undefined
+  lastDrawnOffsetPx: number | undefined
+  setLastDrawn: (offsetPx: number, bpPerPx: number) => void
+  setError: (e: unknown) => void
+}
+
+export function drawTrackAutorun<T extends AnyDisplay>(
   self: T,
   cb: (
     self: T,
@@ -15,14 +25,6 @@ export function doAfterAttach<T extends IAnyStateTreeNode>(
     height: number,
   ) => void,
 ) {
-  createAutorun(
-    self,
-    async () => {
-      await fetchChains(self)
-    },
-    { delay: 1000 },
-  )
-
   function draw(view: LGV) {
     const canvas = self.ref
     if (!canvas) {
@@ -34,16 +36,14 @@ export function doAfterAttach<T extends IAnyStateTreeNode>(
       return
     }
 
-    if (!self.chainData) {
+    if (self.loading) {
       return
     }
 
-    ctx.clearRect(0, 0, canvas.width, self.height * 2)
-    ctx.resetTransform()
-    ctx.scale(2, 2)
+    // ctx.clearRect(0, 0, canvas.width, self.height * 2)
+    // ctx.resetTransform()
+    // ctx.scale(2, 2)
     cb(self, ctx, canvas.width, self.height)
-    self.setLastDrawnOffsetPx(view.offsetPx)
-    self.setLastDrawnBpPerPx(view.bpPerPx)
   }
 
   // first autorun instantly draws if bpPerPx changes
@@ -61,6 +61,6 @@ export function doAfterAttach<T extends IAnyStateTreeNode>(
       const view = getContainingView(self) as LGV
       draw(view)
     },
-    { delay: 1000 },
+    { delay: 500 },
   )
 }

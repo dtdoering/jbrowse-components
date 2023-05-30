@@ -1,8 +1,10 @@
-import configSchemaFactory from './configSchema'
-import modelFactory from './model'
+import { lazy } from 'react'
 import DisplayType from '@jbrowse/core/pluggableElementTypes/DisplayType'
 import PluginManager from '@jbrowse/core/PluginManager'
-import { BaseLinearDisplayComponent } from '@jbrowse/plugin-linear-genome-view'
+
+// locals
+import stateModelFactory from './model'
+import configSchemaFactory from './configSchema'
 
 export default function register(pluginManager: PluginManager) {
   pluginManager.addDisplayType(() => {
@@ -11,11 +13,11 @@ export default function register(pluginManager: PluginManager) {
       name: 'LinearPileupDisplay',
       displayName: 'Pileup display',
       configSchema,
-      stateModel: modelFactory(configSchema),
+      stateModel: stateModelFactory(configSchema),
       subDisplay: { type: 'LinearAlignmentsDisplay', lowerPanel: true },
       trackType: 'AlignmentsTrack',
       viewType: 'LinearGenomeView',
-      ReactComponent: BaseLinearDisplayComponent,
+      ReactComponent: lazy(() => import('./components/ReactComponent')),
     })
   })
 }
