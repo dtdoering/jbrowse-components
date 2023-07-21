@@ -72,11 +72,9 @@ export class RemoteFileWithRangeCache extends RemoteFile {
         const [, start, end] = rangeParse
         const s = Number.parseInt(start, 10)
         const e = Number.parseInt(end, 10)
-        console.log('getRange start', url, s, e - s + 1)
         const response = (await globalRangeCache.getRange(url, s, e - s + 1, {
           signal: init && init.signal,
         })) as BinaryRangeResponse
-        console.log('getRange end', url, s, e - s + 1)
         const { headers } = response
         return new Response(response.buffer, { status: 206, headers })
       }
@@ -90,7 +88,6 @@ export class RemoteFileWithRangeCache extends RemoteFile {
     end: number,
     options: { headers?: HeadersInit; signal?: AbortSignal } = {},
   ): Promise<BinaryRangeResponse> {
-    console.log('fetchBinaryRange', url, start, end, options)
     const requestDate = new Date()
     const requestHeaders = {
       ...options.headers,
