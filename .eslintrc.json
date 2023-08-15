@@ -5,7 +5,6 @@
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:monorepo/recommended",
     "plugin:prettier/recommended",
     "plugin:unicorn/recommended",
     "react-app"
@@ -45,7 +44,9 @@
     "testing-library/prefer-screen-queries": 0,
 
     "unicorn/no-new-array": 0,
+    "unicorn/no-empty-file": 0,
     "unicorn/prefer-type-error": 0,
+    "unicorn/prefer-modern-math-apis": 0,
     "unicorn/prefer-node-protocol": 0,
     "unicorn/no-unreadable-array-destructuring": 0,
     "unicorn/no-abusive-eslint-disable": 0,
@@ -98,7 +99,6 @@
 
     "import/no-extraneous-dependencies": "error",
     "import/no-anonymous-default-export": "off",
-    "monorepo/no-internal-import": "off",
     "prettier/prettier": "warn",
 
     "react/no-danger": "warn",
@@ -136,6 +136,7 @@
     {
       "files": [
         "**/test/**",
+        "**/tests/**",
         "**/*.test.[t,j]s",
         "**/*.test.[t,j]sx",
         "**/rescripts/*",
@@ -154,7 +155,8 @@
         "test": true
       },
       "rules": {
-        "import/no-extraneous-dependencies": "off"
+        "import/no-extraneous-dependencies": "off",
+        "@typescript-eslint/no-non-null-assertion": "off"
       }
     },
     {

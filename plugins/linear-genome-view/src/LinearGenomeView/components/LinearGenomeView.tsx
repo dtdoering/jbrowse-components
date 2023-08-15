@@ -1,15 +1,19 @@
-import React from 'react'
+import React, { lazy, useEffect, useRef } from 'react'
 import { Button, Paper, Typography } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
-import { TrackSelector as TrackSelectorIcon } from '@jbrowse/core/ui/Icons'
 import { LoadingEllipses } from '@jbrowse/core/ui'
 import { observer } from 'mobx-react'
+
+// icons
+import { TrackSelector as TrackSelectorIcon } from '@jbrowse/core/ui/Icons'
 
 // locals
 import { LinearGenomeViewModel } from '..'
 import TrackContainer from './TrackContainer'
 import TracksContainer from './TracksContainer'
-import ImportForm from './ImportForm'
+import { getSession } from '@jbrowse/core/util'
+
+const ImportForm = lazy(() => import('./ImportForm'))
 
 type LGV = LinearGenomeViewModel
 
@@ -24,6 +28,26 @@ const useStyles = makeStyles()(theme => ({
 const LinearGenomeView = observer(({ model }: { model: LGV }) => {
   const { tracks, error, initialized, hasDisplayedRegions } = model
   const { classes } = useStyles()
+  const ref = useRef<HTMLDivElement>(null)
+  const session = getSession(model)
+
+  useEffect(() => {
+    // sets the focused view id based on a click within the LGV; necessary for subviews to be focused properly
+    function handleSelectView(e: Event) {
+      if (e.target instanceof Element) {
+        if (ref?.current && ref.current.contains(e.target)) {
+          session.setFocusedViewId(model.id)
+        }
+      }
+    }
+
+    document.addEventListener('mousedown', handleSelectView)
+    document.addEventListener('keydown', handleSelectView)
+    return () => {
+      document.removeEventListener('mousedown', handleSelectView)
+      document.removeEventListener('keydown', handleSelectView)
+    }
+  }, [ref, session, model])
 
   if (!initialized && !error) {
     return <LoadingEllipses variant="h6" />
@@ -36,7 +60,7 @@ const LinearGenomeView = observer(({ model }: { model: LGV }) => {
   const HeaderComponent = model.HeaderComponent()
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative' }} ref={ref}>
       <HeaderComponent model={model} />
       <MiniControlsComponent model={model} />
       <TracksContainer model={model}>

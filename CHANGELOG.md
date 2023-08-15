@@ -1,3 +1,276 @@
+yarn run v1.22.18 $ lerna-changelog 2.6.3
+
+## Unreleased (2023-08-12)
+
+#### :rocket: Enhancement
+
+- Other
+  - [#3830](https://github.com/GMOD/jbrowse-components/pull/3830) Refactors LGV
+    synteny and pileup with shared mixins
+    ([@carolinebridge-oicr](https://github.com/carolinebridge-oicr))
+  - [#3811](https://github.com/GMOD/jbrowse-components/pull/3811) Add ability to
+    show/hide all tracks in category ([@cmdcolin](https://github.com/cmdcolin))
+- `app-core`
+  - [#3810](https://github.com/GMOD/jbrowse-components/pull/3810) Add sorting
+    and collapsing options to the hierarchical track selector
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3827](https://github.com/GMOD/jbrowse-components/pull/3827) Add check for
+    document.activeElement == INPUT before undo/redo
+    ([@cmdcolin](https://github.com/cmdcolin))
+
+#### :bug: Bug Fix
+
+- [#3839](https://github.com/GMOD/jbrowse-components/pull/3839) Fix bug where
+  multi-quantitative tracks plotted incorrectly for some bigwigs with empty
+  regions ([@cmdcolin](https://github.com/cmdcolin))
+- [#3837](https://github.com/GMOD/jbrowse-components/pull/3837) Fix text layout
+  in dotplots with long coordinate strings
+  ([@cmdcolin](https://github.com/cmdcolin))
+- [#3825](https://github.com/GMOD/jbrowse-components/pull/3825) Fix SVG export
+  compatibility by removing rgba strings
+  ([@cmdcolin](https://github.com/cmdcolin))
+- [#3814](https://github.com/GMOD/jbrowse-components/pull/3814) Fix suspense
+  fallback to track container for lazy loaded display components
+  ([@cmdcolin](https://github.com/cmdcolin))
+- [#3808](https://github.com/GMOD/jbrowse-components/pull/3808) Fix track
+  ordering of hierarchical track selector to more closely match the config.json
+  ([@cmdcolin](https://github.com/cmdcolin))
+- [#3806](https://github.com/GMOD/jbrowse-components/pull/3806) Fix a bug on the
+  BookmarkWidget mui data grid where labels were not saving
+  ([@carolinebridge-oicr](https://github.com/carolinebridge-oicr))
+- [#3804](https://github.com/GMOD/jbrowse-components/pull/3804) Fix version
+  missing from about menu in @jbrowse/react-app
+  ([@cmdcolin](https://github.com/cmdcolin))
+
+#### :house: Internal
+
+- [#3818](https://github.com/GMOD/jbrowse-components/pull/3818) Miscellaneous
+  plugin store code refactoring ([@cmdcolin](https://github.com/cmdcolin))
+
+#### Committers: 3
+
+- Caroline Bridge
+  ([@carolinebridge-oicr](https://github.com/carolinebridge-oicr))
+- Colin Diesh ([@cmdcolin](https://github.com/cmdcolin))
+- Robert Buels ([@rbuels](https://github.com/rbuels)) Done in 1.50s.
+
+yarn run v1.22.18 $ lerna-changelog 2.6.2
+
+## Unreleased (2023-07-12)
+
+#### :rocket: Enhancement
+
+- [#3796](https://github.com/GMOD/jbrowse-components/pull/3796) Allow workers to
+  load CJS plugins ([@garrettjstevens](https://github.com/garrettjstevens))
+- [#3783](https://github.com/GMOD/jbrowse-components/pull/3783) Add ability for
+  track selector button in synteny view to select individual views
+  ([@cmdcolin](https://github.com/cmdcolin))
+- [#3452](https://github.com/GMOD/jbrowse-components/pull/3452) Use notarytool
+  for macOS desktop signing ([@cmdcolin](https://github.com/cmdcolin))
+- [#3766](https://github.com/GMOD/jbrowse-components/pull/3766) Add nextjs
+  circular genome view demo ([@cmdcolin](https://github.com/cmdcolin))
+
+#### :bug: Bug Fix
+
+- Other
+  - [#3798](https://github.com/GMOD/jbrowse-components/pull/3798) Fix VCF
+    feature starting at 1-based 1 ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3775](https://github.com/GMOD/jbrowse-components/pull/3775) Fix stranded
+    RNA-seq rendering and rename option Color by -> "First-of-pair strand"
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3758](https://github.com/GMOD/jbrowse-components/pull/3758) Adds safety
+    checks on AlignmentsDisplay properties to avoid undefined rendering
+    ([@carolinebridge-oicr](https://github.com/carolinebridge-oicr))
+  - [#3770](https://github.com/GMOD/jbrowse-components/pull/3770) Fix potential
+    issue with display searchFeatureByID being undefined
+    ([@cmdcolin](https://github.com/cmdcolin))
+- `core`
+  - [#3784](https://github.com/GMOD/jbrowse-components/pull/3784) Fix synteny
+    rubberband tooltips when views are exactly the same
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3782](https://github.com/GMOD/jbrowse-components/pull/3782) Fix crash on
+    color picker component using debounce on color property
+    ([@carolinebridge-oicr](https://github.com/carolinebridge-oicr))
+  - [#3767](https://github.com/GMOD/jbrowse-components/pull/3767) Check session
+    tracks for text search adapters
+    ([@garrettjstevens](https://github.com/garrettjstevens))
+- `app-core`, `core`, `embedded-core`, `product-core`, `text-indexing`,
+  `web-core`
+  - [#3771](https://github.com/GMOD/jbrowse-components/pull/3771) Use
+    inlineSourceMaps for tsc builds and other misc changes
+    ([@cmdcolin](https://github.com/cmdcolin))
+
+#### :house: Internal
+
+- Other
+  - [#3794](https://github.com/GMOD/jbrowse-components/pull/3794) Move embedded
+    demos to individual repos ([@cmdcolin](https://github.com/cmdcolin))
+- `core`, `product-core`
+  - [#3786](https://github.com/GMOD/jbrowse-components/pull/3786) Centralize
+    rpcWorker in product-core ([@cmdcolin](https://github.com/cmdcolin))
+
+#### Committers: 3
+
+- Caroline Bridge
+  ([@carolinebridge-oicr](https://github.com/carolinebridge-oicr))
+- Colin Diesh ([@cmdcolin](https://github.com/cmdcolin))
+- Garrett Stevens ([@garrettjstevens](https://github.com/garrettjstevens)) Done
+  in 1.55s.
+
+yarn run v1.22.18 $ lerna-changelog 2.6.1
+
+## Unreleased (2023-06-08)
+
+#### :rocket: Enhancement
+
+- Other
+  - [#3743](https://github.com/GMOD/jbrowse-components/pull/3743) Create mixin
+    for shared code between LinearWiggleDisplay and MultiWiggleLinearDisplay
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3711](https://github.com/GMOD/jbrowse-components/pull/3711) Allow synteny
+    data adapters to open files larger than 512Mb
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3639](https://github.com/GMOD/jbrowse-components/pull/3639) Add button to
+    bookmark in jbrowse-web share dialog
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3631](https://github.com/GMOD/jbrowse-components/pull/3631) Add BEDPE add
+    track workflow, avoid showing "Add track" when disabled
+    ([@carolinebridge-oicr](https://github.com/carolinebridge-oicr))
+  - [#3700](https://github.com/GMOD/jbrowse-components/pull/3700) Render
+    alignment track arcs instantly after bpPerPx change
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3695](https://github.com/GMOD/jbrowse-components/pull/3695) Reduce
+    re-drawing on alignments track paired read arcs/cloud display types
+    ([@cmdcolin](https://github.com/cmdcolin))
+- `core`
+  - [#3725](https://github.com/GMOD/jbrowse-components/pull/3725) Filter tracks
+    that match all view.assemblyNames in multi-assembly track selector modes
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3531](https://github.com/GMOD/jbrowse-components/pull/3531) Add
+    @jbrowse/react-app embedded component
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3653](https://github.com/GMOD/jbrowse-components/pull/3653) Evaluate
+    extension point on track config pre-process snapshot
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3706](https://github.com/GMOD/jbrowse-components/pull/3706) Miscellaneous
+    alignments arc/cloud fixes ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3698](https://github.com/GMOD/jbrowse-components/pull/3698) Add column
+    resizers to the variant ANN/CSQ panels
+    ([@cmdcolin](https://github.com/cmdcolin))
+- `app-core`, `product-core`, `web-core`
+  - [#3531](https://github.com/GMOD/jbrowse-components/pull/3531) Add
+    @jbrowse/react-app embedded component
+    ([@cmdcolin](https://github.com/cmdcolin))
+- `__mocks__`
+  - [#3707](https://github.com/GMOD/jbrowse-components/pull/3707) Improved read
+    cloud display for long reads with inversions
+    ([@cmdcolin](https://github.com/cmdcolin))
+
+#### :bug: Bug Fix
+
+- `core`
+  - [#3749](https://github.com/GMOD/jbrowse-components/pull/3749) Avoid
+    re-prompting a user login when refresh token is processed
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3572](https://github.com/GMOD/jbrowse-components/pull/3572) Add OAuth and
+    HTTP BasicAuth servers for local testing, fix some OAuth flows
+    ([@garrettjstevens](https://github.com/garrettjstevens))
+  - [#3708](https://github.com/GMOD/jbrowse-components/pull/3708) Add
+    removable-media to jbrowse desktop snap
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3687](https://github.com/GMOD/jbrowse-components/pull/3687) Take into
+    account ML tag when showing MM tag on alignments, misc refactoring
+    ([@cmdcolin](https://github.com/cmdcolin))
+- Other
+  - [#3747](https://github.com/GMOD/jbrowse-components/pull/3747) Fix blank
+    lines in GFF crashing text-index ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3739](https://github.com/GMOD/jbrowse-components/pull/3739) Fix specifying
+    the assemblyNames config slot on add-connection CLI
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3631](https://github.com/GMOD/jbrowse-components/pull/3631) Add BEDPE add
+    track workflow, avoid showing "Add track" when disabled
+    ([@carolinebridge-oicr](https://github.com/carolinebridge-oicr))
+  - [#3667](https://github.com/GMOD/jbrowse-components/pull/3667) Fix horizontal
+    flip functionality for Hi-C display
+    ([@studentshivang](https://github.com/studentshivang))
+  - [#3703](https://github.com/GMOD/jbrowse-components/pull/3703) Fix rendering
+    error in alignments tracks when filtering by tag in CRAM file
+    ([@Lilas-w](https://github.com/Lilas-w))
+  - [#3694](https://github.com/GMOD/jbrowse-components/pull/3694) Fix ability to
+    filter certain fields in BAM/CRAM files
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3691](https://github.com/GMOD/jbrowse-components/pull/3691) Fix breakpoint
+    split view alignment connections not pointing at right position in v2.5.0
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3686](https://github.com/GMOD/jbrowse-components/pull/3686) Fix jbrowse
+    create/jbrowse upgrade CLI intermittent failures
+    ([@cmdcolin](https://github.com/cmdcolin))
+- `product-core`, `web-core`
+  - [#3738](https://github.com/GMOD/jbrowse-components/pull/3738) Don't throw on
+    UCSC connection containing assemblies not matching connection->assemblyNames
+    config ([@cmdcolin](https://github.com/cmdcolin))
+- `app-core`, `core`, `embedded-core`
+  - [#3731](https://github.com/GMOD/jbrowse-components/pull/3731) Fix view menu
+    going off screen in some cases ([@cmdcolin](https://github.com/cmdcolin))
+- `app-core`
+  - [#3713](https://github.com/GMOD/jbrowse-components/pull/3713) Fix centering
+    of the ImportForm on SV inspector ([@cmdcolin](https://github.com/cmdcolin))
+
+#### :memo: Documentation
+
+- Other
+  - [#3752](https://github.com/GMOD/jbrowse-components/pull/3752) Add storybook
+    example for fetching features currently in view
+    ([@cmdcolin](https://github.com/cmdcolin))
+  - [#3732](https://github.com/GMOD/jbrowse-components/pull/3732) Add JBrowse R
+    shiny app demo
+    ([@carolinebridge-oicr](https://github.com/carolinebridge-oicr))
+  - [#3693](https://github.com/GMOD/jbrowse-components/pull/3693) Remove package
+    table from release blogposts ([@cmdcolin](https://github.com/cmdcolin))
+- `core`, `embedded-core`, `product-core`
+  - [#3704](https://github.com/GMOD/jbrowse-components/pull/3704) Organize
+    autogenerated docs into categories
+    ([@cmdcolin](https://github.com/cmdcolin))
+
+#### :house: Internal
+
+- `app-core`, `core`, `product-core`, `text-indexing`
+  - [#3740](https://github.com/GMOD/jbrowse-components/pull/3740) Bump electron,
+    proxy-agent, fontsource-roboto, etc. and update SnackbarMessage from typed
+    array to object ([@cmdcolin](https://github.com/cmdcolin))
+- `core`
+  - [#3741](https://github.com/GMOD/jbrowse-components/pull/3741) Distinguish
+    between SessionWithConnections and SessionWithConnectionEditing
+    ([@cmdcolin](https://github.com/cmdcolin))
+- Other
+  - [#3734](https://github.com/GMOD/jbrowse-components/pull/3734) PileupRenderer
+    refactor ([@cmdcolin](https://github.com/cmdcolin))
+- `app-core`, `core`, `product-core`, `web-core`
+  - [#3717](https://github.com/GMOD/jbrowse-components/pull/3717) More
+    modularizing of shared app code ([@cmdcolin](https://github.com/cmdcolin))
+- `product-core`
+  - [#3709](https://github.com/GMOD/jbrowse-components/pull/3709) Silence
+    console warn in CopyAndDelete test
+    ([@cmdcolin](https://github.com/cmdcolin))
+- `app-core`, `core`, `embedded-core`, `product-core`, `text-indexing`
+  - [#3701](https://github.com/GMOD/jbrowse-components/pull/3701) Create
+    app-core and embedded-core packages
+    ([@cmdcolin](https://github.com/cmdcolin))
+- `core`, `product-core`
+  - [#3661](https://github.com/GMOD/jbrowse-components/pull/3661) Create
+    packages/product-core containing shared code between the various products
+    ([@rbuels](https://github.com/rbuels))
+
+#### Committers: 6
+
+- Caroline Bridge
+  ([@carolinebridge-oicr](https://github.com/carolinebridge-oicr))
+- Colin Diesh ([@cmdcolin](https://github.com/cmdcolin))
+- Garrett Stevens ([@garrettjstevens](https://github.com/garrettjstevens))
+- Robert Buels ([@rbuels](https://github.com/rbuels))
+- Shivang Dwivedi ([@studentshivang](https://github.com/studentshivang))
+- [@Lilas-w](https://github.com/Lilas-w) Done in 2.84s.
+
 ## 2.5.0 (2023-05-04)
 
 <details><summary>Packages in this release</summary>

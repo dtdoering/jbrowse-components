@@ -3,7 +3,7 @@ import { getConf, AnyConfigurationModel } from '@jbrowse/core/configuration'
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes/models'
 import { Region } from '@jbrowse/core/util/types'
 import { ElementId, Region as MUIRegion } from '@jbrowse/core/util/types/mst'
-import { MenuItem, ReturnToImportFormDialog } from '@jbrowse/core/ui'
+import { MenuItem } from '@jbrowse/core/ui'
 import {
   assembleLocString,
   clamp,
@@ -51,21 +51,19 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'
 import ZoomInIcon from '@mui/icons-material/ZoomIn'
 import MenuOpenIcon from '@mui/icons-material/MenuOpen'
 
-// locals
-import { renderToSvg } from './svgcomponents/SVGLinearGenomeView'
-
-import ExportSvgDlg from './components/ExportSvgDialog'
 import MiniControls from './components/MiniControls'
 import Header from './components/Header'
 import { generateLocations, parseLocStrings } from './util'
 
 // lazies
+const ReturnToImportFormDialog = lazy(
+  () => import('@jbrowse/core/ui/ReturnToImportFormDialog'),
+)
 const SequenceSearchDialog = lazy(
   () => import('./components/SequenceSearchDialog'),
 )
-
+const ExportSvgDialog = lazy(() => import('./components/ExportSvgDialog'))
 const GetSequenceDialog = lazy(() => import('./components/GetSequenceDialog'))
-
 const SearchResultsDialog = lazy(
   () => import('./components/SearchResultsDialog'),
 )
@@ -131,6 +129,7 @@ export const WIDGET_HEIGHT = 32
 
 /**
  * #stateModel LinearGenomeView
+ * #category view
  */
 export function stateModelFactory(pluginManager: PluginManager) {
   return types
@@ -250,8 +249,7 @@ export function stateModelFactory(pluginManager: PluginManager) {
       // which is basically like an onLoad
       afterDisplayedRegionsSetCallbacks: [] as Function[],
       scaleFactor: 1,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      trackRefs: {} as { [key: string]: any },
+      trackRefs: {} as { [key: string]: HTMLDivElement },
       coarseDynamicBlocks: [] as BaseBlock[],
       coarseTotalBp: 0,
       leftOffset: undefined as undefined | BpOffset,
@@ -622,10 +620,8 @@ export function stateModelFactory(pluginManager: PluginManager) {
       ) {
         getSession(self).queueDialog(handleClose => [
           SearchResultsDialog,
-
           {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            model: self as any,
+            model: self as LinearGenomeViewModel,
             searchResults,
             searchQuery,
             handleClose,
@@ -926,8 +922,10 @@ export function stateModelFactory(pluginManager: PluginManager) {
        * creates an svg export and save using FileSaver
        */
       async exportSvg(opts: ExportSvgOptions = {}) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const html = await renderToSvg(self as any, opts)
+        const { renderToSvg } = await import(
+          './svgcomponents/SVGLinearGenomeView'
+        )
+        const html = await renderToSvg(self as LinearGenomeViewModel, opts)
         const blob = new Blob([html], { type: 'image/svg+xml' })
         saveAs(blob, opts.filename || 'image.svg')
       },
@@ -1056,7 +1054,7 @@ export function stateModelFactory(pluginManager: PluginManager) {
             icon: PhotoCameraIcon,
             onClick: () => {
               getSession(self).queueDialog(handleClose => [
-                ExportSvgDlg,
+                ExportSvgDialog,
                 { model: self, handleClose },
               ])
             },
@@ -1172,10 +1170,10 @@ export function stateModelFactory(pluginManager: PluginManager) {
         /**
          * #getter
          * static blocks are an important concept jbrowse uses to avoid
-         * re-rendering when you scroll to the side. when you horizontally scroll to the
-         * right, old blocks to the left may be removed, and new blocks may be
-         * instantiated on the right. tracks may use the static blocks to render their
-         * data for the region represented by the block
+         * re-rendering when you scroll to the side. when you horizontally
+         * scroll to the right, old blocks to the left may be removed, and new
+         * blocks may be instantiated on the right. tracks may use the static
+         * blocks to render their data for the region represented by the block
          */
         get staticBlocks() {
           const ret = calculateStaticBlocks(self)
@@ -1189,9 +1187,9 @@ export function stateModelFactory(pluginManager: PluginManager) {
         /**
          * #getter
          * dynamic blocks represent the exact coordinates of the currently
-         * visible genome regions on the screen. they are similar to static blocks, but
-         * static blocks can go offscreen while dynamic blocks represent exactly what
-         * is on screen
+         * visible genome regions on the screen. they are similar to static
+         * blocks, but static blocks can go offscreen while dynamic blocks
+         * represent exactly what is on screen
          */
         get dynamicBlocks() {
           return calculateDynamicBlocks(self)
@@ -1207,14 +1205,14 @@ export function stateModelFactory(pluginManager: PluginManager) {
                 ...block,
                 start: Math.floor(block.start),
                 end: Math.ceil(block.end),
-              } as BaseBlock),
+              }) as BaseBlock,
           )
         },
 
         /**
          * #getter
-         * a single "combo-locstring" representing all the regions visible
-         * on the screen
+         * a single "combo-locstring" representing all the regions visible on
+         * the screen
          */
         get visibleLocStrings() {
           return calculateVisibleLocStrings(this.dynamicBlocks.contentBlocks)
@@ -1346,8 +1344,8 @@ export function stateModelFactory(pluginManager: PluginManager) {
        * Navigate to a location based on its refName and optionally start, end,
        * and assemblyName. Will not try to change displayed regions, use
        * `navToLocations` instead. Only navigates to a location if it is
-       * entirely within a displayedRegion. Navigates to the first matching location
-       * encountered.
+       * entirely within a displayedRegion. Navigates to the first matching
+       * location encountered.
        *
        * Throws an error if navigation was unsuccessful
        *
@@ -1378,8 +1376,11 @@ export function stateModelFactory(pluginManager: PluginManager) {
         ) {
           throw new Error('found start greater than end')
         }
-        const f1 = locations[0]
-        const f2 = locations[locations.length - 1]
+        const f1 = locations.at(0)
+        const f2 = locations.at(-1)
+        if (!f1 || !f2) {
+          return
+        }
         const a = self.assemblyNames[0]
         const { assemblyManager } = getSession(self)
         const assembly1 = assemblyManager.get(f1.assemblyName || a)

@@ -152,7 +152,7 @@ export default abstract class JBrowseCommand extends Command {
     return fsPromises.readFile(location, { encoding: 'utf8' })
   }
 
-  async readJsonFile(location: string): Promise<Record<string, unknown>> {
+  async readJsonFile<T>(location: string): Promise<T> {
     let contents
     try {
       contents = await fsPromises.readFile(location, { encoding: 'utf8' })
@@ -292,9 +292,8 @@ export default abstract class JBrowseCommand extends Command {
     )
     if (response.ok) {
       const result = (await response.json()) as GithubRelease
-      const file = result?.assets?.find(f =>
-        f.name.includes('jbrowse-web'),
-      )?.browser_download_url
+      const file = result?.assets?.find(f => f.name.includes('jbrowse-web'))
+        ?.browser_download_url
 
       if (!file) {
         this.error(

@@ -167,15 +167,6 @@ export function getNiceDomain({
   return scale.domain() as [number, number]
 }
 
-export function groupBy<T>(array: T[], predicate: (v: T) => string) {
-  const result = {} as { [key: string]: T[] }
-  for (const value of array) {
-    const entry = (result[predicate(value)] ||= [])
-    entry.push(value)
-  }
-  return result
-}
-
 export async function getQuantitativeStats(
   self: {
     adapterConfig: AnyConfigurationModel
@@ -205,7 +196,7 @@ export async function getQuantitativeStats(
   }
 
   if (autoscaleType === 'global' || autoscaleType === 'globalsd') {
-    const results: QuantitativeStats = (await rpcManager.call(
+    const results = (await rpcManager.call(
       sessionId,
       'WiggleGetGlobalQuantitativeStats',
       params,

@@ -103,7 +103,6 @@ export interface AbstractSessionModel extends AbstractViewContainer {
   sessionConnections?: AnyConfigurationModel[]
   connectionInstances?: {
     name: string
-    connectionId: string
     tracks: AnyConfigurationModel[]
     configuration: AnyConfigurationModel
   }[]
@@ -166,6 +165,7 @@ export interface SessionWithWidgets extends AbstractSessionModel {
   minimized: boolean
   visibleWidget?: Widget
   widgets: Map<string, Widget>
+  hideAllWidgets: () => void
   activeWidgets: Map<string, Widget>
   addWidget(
     typeName: string,
@@ -192,14 +192,22 @@ export function isSessionModelWithWidgets(
 ): thing is SessionWithWidgets {
   return isSessionModel(thing) && 'widgets' in thing
 }
-
 interface SessionWithConnections {
-  addConnectionConf: (arg: AnyConfigurationModel) => void
+  makeConnection: (arg: AnyConfigurationModel) => void
 }
-
 export function isSessionModelWithConnections(
   thing: unknown,
 ): thing is SessionWithConnections {
+  return isSessionModel(thing) && 'makeConnection' in thing
+}
+
+interface SessionWithConnectionEditing {
+  addConnectionConf: (arg: AnyConfigurationModel) => void
+}
+
+export function isSessionModelWithConnectionEditing(
+  thing: unknown,
+): thing is SessionWithConnectionEditing {
   return isSessionModel(thing) && 'addConnectionConf' in thing
 }
 
@@ -228,6 +236,13 @@ export function isSelectionContainer(
     'selection' in thing &&
     'setSelection' in thing
   )
+}
+
+/** abstract interface for a session allows applying focus to views and widgets */
+export interface SessionWithFocusedViewAndDrawerWidgets
+  extends SessionWithDrawerWidgets {
+  focusedViewId: string | undefined
+  setFocusedViewId(id: string): void
 }
 
 /** minimum interface that all view state models must implement */
@@ -395,8 +410,30 @@ export function isUriLocation(location: unknown): location is UriLocation {
     !!location.uri
   )
 }
+export function isLocalPathLocation(
+  location: unknown,
+): location is LocalPathLocation {
+  return (
+    typeof location === 'object' &&
+    location !== null &&
+    'localPath' in location &&
+    !!location.localPath
+  )
+}
+
+export function isBlobLocation(location: unknown): location is BlobLocation {
+  return (
+    typeof location === 'object' &&
+    location !== null &&
+    'blobId' in location &&
+    !!location.blobId
+  )
+}
 export class AuthNeededError extends Error {
-  constructor(public message: string, public url: string) {
+  constructor(
+    public message: string,
+    public url: string,
+  ) {
     super(message)
     this.name = 'AuthNeededError'
 
@@ -405,7 +442,10 @@ export class AuthNeededError extends Error {
 }
 
 export class RetryError extends Error {
-  constructor(public message: string, public internetAccountId: string) {
+  constructor(
+    public message: string,
+    public internetAccountId: string,
+  ) {
     super(message)
     this.name = 'RetryError'
   }

@@ -1,6 +1,6 @@
 {
   "name": "@jbrowse/img",
-  "version": "2.5.0",
+  "version": "2.6.3",
   "main": "dist/index.js",
   "module": "esm/index.js",
   "author": "JBrowse Team",
@@ -13,8 +13,7 @@
   },
   "files": [
     "dist",
-    "esm",
-    "src"
+    "esm"
   ],
   "scripts": {
     "test": "cd ../../; jest --env node --testMatch '**/*testmod.js' products/jbrowse-img",
@@ -22,18 +21,18 @@
     "prebuild": "yarn clean",
     "build": "npm-run-all build:*",
     "build:esm": "tsc --build tsconfig.build.esm.json",
-    "build:es5": "tsc --build tsconfig.build.es5.json",
+    "build:commonjs": "tsc --build tsconfig.build.commonjs.json",
     "preversion": "npm run build"
   },
   "dependencies": {
     "@babel/runtime": "^7.17.9",
     "@emotion/cache": "^11.7.1",
     "@emotion/react": "^11.9.0",
-    "@jbrowse/plugin-linear-genome-view": "^2.5.0",
-    "@jbrowse/react-linear-genome-view": "^2.5.0",
+    "@jbrowse/plugin-linear-genome-view": "^2.6.3",
+    "@jbrowse/react-linear-genome-view": "^2.6.3",
     "abortcontroller-polyfill": "^1.7.3",
     "canvas": "^2.9.1",
-    "jsdom": "^21.1.1",
+    "jsdom": "^22.1.0",
     "mobx": "^6.6.0",
     "node-fetch": "^2.6.7",
     "react": "^17.0.0",

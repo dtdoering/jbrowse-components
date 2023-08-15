@@ -7,7 +7,7 @@ exports[`JBrowse model creates with empty snapshot 1`] = `
   "configuration": {},
   "connections": [],
   "defaultSession": {
-    "name": "New session",
+    "name": "New Session",
   },
   "internetAccounts": [],
   "plugins": [],
@@ -450,6 +450,13 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
         },
       },
     },
+    "hierarchical": {
+      "defaultCollapsed": {
+        "categoryNames": [
+          "Methylation",
+        ],
+      },
+    },
     "logoPath": {
       "internetAccountId": undefined,
       "internetAccountPreAuthorization": undefined,
@@ -488,22 +495,7 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
       },
     },
   },
-  "internetAccounts": [
-    {
-      "clientId": "50knr6xrjfc39sk",
-      "description": "Account to access Dropbox files",
-      "internetAccountId": "dropboxOAuth",
-      "name": "Dropbox",
-      "type": "DropboxOAuthInternetAccount",
-    },
-    {
-      "clientId": "109518325434-udfch80a0v70mgu65d5fejqsq5kvhm1b.apps.googleusercontent.com",
-      "description": "Account to access Google Drive files",
-      "internetAccountId": "googleOAuth",
-      "name": "Google Drive",
-      "type": "GoogleDriveOAuthInternetAccount",
-    },
-  ],
+  "internetAccounts": [],
   "plugins": [
     {
       "name": "UMDLocPlugin",
@@ -1517,58 +1509,6 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
       ],
       "name": "wiggle_track xyplot",
       "trackId": "volvox_microarray",
-      "type": "QuantitativeTrack",
-    },
-    {
-      "adapter": {
-        "bigWigLocation": {
-          "internetAccountId": "dropboxOAuth",
-          "internetAccountPreAuthorization": undefined,
-          "locationType": "UriLocation",
-          "uri": "https://www.dropbox.com/s/96wflrzcbmf7nlj/volvox.bw?dl=0",
-        },
-        "type": "BigWigAdapter",
-      },
-      "assemblyNames": [
-        "volvox",
-      ],
-      "category": [
-        "Authentication",
-      ],
-      "displays": [
-        {
-          "displayId": "dropbox_bigwig-LinearWiggleDisplay",
-          "type": "LinearWiggleDisplay",
-        },
-      ],
-      "name": "Dropbox BigWig",
-      "trackId": "dropbox_bigwig",
-      "type": "QuantitativeTrack",
-    },
-    {
-      "adapter": {
-        "bigWigLocation": {
-          "internetAccountId": "googleOAuth",
-          "internetAccountPreAuthorization": undefined,
-          "locationType": "UriLocation",
-          "uri": "https://drive.google.com/file/d/1PIvZCOJioK9eBL1Vuvfa4L_Fv9zTooHk/view?usp=sharing",
-        },
-        "type": "BigWigAdapter",
-      },
-      "assemblyNames": [
-        "volvox",
-      ],
-      "category": [
-        "Authentication",
-      ],
-      "displays": [
-        {
-          "displayId": "google_bigwig-LinearWiggleDisplay",
-          "type": "LinearWiggleDisplay",
-        },
-      ],
-      "name": "Google Drive BigWig",
-      "trackId": "google_bigwig",
       "type": "QuantitativeTrack",
     },
     {
@@ -2760,6 +2700,7 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
       ],
       "category": [
         "BigWig",
+        "XYPlot",
       ],
       "displays": [
         {
@@ -4070,6 +4011,118 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
       "name": "volvox_inv_indels",
       "trackId": "volvox_inv_indels",
       "type": "SyntenyTrack",
+    },
+    {
+      "adapter": {
+        "craiLocation": {
+          "internetAccountId": undefined,
+          "internetAccountPreAuthorization": undefined,
+          "locationType": "UriLocation",
+          "uri": "volvox-inv-pbsim.cram.crai",
+        },
+        "cramLocation": {
+          "internetAccountId": undefined,
+          "internetAccountPreAuthorization": undefined,
+          "locationType": "UriLocation",
+          "uri": "volvox-inv-pbsim.cram",
+        },
+        "sequenceAdapter": {
+          "twoBitLocation": {
+            "locationType": "UriLocation",
+            "uri": "volvox.2bit",
+          },
+          "type": "TwoBitAdapter",
+        },
+        "type": "CramAdapter",
+      },
+      "assemblyNames": [
+        "volvox",
+      ],
+      "category": [
+        "Alignments",
+      ],
+      "displays": [
+        {
+          "displayId": "volvox-inv-pbsim-LinearAlignmentsDisplay",
+          "type": "LinearAlignmentsDisplay",
+        },
+        {
+          "displayId": "volvox-inv-pbsim-LinearPileupDisplay",
+          "type": "LinearPileupDisplay",
+        },
+        {
+          "displayId": "volvox-inv-pbsim-LinearSNPCoverageDisplay",
+          "type": "LinearSNPCoverageDisplay",
+        },
+        {
+          "displayId": "volvox-inv-pbsim-LinearReadArcsDisplay",
+          "type": "LinearReadArcsDisplay",
+        },
+        {
+          "displayId": "volvox-inv-pbsim-LinearReadCloudDisplay",
+          "type": "LinearReadCloudDisplay",
+        },
+      ],
+      "name": "volvox-inv-pbsim",
+      "trackId": "volvox-inv-pbsim",
+      "type": "AlignmentsTrack",
+    },
+    {
+      "adapter": {
+        "bamLocation": {
+          "internetAccountId": undefined,
+          "internetAccountPreAuthorization": undefined,
+          "locationType": "UriLocation",
+          "uri": "paired_end_stranded_rnaseq.bam",
+        },
+        "index": {
+          "location": {
+            "internetAccountId": undefined,
+            "internetAccountPreAuthorization": undefined,
+            "locationType": "UriLocation",
+            "uri": "paired_end_stranded_rnaseq.bam.bai",
+          },
+        },
+        "sequenceAdapter": {
+          "twoBitLocation": {
+            "locationType": "UriLocation",
+            "uri": "volvox.2bit",
+          },
+          "type": "TwoBitAdapter",
+        },
+        "type": "BamAdapter",
+      },
+      "assemblyNames": [
+        "volvox",
+      ],
+      "category": [
+        "Alignments",
+      ],
+      "displays": [
+        {
+          "displayId": "paired_end_stranded_rnaseq-LinearAlignmentsDisplay",
+          "type": "LinearAlignmentsDisplay",
+        },
+        {
+          "displayId": "paired_end_stranded_rnaseq-LinearPileupDisplay",
+          "type": "LinearPileupDisplay",
+        },
+        {
+          "displayId": "paired_end_stranded_rnaseq-LinearSNPCoverageDisplay",
+          "type": "LinearSNPCoverageDisplay",
+        },
+        {
+          "displayId": "paired_end_stranded_rnaseq-LinearReadArcsDisplay",
+          "type": "LinearReadArcsDisplay",
+        },
+        {
+          "displayId": "paired_end_stranded_rnaseq-LinearReadCloudDisplay",
+          "type": "LinearReadCloudDisplay",
+        },
+      ],
+      "name": "volvox-stranded-rnaseq",
+      "trackId": "paired_end_stranded_rnaseq",
+      "type": "AlignmentsTrack",
     },
   ],
 }

@@ -1,10 +1,10 @@
 import Rpc from 'librpc-web-mod'
 import shortid from 'shortid'
-import { deserializeError } from 'serialize-error'
 
 // locals
 import BaseRpcDriver, { RpcDriverConstructorArgs } from './BaseRpcDriver'
 import { PluginDefinition } from '../PluginLoader'
+import { deserializeError } from 'serialize-error'
 
 interface WebWorkerRpcDriverConstructorArgs extends RpcDriverConstructorArgs {
   makeWorkerInstance: () => Worker
@@ -59,6 +59,9 @@ export default class WebWorkerRpcDriver extends BaseRpcDriver {
     // load balancing rather than using librpc's builtin round-robin
     const instance = this.makeWorkerInstance()
 
+    // @ts-ignore this is used to avoid warning in jbrowse-web startup
+    // (because this file is referred to via src, declare.d.ts file is in
+    // e.g. products/jbrowse-web)
     const worker = new WebWorkerHandle({ workers: [instance] })
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
     if (isSafari) {

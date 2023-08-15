@@ -38,9 +38,11 @@ export default class TextSearchManager {
 
   relevantAdapters(searchScope: SearchScope) {
     const pm = this.pluginManager
-    const { aggregateTextSearchAdapters, tracks } = pm.rootModel?.jbrowse as {
-      tracks: AnyConfigurationModel[]
+    const { aggregateTextSearchAdapters } = pm.rootModel?.jbrowse as {
       aggregateTextSearchAdapters: AnyConfigurationModel[]
+    }
+    const { tracks } = pm.rootModel?.session as {
+      tracks: AnyConfigurationModel[]
     }
 
     const { assemblyName } = searchScope
@@ -58,8 +60,8 @@ export default class TextSearchManager {
     assemblyName: string,
     confs: AnyConfigurationModel[],
   ): AnyConfigurationModel[] {
-    return confs.filter(c =>
-      readConfObject(c, 'assemblyNames')?.includes(assemblyName),
+    return confs.filter(
+      c => readConfObject(c, 'assemblyNames')?.includes(assemblyName),
     )
   }
 
@@ -68,12 +70,13 @@ export default class TextSearchManager {
     confs: AnyConfigurationModel[],
   ) {
     return confs
-      .filter(conf =>
-        readConfObject(conf, [
-          'textSearching',
-          'textSearchAdapter',
-          'assemblyNames',
-        ])?.includes(assemblyName),
+      .filter(
+        conf =>
+          readConfObject(conf, [
+            'textSearching',
+            'textSearchAdapter',
+            'assemblyNames',
+          ])?.includes(assemblyName),
       )
       .map(
         conf => conf.textSearching.textSearchAdapter as AnyConfigurationModel,

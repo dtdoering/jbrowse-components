@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { lazy } from 'react'
 import {
   addDisposer,
   cast,
@@ -14,7 +14,6 @@ import { saveAs } from 'file-saver'
 import { autorun, transaction } from 'mobx'
 
 import { getParentRenderProps } from '@jbrowse/core/util/tracks'
-import { ReturnToImportFormDialog } from '@jbrowse/core/ui'
 import { BaseTrackStateModel } from '@jbrowse/core/pluggableElementTypes/models'
 import BaseViewModel from '@jbrowse/core/pluggableElementTypes/models/BaseViewModel'
 import { Base1DViewModel } from '@jbrowse/core/util/Base1DViewModel'
@@ -38,9 +37,13 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'
 // locals
 import { Dotplot1DView, DotplotHView, DotplotVView } from './1dview'
 import { getBlockLabelKeysToHide, makeTicks } from './components/util'
-import { renderToSvg } from './svgcomponents/SVGDotplotView'
-import ExportSvgDlg from './components/ExportSvgDialog'
+import { BaseBlock } from './blockTypes'
 
+// lazies
+const ExportSvgDialog = lazy(() => import('./components/ExportSvgDialog'))
+const ReturnToImportFormDialog = lazy(
+  () => import('@jbrowse/core/ui/ReturnToImportFormDialog'),
+)
 type Coord = [number, number]
 
 export interface ExportSvgOptions {
@@ -51,8 +54,20 @@ export interface ExportSvgOptions {
   themeName?: string
 }
 
+const len = (a: string) => measureText(a.slice(0, 30))
+const pxWidthForBlocks = (blocks: BaseBlock[], hide: Set<string>) => {
+  return max([
+    ...blocks.filter(b => !hide.has(b.key)).map(b => len(b.refName)),
+    ...blocks
+      .filter(b => !hide.has(b.key))
+      .map(b => len(b.end.toLocaleString('en-us'))),
+  ])
+}
+
 /**
  * #stateModel DotplotView
+ * #category view
+ * extends  `BaseViewModel`
  */
 export default function stateModelFactory(pm: PluginManager) {
   return types
@@ -533,8 +548,8 @@ export default function stateModelFactory(pm: PluginManager) {
        * creates an svg export and save using FileSaver
        */
       async exportSvg(opts: ExportSvgOptions = {}) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const html = await renderToSvg(self as any, opts)
+        const { renderToSvg } = await import('./svgcomponents/SVGDotplotView')
+        const html = await renderToSvg(self as DotplotViewModel, opts)
         const blob = new Blob([html], { type: 'image/svg+xml' })
         saveAs(blob, opts.filename || 'image.svg')
       },
@@ -608,14 +623,9 @@ export default function stateModelFactory(pm: PluginManager) {
 
             const vhide = getBlockLabelKeysToHide(vblocks, viewHeight, voffset)
             const hhide = getBlockLabelKeysToHide(hblocks, viewWidth, hoffset)
+            const by = pxWidthForBlocks(hblocks, hhide)
+            const bx = pxWidthForBlocks(vblocks, vhide)
 
-            const len = (a: string) => measureText(a.slice(0, 30))
-            const by = max(
-              hblocks.filter(b => !hhide.has(b.key)).map(b => len(b.refName)),
-            )
-            const bx = max(
-              vblocks.filter(b => !vhide.has(b.key)).map(b => len(b.refName)),
-            )
             // these are set via autorun to avoid dependency cycle
             self.setBorderY(Math.max(by + padding, 50))
             self.setBorderX(Math.max(bx + padding, 50))
@@ -684,7 +694,7 @@ export default function stateModelFactory(pm: PluginManager) {
             icon: PhotoCameraIcon,
             onClick: () => {
               getSession(self).queueDialog(handleClose => [
-                ExportSvgDlg,
+                ExportSvgDialog,
                 { model: self, handleClose },
               ])
             },

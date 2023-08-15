@@ -1,5 +1,4 @@
-import { Feature } from '@jbrowse/core/util'
-import { groupBy } from '../util'
+import { groupBy, Feature } from '@jbrowse/core/util'
 import { drawLine } from '../drawxy'
 import WiggleBaseRenderer, {
   MultiRenderArgsDeserialized as MultiArgs,
@@ -11,7 +10,7 @@ export default class MultiRowLineRenderer extends WiggleBaseRenderer {
     const { bpPerPx, sources, regions, features } = props
     const [region] = regions
     const groups = groupBy([...features.values()], f => f.get('source'))
-    const height = props.height / Object.keys(groups).length
+    const height = props.height / sources.length
     const width = (region.end - region.start) / bpPerPx
     let feats = [] as Feature[]
     ctx.save()

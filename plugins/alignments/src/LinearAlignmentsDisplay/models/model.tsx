@@ -193,7 +193,7 @@ function stateModelFactory(
        * #method
        */
       searchFeatureByID(id: string) {
-        return self.PileupDisplay.searchFeatureByID(id)
+        return self.PileupDisplay.searchFeatureByID?.(id)
       },
 
       /**
@@ -336,7 +336,11 @@ function stateModelFactory(
        */
       async renderSvg(opts: { rasterizeLayers?: boolean }) {
         const pileupHeight = self.height - self.SNPCoverageDisplay.height
-        await when(() => self.PileupDisplay.ready)
+        await when(
+          () =>
+            !self.PileupDisplay.renderProps().notReady &&
+            !self.SNPCoverageDisplay.renderProps().notReady,
+        )
         return (
           <>
             <g>{await self.SNPCoverageDisplay.renderSvg(opts)}</g>
@@ -357,6 +361,9 @@ function stateModelFactory(
          * #method
          */
         trackMenuItems(): MenuItem[] {
+          if (!self.PileupDisplay) {
+            return []
+          }
           const extra = getLowerPanelDisplays(pluginManager).map(d => ({
             type: 'radio',
             label: d.displayName,

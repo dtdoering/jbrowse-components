@@ -38,7 +38,7 @@ interface Props {
 
 // using forwardRef so that MUI Tooltip can wrap this component
 const EditableTypography = React.forwardRef<HTMLDivElement, Props>(
-  (props, ref) => {
+  function (props, ref) {
     const { value, setValue, variant, ...other } = props
     const [editedValue, setEditedValue] = useState<string>()
     const [sizerNode, setSizerNode] = useState<HTMLSpanElement | null>(null)
