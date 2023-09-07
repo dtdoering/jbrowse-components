@@ -2,29 +2,27 @@ import { toArray } from 'rxjs/operators'
 import path from 'path'
 import { LocalFile, GenericFilehandle } from 'generic-filehandle'
 import { firstValueFrom } from 'rxjs'
+// locals
 import Adapter from './NCListAdapter'
 import configSchema from './configSchema'
 
 export function generateReadBuffer(
   getFileFunction: (str: string) => GenericFilehandle,
 ) {
-  return (request: Request) => {
-    const file = getFileFunction(request.url)
-    return file.readFile('utf8')
+  return async (request: RequestInfo | URL) => {
+    const filehandle = getFileFunction(`${request}`)
+    const str = await filehandle.readFile('utf8')
+    return new Response(str)
   }
 }
 
-beforeEach(() => {
-  // @ts-expect-error
-  fetch.resetMocks()
-  // @ts-expect-error
-  fetch.mockResponse(
+jest
+  .spyOn(global, 'fetch')
+  .mockImplementation(
     generateReadBuffer(
-      (url: string) =>
-        new LocalFile(path.join(__dirname, `../../test_data/${url}`)),
+      url => new LocalFile(path.join(__dirname, `../../test_data/${url}`)),
     ),
   )
-})
 
 test('adapter can fetch features from ensembl_genes test set', async () => {
   const args = {
@@ -55,4 +53,4 @@ test('adapter can fetch features from ensembl_genes test set', async () => {
   expect(await adapter.hasDataForRefName('ctgA')).toBe(false)
   expect(await adapter.hasDataForRefName('21')).toBe(true)
   expect(await adapter.hasDataForRefName('20')).toBe(false)
-})
+}, 10000)

@@ -53,13 +53,14 @@ export function getPluginManager(initialState?: any, adminMode = true) {
   pluginManager.configure()
   return pluginManager
 }
-
 export function generateReadBuffer(getFile: (s: string) => GenericFilehandle) {
-  return async (request: Request) => {
+  return async (request: RequestInfo | URL, opts?: RequestInit) => {
     try {
-      const file = getFile(request.url)
+      const url = `${request}`
+      const file = getFile(url)
       const maxRangeRequest = 10000000 // kind of arbitrary, part of the rangeParser
-      const r = request.headers.get('range')
+      // @ts-expect-error
+      const r = opts?.headers?.get?.('range')
       if (r) {
         const range = rangeParser(maxRangeRequest, r)
         if (range === -2 || range === -1) {
@@ -152,10 +153,9 @@ export function doBeforeEach(
   clearCache()
   clearAdapterCache()
 
-  // @ts-expect-error
-  fetch.resetMocks()
-  // @ts-expect-error
-  fetch.mockResponse(generateReadBuffer(url => new LocalFile(cb(url))))
+  jest
+    .spyOn(global, 'fetch')
+    .mockImplementation(generateReadBuffer(url => new LocalFile(cb(url))))
 }
 
 export async function doSetupForImportForm(val?: unknown) {
