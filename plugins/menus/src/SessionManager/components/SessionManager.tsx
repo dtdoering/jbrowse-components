@@ -14,11 +14,13 @@ import { makeStyles } from 'tss-react/mui'
 
 import { observer } from 'mobx-react'
 import pluralize from 'pluralize'
-import { AbstractSessionModel } from '@jbrowse/core/util'
+import { AbstractSessionModel, sum } from '@jbrowse/core/util'
 
 // icons
 import DeleteIcon from '@mui/icons-material/Delete'
 import ViewListIcon from '@mui/icons-material/ViewList'
+
+// locals
 import DeleteDialog from './DeleteDialog'
 
 const useStyles = makeStyles()(theme => ({
@@ -51,9 +53,7 @@ const AutosaveEntry = observer(({ session }: { session: SessionModel }) => {
   ).session as SessionSnap
 
   const { views = [] } = autosavedSession || {}
-  const totalTracks = views
-    .map(view => view.tracks.length)
-    .reduce((a, b) => a + b, 0)
+  const totalTracks = sum(views.map(view => view.tracks?.length ?? 0))
 
   return autosavedSession ? (
     <Paper className={classes.root}>
@@ -106,9 +106,9 @@ const SessionManager = observer(({ session }: { session: SessionModel }) => {
           {session.savedSessions.length ? (
             session.savedSessions.map((sessionSnapshot, idx) => {
               const { views = [] } = sessionSnapshot
-              const totalTracks = views
-                .map(view => view.tracks.length)
-                .reduce((a, b) => a + b, 0)
+              const totalTracks = sum(
+                views.map(view => view.tracks?.length ?? 0),
+              )
               return (
                 <ListItem
                   button
