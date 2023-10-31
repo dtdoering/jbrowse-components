@@ -45,7 +45,6 @@ const ViewContainerTitle = observer(function ({
         }
         setValue={val => view.setDisplayName(val)}
         variant="body2"
-        fontWeight={session.focusedViewId === view.id ? 'bold' : ''}
         classes={{
           input: classes.input,
           inputBase: classes.inputBase,

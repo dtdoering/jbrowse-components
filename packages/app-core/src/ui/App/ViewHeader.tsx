@@ -24,7 +24,6 @@ const useStyles = makeStyles()(theme => ({
   },
   iconFocused: {
     stroke: theme.palette.secondary.contrastText,
-    strokeWidth: 2,
   },
   grow: {
     flexGrow: 1,
@@ -47,7 +46,7 @@ const ViewHeader = observer(function ({
   onClose: () => void
   onMinimize: () => void
 }) {
-  const { classes, cx } = useStyles()
+  const { classes } = useStyles()
   const scrollRef = useRef<HTMLDivElement>(null)
   const session = getSession(view) as SessionWithFocusedViewAndDrawerWidgets
 
@@ -61,51 +60,27 @@ const ViewHeader = observer(function ({
       <ViewMenu
         model={view}
         IconProps={{
-          className: cx(
-            classes.icon,
-            session.focusedViewId === view.id ? classes.iconFocused : '',
-          ),
+          className: classes.icon,
         }}
       />
       <div className={classes.grow} />
 
       <div className={classes.viewTitle}>
         {session.focusedViewId === view.id ? (
-          <KeyboardArrowRightIcon
-            className={cx(classes.icon, classes.iconFocused)}
-            fontSize="small"
-          />
+          <KeyboardArrowRightIcon className={classes.icon} fontSize="small" />
         ) : null}
         <ViewContainerTitle view={view} />
       </div>
       <div className={classes.grow} />
       <IconButton data-testid="minimize_view" onClick={onMinimize}>
         {view.minimized ? (
-          <AddIcon
-            className={cx(
-              classes.icon,
-              session.focusedViewId === view.id ? classes.iconFocused : '',
-            )}
-            fontSize="small"
-          />
+          <AddIcon className={classes.icon} fontSize="small" />
         ) : (
-          <MinimizeIcon
-            className={cx(
-              classes.icon,
-              session.focusedViewId === view.id ? classes.iconFocused : '',
-            )}
-            fontSize="small"
-          />
+          <MinimizeIcon className={classes.icon} fontSize="small" />
         )}
       </IconButton>
       <IconButton data-testid="close_view" onClick={onClose}>
-        <CloseIcon
-          className={cx(
-            classes.icon,
-            session.focusedViewId === view.id ? classes.iconFocused : '',
-          )}
-          fontSize="small"
-        />
+        <CloseIcon className={classes.icon} fontSize="small" />
       </IconButton>
     </div>
   )
