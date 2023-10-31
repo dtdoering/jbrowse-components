@@ -1,3 +1,4 @@
+import React from 'react'
 import assemblyManagerFactory, {
   assemblyConfigSchemaFactory,
 } from '@jbrowse/core/assemblyManager'
@@ -15,7 +16,17 @@ import { version } from '../version'
 /**
  * #stateModel JBrowseReactCircularGenomeViewRootModel
  */
-export default function createModel(runtimePlugins: PluginConstructor[]) {
+export default function createModel(
+  runtimePlugins: PluginConstructor[],
+  makeWorkerInstance: () => Worker = () => {
+    throw new Error('no makeWorkerInstance supplied')
+  },
+  hydrateFn?: (
+    container: Element | Document,
+    initialChildren: React.ReactNode,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) => any,
+) {
   const pluginManager = new PluginManager(
     [...corePlugins, ...runtimePlugins].map(P => new P()),
   )
@@ -48,7 +59,7 @@ export default function createModel(runtimePlugins: PluginConstructor[]) {
       ),
     })
     .volatile(() => ({
-      error: undefined as Error | undefined,
+      error: undefined as unknown,
       adminMode: false,
       version,
     }))
@@ -72,8 +83,8 @@ export default function createModel(runtimePlugins: PluginConstructor[]) {
       /**
        * #action
        */
-      setError(errorMessage: Error | undefined) {
-        self.error = errorMessage
+      setError(error: unknown) {
+        self.error = error
       },
       /**
        * #action
@@ -126,8 +137,12 @@ export default function createModel(runtimePlugins: PluginConstructor[]) {
     }))
     .volatile(self => ({
       rpcManager: new RpcManager(pluginManager, self.config.configuration.rpc, {
+        WebWorkerRpcDriver: {
+          makeWorkerInstance,
+        },
         MainThreadRpcDriver: {},
       }),
+      hydrateFn,
       textSearchManager: new TextSearchManager(pluginManager),
     }))
   return { model: rootModel, pluginManager }

@@ -22,6 +22,9 @@ const useStyles = makeStyles()(theme => ({
   grow: {
     flexGrow: 1,
   },
+  container: {
+    display: 'flex',
+  },
   iconRoot: {
     '&:hover': {
       backgroundColor: alpha(
@@ -35,13 +38,13 @@ const useStyles = makeStyles()(theme => ({
   },
 }))
 
-export default observer(({ view }: { view: IBaseViewModel }) => {
+const ViewTitle = observer(({ view }: { view: IBaseViewModel }) => {
   const { classes } = useStyles()
   const { displayName } = view
   const [dlgOpen, setDlgOpen] = useState(false)
   const session = getSession(view)
   return (
-    <div style={{ display: 'flex' }}>
+    <div className={classes.container}>
       <ViewMenu
         model={view}
         IconButtonProps={{
@@ -74,3 +77,5 @@ export default observer(({ view }: { view: IBaseViewModel }) => {
     </div>
   )
 })
+
+export default ViewTitle

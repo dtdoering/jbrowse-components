@@ -10,7 +10,6 @@
           "date": "2020-08-20"
         },
         "formatAbout": {
-          "hideUris": true,
           "config": "jexl:{extraField:'important data'}"
         },
         "adapter": {
@@ -19,7 +18,19 @@
             "uri": "volvox.2bit",
             "locationType": "UriLocation"
           }
-        }
+        },
+        "displays": [
+          {
+            "type": "LinearReferenceSequenceDisplay",
+            "displayId": "volvox_refseq-LinearReferenceSequenceDisplay"
+          },
+          {
+            "type": "LinearGCContentDisplay",
+            "displayId": "volvox_refseq-LinearGCContentDisplay",
+            "windowSize": 10,
+            "windowDelta": 10
+          }
+        ]
       },
       "refNameAliases": {
         "adapter": {
@@ -176,6 +187,9 @@
     }
   ],
   "configuration": {
+    "LinearGenomeViewPlugin": {
+      "trackLabels": "offset"
+    },
     "hierarchical": {
       "defaultCollapsed": {
         "categoryNames": ["Methylation"]
@@ -619,6 +633,9 @@
     {
       "type": "VariantTrack",
       "trackId": "volvox_test_vcf",
+      "formatAbout": {
+        "hideUris": true
+      },
       "name": "volvox 1000genomes vcf",
       "assemblyNames": ["volvox"],
       "category": ["VCF"],
@@ -2111,6 +2128,20 @@
             "uri": "volvox.2bit",
             "locationType": "UriLocation"
           }
+        }
+      },
+      "assemblyNames": ["volvox"]
+    },
+    {
+      "type": "FeatureTrack",
+      "trackId": "arc_test",
+      "name": "Arc test track",
+      "category": ["Miscellaneous"],
+      "adapter": {
+        "type": "BedAdapter",
+        "bedLocation": {
+          "uri": "arc_test.bed",
+          "locationType": "UriLocation"
         }
       },
       "assemblyNames": ["volvox"]

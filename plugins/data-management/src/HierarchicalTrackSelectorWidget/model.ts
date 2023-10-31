@@ -207,12 +207,11 @@ export default function stateTreeFactory(pluginManager: PluginManager) {
         name: string
         tracks: AnyConfigurationModel[]
       }): TreeNode[] {
-        return generateHierarchy(
-          self as HierarchicalTrackSelectorModel,
-          self.connectionTrackConfigurations(connection),
-          self.collapsed,
-          connection.name,
-        )
+        return generateHierarchy({
+          model: self,
+          trackConfs: self.connectionTrackConfigurations(connection),
+          extra: connection.name,
+        })
       },
     }))
     .views(self => ({
@@ -242,7 +241,10 @@ export default function stateTreeFactory(pluginManager: PluginManager) {
             .map(s => ({
               name: s.group,
               id: s.group,
-              children: generateHierarchy(self, s.tracks, self.collapsed),
+              children: generateHierarchy({
+                model: self,
+                trackConfs: s.tracks,
+              }),
             }))
             // always keep the Tracks entry at idx 0
             .filter((f, idx) => idx === 0 || !!f.children.length),
@@ -287,7 +289,8 @@ export default function stateTreeFactory(pluginManager: PluginManager) {
             ])
           ) {
             self.collapseTopLevelCategories()
-          } else if (
+          }
+          if (
             getConf(session, [
               'hierarchical',
               'defaultCollapsed',
@@ -295,14 +298,13 @@ export default function stateTreeFactory(pluginManager: PluginManager) {
             ])
           ) {
             self.collapseSubCategories()
-          } else {
-            for (const entry of getConf(session, [
-              'hierarchical',
-              'defaultCollapsed',
-              'categoryNames',
-            ])) {
-              self.collapsed.set(entry, true)
-            }
+          }
+          for (const entry of getConf(session, [
+            'hierarchical',
+            'defaultCollapsed',
+            'categoryNames',
+          ])) {
+            self.collapsed.set(entry, true)
           }
           self.initialized = true
         }
@@ -311,9 +313,7 @@ export default function stateTreeFactory(pluginManager: PluginManager) {
     .views(self => ({
       get hasAnySubcategories() {
         return self.allTracks.some(group =>
-          group.tracks.some(
-            track => readConfObject(track, 'category')?.length > 1,
-          ),
+          group.tracks.some(t => readConfObject(t, 'category')?.length > 1),
         )
       },
     }))

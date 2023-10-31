@@ -123,11 +123,12 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
           {
             "displayId": "volvox_refseq-LinearGCContentDisplay",
             "type": "LinearGCContentDisplay",
+            "windowDelta": 10,
+            "windowSize": 10,
           },
         ],
         "formatAbout": {
           "config": "jexl:{extraField:'important data'}",
-          "hideUris": true,
         },
         "metadata": {
           "date": "2020-08-20",
@@ -430,6 +431,9 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
     },
   ],
   "configuration": {
+    "LinearGenomeViewPlugin": {
+      "trackLabels": "offset",
+    },
     "extraThemes": {
       "darkForest": {
         "name": "Dark (forest, from config file)",
@@ -1274,6 +1278,9 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
           "type": "ChordVariantDisplay",
         },
       ],
+      "formatAbout": {
+        "hideUris": true,
+      },
       "name": "volvox 1000genomes vcf",
       "trackId": "volvox_test_vcf",
       "type": "VariantTrack",
@@ -4123,6 +4130,36 @@ exports[`JBrowse model creates with non-empty snapshot 1`] = `
       "name": "volvox-stranded-rnaseq",
       "trackId": "paired_end_stranded_rnaseq",
       "type": "AlignmentsTrack",
+    },
+    {
+      "adapter": {
+        "bedLocation": {
+          "internetAccountId": undefined,
+          "internetAccountPreAuthorization": undefined,
+          "locationType": "UriLocation",
+          "uri": "arc_test.bed",
+        },
+        "type": "BedAdapter",
+      },
+      "assemblyNames": [
+        "volvox",
+      ],
+      "category": [
+        "Miscellaneous",
+      ],
+      "displays": [
+        {
+          "displayId": "arc_test-LinearBasicDisplay",
+          "type": "LinearBasicDisplay",
+        },
+        {
+          "displayId": "arc_test-LinearArcDisplay",
+          "type": "LinearArcDisplay",
+        },
+      ],
+      "name": "Arc test track",
+      "trackId": "arc_test",
+      "type": "FeatureTrack",
     },
   ],
 }

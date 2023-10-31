@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { observer } from 'mobx-react'
-import { alpha, Portal } from '@mui/material'
+import { alpha, Portal, useTheme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { Feature } from '@jbrowse/core/util'
 
@@ -46,7 +46,7 @@ export type TooltipContentsComponent = React.ForwardRefExoticComponent<
   { feature: Feature; model: any } & React.RefAttributes<HTMLDivElement>
 >
 
-function Tooltip({
+const Tooltip = observer(function Tooltip({
   model,
   height,
   clientMouseCoord,
@@ -63,6 +63,7 @@ function Tooltip({
   clientRect?: DOMRect
   TooltipContents: TooltipContentsComponent
 }) {
+  const theme = useTheme()
   const { featureUnderMouse } = model
   const [width, setWidth] = useState(0)
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
@@ -91,9 +92,10 @@ function Tooltip({
   )
   const { styles, attributes } = usePopper(virtElement, anchorEl)
 
+  const popperTheme = theme?.components?.MuiPopper
   return featureUnderMouse ? (
     <>
-      <Portal>
+      <Portal container={popperTheme?.defaultProps?.container}>
         <div
           ref={setAnchorEl}
           className={classes.tooltip}
@@ -118,6 +120,6 @@ function Tooltip({
       />
     </>
   ) : null
-}
+})
 
-export default observer(Tooltip)
+export default Tooltip

@@ -89,6 +89,19 @@ export function BaseWebSession({
        */
       sessionPlugins: types.array(types.frozen()),
     })
+    .volatile((/* self */) => ({
+      /**
+       * #volatile
+       */
+      sessionThemeName: localStorageGetItem('themeName') || 'default',
+      /**
+       * #volatile
+       * this is the current "task" that is being performed in the UI.
+       * this is usually an object of the form
+       * `{ taskName: "configure", target: thing_being_configured }`
+       */
+      task: undefined,
+    }))
     .views(self => ({
       /**
        * #getter
@@ -126,19 +139,6 @@ export function BaseWebSession({
       setName(str: string) {
         self.name = str
       },
-    }))
-    .volatile((/* self */) => ({
-      /**
-       * #volatile
-       */
-      sessionThemeName: localStorageGetItem('themeName') || 'default',
-      /**
-       * #volatile
-       * this is the current "task" that is being performed in the UI.
-       * this is usually an object of the form
-       * `{ taskName: "configure", target: thing_being_configured }`
-       */
-      task: undefined,
     }))
 
     .views(self => ({
@@ -360,7 +360,9 @@ export function BaseWebSession({
             label: 'Copy track',
             disabled: isRefSeq,
             onClick: () => {
-              type Display = { displayId: string }
+              interface Display {
+                displayId: string
+              }
               const snap = clone(getSnapshot(config)) as {
                 [key: string]: unknown
                 displays: Display[]

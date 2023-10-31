@@ -50,7 +50,7 @@ export default function UCSCTrackHubConnection(pluginManager: PluginManager) {
                 locationType: 'LocalPathLocation' as const,
               }
           const genomesFile = await fetchGenomesFile(genomesFileLocation)
-          const map = {} as { [key: string]: number }
+          const map = {} as Record<string, number>
           for (const [genomeName, genome] of genomesFile) {
             const assemblyNames = getConf(self, 'assemblyNames')
             if (
@@ -104,7 +104,7 @@ export default function UCSCTrackHubConnection(pluginManager: PluginManager) {
             `There was a problem connecting to the UCSC Track Hub "${self.configuration.name}". Please make sure you have entered a valid hub.txt file. The error that was thrown is: "${e}"`,
             'error',
           )
-          session.breakConnection(self.configuration)
+          session.breakConnection?.(self.configuration)
         }
       },
     }))

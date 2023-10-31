@@ -22,6 +22,7 @@ import {
 import RpcManager from '../../rpc/RpcManager'
 import { Feature } from '../simpleFeature'
 import { BaseInternetAccountModel } from '../../pluggableElementTypes/models'
+import { ThemeOptions } from '@mui/material'
 
 export * from './util'
 
@@ -82,16 +83,28 @@ export type DialogComponentType =
 
 /** minimum interface that all session state models must implement */
 export interface AbstractSessionModel extends AbstractViewContainer {
+  jbrowse: IAnyStateTreeNode
   drawerPosition?: string
-  setSelection(feature: Feature): void
-  clearSelection(): void
   configuration: AnyConfigurationModel
   rpcManager: RpcManager
   assemblyNames: string[]
   assemblies: AnyConfigurationModel[]
   selection?: unknown
-  duplicateCurrentSession?(): void
-  notify(message: string, level?: NotificationLevel, action?: SnackAction): void
+  focusedViewId?: string
+  themeName?: string
+  hovered: unknown
+  setHovered: (arg: unknown) => void
+  setFocusedViewId?: (id: string) => void
+  allThemes?: () => Record<string, ThemeOptions | undefined>
+  setSelection: (feature: Feature) => void
+  setSession?: (arg: { name: string; [key: string]: unknown }) => void
+  clearSelection: () => void
+  duplicateCurrentSession?: () => void
+  notify: (
+    message: string,
+    level?: NotificationLevel,
+    action?: SnackAction,
+  ) => void
   assemblyManager: AssemblyManager
   version: string
   getTrackActionMenuItems?: Function
@@ -100,13 +113,20 @@ export interface AbstractSessionModel extends AbstractViewContainer {
   textSearchManager?: TextSearchManager
   connections: AnyConfigurationModel[]
   deleteConnection?: Function
+  temporaryAssemblies?: unknown[]
+  addTemporaryAssembly?: (arg: Record<string, unknown>) => void
+  removeTemporaryAssembly?: (arg: string) => void
   sessionConnections?: AnyConfigurationModel[]
+  sessionTracks?: AnyConfigurationModel[]
   connectionInstances?: {
     name: string
     tracks: AnyConfigurationModel[]
     configuration: AnyConfigurationModel
   }[]
   makeConnection?: Function
+  breakConnection?: Function
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  prepareToBreakConnection?: (arg: AnyConfigurationModel) => any
   adminMode?: boolean
   showWidget?: Function
   addWidget?: Function
@@ -155,6 +175,16 @@ export function isSessionWithAddTracks(
   )
 }
 
+/** abstract interface for a session allows adding tracks */
+export interface SessionWithShareURL extends AbstractSessionModel {
+  shareURL: string
+}
+export function isSessionWithShareURL(
+  thing: unknown,
+): thing is SessionWithShareURL {
+  return isSessionModel(thing) && 'shareURL' in thing && !!thing.shareURL
+}
+
 export interface Widget {
   type: string
   id: string
@@ -164,9 +194,9 @@ export interface Widget {
 export interface SessionWithWidgets extends AbstractSessionModel {
   minimized: boolean
   visibleWidget?: Widget
-  widgets: Map<string, Widget>
+  widgets: Map<string | number, Widget>
   hideAllWidgets: () => void
-  activeWidgets: Map<string, Widget>
+  activeWidgets: Map<string | number, Widget>
   addWidget(
     typeName: string,
     id: string,
@@ -477,9 +507,15 @@ export type FileLocation = LocalPathLocation | UriLocation | BlobLocation
 // These types are slightly different than the MST models representing a
 // location because a blob cannot be stored in a MST, so this is the
 // pre-processed file location
-export type PreUriLocation = { uri: string }
-export type PreLocalPathLocation = { localPath: string }
-export type PreBlobLocation = { blob: File }
+export interface PreUriLocation {
+  uri: string
+}
+export interface PreLocalPathLocation {
+  localPath: string
+}
+export interface PreBlobLocation {
+  blob: File
+}
 export type PreFileLocation =
   | PreUriLocation
   | PreLocalPathLocation

@@ -36,18 +36,15 @@ const useStyles = makeStyles()(theme => ({
   dropDownIcon: {
     color: theme.palette.secondary.contrastText,
   },
-  header: {
-    background: theme.palette.secondary.main,
-  },
   headerFocused: {
-    background: theme.palette.secondary.light,
+    background: theme.palette.secondary.main,
   },
   headerUnfocused: {
     background: theme.palette.secondary.dark,
   },
 }))
 
-export default observer(function ({
+const DrawerHeader = observer(function ({
   session,
   setToolbarHeight,
 }: {
@@ -58,17 +55,14 @@ export default observer(function ({
   const focusedViewId = session.focusedViewId
   // @ts-ignore
   const viewWidgetId = session.visibleWidget?.view?.id
-  const isFocused = focusedViewId && focusedViewId === viewWidgetId
 
   return (
     <AppBar
       position="sticky"
       className={
-        isFocused
-          ? `${classes.headerFocused}`
-          : viewWidgetId
-          ? `${classes.headerUnfocused}`
-          : classes.header
+        focusedViewId === viewWidgetId
+          ? classes.headerFocused
+          : classes.headerUnfocused
       }
       ref={ref => setToolbarHeight(ref?.getBoundingClientRect().height || 0)}
     >
@@ -215,3 +209,5 @@ const DrawerControls = observer(function ({
     </>
   )
 })
+
+export default DrawerHeader

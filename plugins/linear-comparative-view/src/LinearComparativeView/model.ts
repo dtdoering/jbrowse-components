@@ -157,13 +157,15 @@ function stateModelFactory(pluginManager: PluginManager) {
       // e.g. read vs ref
       beforeDestroy() {
         const session = getSession(self)
-        self.assemblyNames.forEach(asm => session.removeTemporaryAssembly(asm))
+        for (const name of self.assemblyNames) {
+          session.removeTemporaryAssembly?.(name)
+        }
       },
 
       onSubviewAction(actionName: string, path: string, args?: unknown[]) {
         self.views.forEach(view => {
           const ret = getPath(view)
-          if (ret.lastIndexOf(path) !== ret.length - path.length) {
+          if (!ret.endsWith(path)) {
             // @ts-expect-error
             view[actionName](args?.[0])
           }

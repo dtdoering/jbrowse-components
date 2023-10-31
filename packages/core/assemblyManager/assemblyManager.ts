@@ -17,7 +17,7 @@ import RpcManager from '../rpc/RpcManager'
  * #stateModel AssemblyManager
  */
 function assemblyManagerFactory(conf: IAnyType, pm: PluginManager) {
-  type Conf = Instance<typeof conf> | string
+  type Conf = Instance<typeof conf> // this is type any, try to narrow...
   return types
     .model({
       /**
@@ -30,7 +30,7 @@ function assemblyManagerFactory(conf: IAnyType, pm: PluginManager) {
     })
     .views(self => ({
       get assemblyNameMap() {
-        const obj = {} as { [key: string]: Assembly | undefined }
+        const obj = {} as Record<string, Assembly | undefined>
         for (const assembly of self.assemblies) {
           for (const name of assembly.allAliases) {
             obj[name] = assembly
@@ -153,7 +153,7 @@ function assemblyManagerFactory(conf: IAnyType, pm: PluginManager) {
           return assembly.isValidRefName(refName)
         }
         throw new Error(
-          `isValidRefName for ${assemblyName} failed, assembly does not exist`,
+          `Failed to look up refName ${refName} on ${assemblyName} because assembly does not exist`,
         )
       },
     }))

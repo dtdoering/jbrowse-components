@@ -363,7 +363,7 @@ function stateModelFactory() {
         addDisposer(
           self,
           autorun(() => {
-            const blocksPresent: { [key: string]: boolean } = {}
+            const blocksPresent: Record<string, boolean> = {}
             const view = getContainingView(self) as LGV
             if (!view.initialized) {
               return
@@ -376,7 +376,7 @@ function stateModelFactory() {
             })
             self.blockState.forEach((_, key) => {
               if (!blocksPresent[key]) {
-                self.deleteBlock(key)
+                self.deleteBlock(key as string)
               }
             })
           }),

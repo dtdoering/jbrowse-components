@@ -36,7 +36,7 @@ const ToggleConnectionsDlg = lazy(
 interface ModalArgs {
   connectionConf: AnyConfigurationModel
   safelyBreakConnection: () => void
-  dereferenceTypeCount: { [key: string]: number }
+  dereferenceTypeCount: Record<string, number>
   name: string
 }
 
@@ -45,7 +45,7 @@ interface DialogDetails {
   connectionConf: AnyConfigurationModel
 }
 
-export default observer(function HamburgerMenu({
+const HamburgerMenu = observer(function ({
   model,
 }: {
   model: HierarchicalTrackSelectorModel
@@ -61,7 +61,7 @@ export default observer(function HamburgerMenu({
     deletingConnection?: boolean,
   ) {
     const name = readConfObject(connectionConf, 'name')
-    const result = session.prepareToBreakConnection(connectionConf)
+    const result = session.prepareToBreakConnection?.(connectionConf)
     if (result) {
       const [safelyBreakConnection, dereferenceTypeCount] = result
       if (Object.keys(dereferenceTypeCount).length > 0) {
@@ -195,3 +195,5 @@ export default observer(function HamburgerMenu({
     </>
   )
 })
+
+export default HamburgerMenu

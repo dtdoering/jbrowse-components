@@ -29,7 +29,7 @@ export function doAfterAttach(self: LinearSyntenyDisplayModel) {
   addDisposer(
     self,
     autorun(() => {
-      const view = getContainingView(self)
+      const view = getContainingView(self) as LinearSyntenyViewModel
       if (!view.initialized) {
         return
       }
@@ -50,7 +50,7 @@ export function doAfterAttach(self: LinearSyntenyDisplayModel) {
   addDisposer(
     self,
     autorun(() => {
-      const view = getContainingView(self)
+      const view = getContainingView(self) as LinearSyntenyViewModel
       if (!view.initialized) {
         return
       }
@@ -97,8 +97,7 @@ export function doAfterAttach(self: LinearSyntenyDisplayModel) {
         const map = [] as FeatPos[]
         const feats = self.features || []
 
-        for (let i = 0; i < feats.length; i++) {
-          const f = feats[i]
+        for (const f of feats) {
           const mate = f.get('mate')
           let f1s = f.get('start')
           let f1e = f.get('end')

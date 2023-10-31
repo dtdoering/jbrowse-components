@@ -4,15 +4,22 @@ import { DataGrid, GridToolbar } from '@mui/x-data-grid'
 import { Checkbox, FormControlLabel, Typography } from '@mui/material'
 
 // locals
-import { measureGridWidth, getStr, isUriLocation } from '../../util'
-import ResizeBar, { useResizeBar } from '../../ui/ResizeBar'
+import { measureGridWidth, getStr } from '../../util'
+import ResizeBar from '../../ui/ResizeBar'
 import FieldName from './FieldName'
-import UriLink from './UriLink'
+import { useResizeBar } from '../../ui/useResizeBar'
+import { SanitizedHTML } from '../../ui'
 
-export const useStyles = makeStyles()(theme => ({
+const useStyles = makeStyles()(theme => ({
   margin: {
     margin: theme.spacing(1),
     width: '100%',
+  },
+
+  cell: {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
 }))
 
@@ -94,16 +101,20 @@ export default function DataGridDetails({
             hideFooter={rows.length < 25}
             slots={{ toolbar: checked ? GridToolbar : null }}
             slotProps={{
-              toolbar: { printOptions: { disableToolbarButton: true } },
+              toolbar: {
+                printOptions: {
+                  disableToolbarButton: true,
+                },
+              },
             }}
             columns={colNames.map((val, index) => ({
               field: val,
               renderCell: params => {
                 const value = params.value as string
-                return isUriLocation(value) ? (
-                  <UriLink value={value} />
-                ) : (
-                  <>{getStr(value)}</>
+                return (
+                  <div className={classes.cell}>
+                    <SanitizedHTML html={getStr(value)} />
+                  </div>
                 )
               },
               width: widths[index],

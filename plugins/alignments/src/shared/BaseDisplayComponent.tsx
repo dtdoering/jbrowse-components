@@ -1,6 +1,9 @@
 import React from 'react'
 import { LoadingEllipses } from '@jbrowse/core/ui'
-import { BlockMsg } from '@jbrowse/plugin-linear-genome-view'
+import {
+  BlockMsg,
+  LinearGenomeViewModel,
+} from '@jbrowse/plugin-linear-genome-view'
 import { makeStyles } from 'tss-react/mui'
 import { observer } from 'mobx-react'
 
@@ -26,7 +29,7 @@ const useStyles = makeStyles()(theme => {
   }
 })
 
-export default observer(function ({
+const BaseDisplayComponent = observer(function ({
   model,
   children,
 }: {
@@ -56,7 +59,7 @@ const DataDisplay = observer(function ({
   children?: React.ReactNode
 }) {
   const { drawn, loading } = model
-  const view = getContainingView(model)
+  const view = getContainingView(model) as LinearGenomeViewModel
   const left = (model.lastDrawnOffsetPx || 0) - view.offsetPx
   return (
     // this data-testid is located here because changing props on the canvas
@@ -81,3 +84,5 @@ const LoadingBar = observer(function ({
     </div>
   )
 })
+
+export default BaseDisplayComponent

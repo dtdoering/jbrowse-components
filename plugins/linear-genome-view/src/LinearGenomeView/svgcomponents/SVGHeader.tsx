@@ -1,8 +1,7 @@
 import React from 'react'
-import { getSession } from '@jbrowse/core/util'
+import { getSession, stripAlpha } from '@jbrowse/core/util'
 import Base1DView from '@jbrowse/core/util/Base1DViewModel'
 import { useTheme } from '@mui/material'
-import Color from 'color'
 
 // locals
 import { LinearGenomeViewModel, HEADER_OVERVIEW_HEIGHT } from '..'
@@ -27,7 +26,7 @@ export default function SVGHeader({
   const assemblyName = assemblyNames.length > 1 ? '' : assemblyNames[0]
   const assembly = assemblyManager.get(assemblyName)
   const theme = useTheme()
-  const c = Color(theme.palette.text.primary).hex()
+  const c = stripAlpha(theme.palette.text.primary)
   const overview = Base1DView.create({
     displayedRegions: JSON.parse(JSON.stringify(displayedRegions)),
     interRegionPaddingWidth: 0,
@@ -41,9 +40,7 @@ export default function SVGHeader({
   overview.setVolatileWidth(width)
   overview.showAllRegions()
   const block = overview.dynamicBlocks.contentBlocks[0]
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const first = visibleRegions.at(0)!
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const last = visibleRegions.at(-1)!
   const firstOverviewPx =
     overview.bpToPx({

@@ -42,7 +42,7 @@ function sortConfs(
   return ret.map(a => a[0])
 }
 
-export type TreeNode = {
+export interface TreeNode {
   name: string
   id: string
   conf?: AnyConfigurationModel
@@ -51,21 +51,31 @@ export type TreeNode = {
   children: TreeNode[]
 }
 
-export function generateHierarchy(
+export function generateHierarchy({
+  model,
+  trackConfs,
+  extra,
+}: {
   model: {
     filterText: string
     activeSortTrackNames: boolean
     activeSortCategories: boolean
+    collapsed: Map<string | number, boolean>
     view?: {
       tracks: { configuration: AnyConfigurationModel }[]
     }
-  },
-  trackConfs: AnyConfigurationModel[],
-  collapsed: { get: (arg: string) => boolean | undefined },
-  extra?: string,
-): TreeNode[] {
+  }
+  trackConfs: AnyConfigurationModel[]
+  extra?: string
+}): TreeNode[] {
   const hierarchy = { children: [] as TreeNode[] } as TreeNode
-  const { filterText, activeSortTrackNames, activeSortCategories, view } = model
+  const {
+    collapsed,
+    filterText,
+    activeSortTrackNames,
+    activeSortCategories,
+    view,
+  } = model
   if (!view) {
     return []
   }

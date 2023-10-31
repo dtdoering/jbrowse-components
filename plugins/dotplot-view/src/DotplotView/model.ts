@@ -72,8 +72,9 @@ const pxWidthForBlocks = (blocks: BaseBlock[], hide: Set<string>) => {
 export default function stateModelFactory(pm: PluginManager) {
   return types
     .compose(
+      'DotplotView',
       BaseViewModel,
-      types.model('DotplotView', {
+      types.model({
         /**
          * #property
          */
@@ -556,7 +557,9 @@ export default function stateModelFactory(pm: PluginManager) {
       // if any of our assemblies are temporary assemblies
       beforeDestroy() {
         const session = getSession(self)
-        self.assemblyNames.forEach(asm => session.removeTemporaryAssembly(asm))
+        for (const name in self.assemblyNames) {
+          session.removeTemporaryAssembly?.(name)
+        }
       },
       afterAttach() {
         addDisposer(

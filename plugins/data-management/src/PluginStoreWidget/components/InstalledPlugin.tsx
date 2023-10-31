@@ -36,7 +36,7 @@ function LockedPlugin() {
   )
 }
 
-export default observer(function ({
+const InstalledPlugin = observer(function ({
   plugin,
   model,
 }: {
@@ -46,11 +46,12 @@ export default observer(function ({
   const [dialogPlugin, setDialogPlugin] = useState<string>()
   const { pluginManager } = getEnv(model)
   const session = getSession(model)
-  const { jbrowse, adminMode, sessionPlugins } = session
-  const isSessionPlugin = sessionPlugins?.some(
-    (p: { url: string }) =>
-      pluginManager.pluginMetadata[plugin.name].url === p.url,
-  )
+  const { jbrowse, adminMode } = session
+  const isSessionPlugin = isSessionWithSessionPlugins(session)
+    ? session.sessionPlugins?.some(
+        p => pluginManager.pluginMetadata[plugin.name].url === p.url,
+      )
+    : false
 
   return (
     <>
@@ -76,7 +77,6 @@ export default observer(function ({
       <ListItem key={plugin.name}>
         {adminMode || isSessionPlugin ? (
           <IconButton
-            aria-label="removePlugin"
             data-testid={`removePlugin-${plugin.name}`}
             onClick={() => setDialogPlugin(plugin.name)}
           >
@@ -90,3 +90,5 @@ export default observer(function ({
     </>
   )
 })
+
+export default InstalledPlugin

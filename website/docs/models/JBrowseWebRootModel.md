@@ -16,6 +16,9 @@ composed of
 
 - BaseRootModel
 - InternetAccountsMixin
+- HistoryManagementMixin
+- AppFocusMixin
+- RootAppMenuMixin
 
 note: many properties of the root model are available through the session, and
 we generally prefer using the session model (via e.g. getSession) over the root
@@ -85,20 +88,6 @@ localStorageId: (name: string) => string
 ```js
 // type signature
 setSession: (sessionSnapshot?: ModelCreationType<ExtractCFromProps<{ id: IOptionalIType<ISimpleType<string>, [undefined]>; name: ISimpleType<string>; margin: IType<number, number, number>; }>>) => void
-```
-
-#### action: setAssemblyEditing
-
-```js
-// type signature
-setAssemblyEditing: (flag: boolean) => void
-```
-
-#### action: setDefaultSessionEditing
-
-```js
-// type signature
-setDefaultSessionEditing: (flag: boolean) => void
 ```
 
 #### action: setPluginsUpdated
