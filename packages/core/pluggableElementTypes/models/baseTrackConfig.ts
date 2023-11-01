@@ -1,6 +1,7 @@
-import { types, Instance } from 'mobx-state-tree'
-import { ConfigurationSchema } from '../../configuration'
+import { types, Instance, getSnapshot, getRoot } from 'mobx-state-tree'
+import { ConfigurationSchema, readConfObject } from '../../configuration'
 import PluginManager from '../../PluginManager'
+import { getSession, notEmpty } from '../../util'
 
 /**
  * #config BaseTrack
@@ -80,6 +81,14 @@ export function createBaseTrackConfig(pluginManager: PluginManager) {
           'text search adapter',
         ),
       }),
+
+      /**
+       * #slot
+       */
+      sequenceAdapters: {
+        type: 'frozen',
+        defaultValue: {},
+      },
 
       /**
        * #slot
@@ -188,6 +197,26 @@ export function createBaseTrackConfig(pluginManager: PluginManager) {
           }
           const length = self.displays.push(conf)
           return self.displays[length - 1]
+        },
+        setSequenceAdapters(a: Record<string, unknown>) {
+          self.sequenceAdapters = a
+        },
+        afterAttach() {
+          const { assemblyManager } = getRoot<any>(self)
+          const assemblyNames = readConfObject(
+            self,
+            'assemblyNames',
+          ) as string[]
+          const map = Object.fromEntries(
+            assemblyNames
+              .map(a => {
+                const conf = assemblyManager.get(a)?.configuration
+                return conf ? ([a, getSnapshot(conf)] as const) : undefined
+              })
+              .filter(notEmpty),
+          )
+          console.log({ c: readConfObject(self), map })
+          self.setSequenceAdapters(map)
         },
       }),
     },

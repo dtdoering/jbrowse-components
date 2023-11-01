@@ -173,6 +173,7 @@ export function BaseWebSession({
        * #getter
        */
       get assemblyManager(): AssemblyManager {
+        console.log('here', self.root.assemblyManager, getSnapshot(self.root))
         return self.root.assemblyManager
       },
       /**
