@@ -3,6 +3,7 @@ import {
   GenericFilehandle,
   LocalFile,
   Fetcher,
+  RemoteFile,
 } from 'generic-filehandle'
 import isNode from 'detect-node'
 
@@ -85,9 +86,7 @@ export function openLocation(
       }
     }
     // Otherwise fall back on usual open
-    return new RemoteFileWithRangeCache(absoluteLocation.uri, {
-      fetch: checkAuthNeededFetch,
-    })
+    return new RemoteFile(absoluteLocation.uri)
   }
   throw new Error('invalid fileLocation')
 }
