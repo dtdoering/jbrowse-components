@@ -3,7 +3,7 @@ import { getConf } from '@jbrowse/core/configuration'
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes/models'
 import { Region } from '@jbrowse/core/util/types'
 import { ElementId, Region as MUIRegion } from '@jbrowse/core/util/types/mst'
-import { MenuItem, ReturnToImportFormDialog } from '@jbrowse/core/ui'
+import { MenuItem } from '@jbrowse/core/ui'
 import {
   assembleLocString,
   clamp,
@@ -54,21 +54,18 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'
 import ZoomInIcon from '@mui/icons-material/ZoomIn'
 import MenuOpenIcon from '@mui/icons-material/MenuOpen'
 
-// locals
-import { renderToSvg } from './svgcomponents/SVGLinearGenomeView'
-
-import ExportSvgDlg from './components/ExportSvgDialog'
 import MiniControls from './components/MiniControls'
 import Header from './components/Header'
 import { generateLocations, parseLocStrings } from './util'
-
 // lazies
+const ReturnToImportFormDialog = lazy(
+  () => import('@jbrowse/core/ui/ReturnToImportFormDialog'),
+)
 const SequenceSearchDialog = lazy(
   () => import('./components/SequenceSearchDialog'),
 )
-
+const ExportSvgDialog = lazy(() => import('./components/ExportSvgDialog'))
 const GetSequenceDialog = lazy(() => import('./components/GetSequenceDialog'))
-
 const SearchResultsDialog = lazy(
   () => import('./components/SearchResultsDialog'),
 )
@@ -139,8 +136,9 @@ export const WIDGET_HEIGHT = 32
 export function stateModelFactory(pluginManager: PluginManager) {
   return types
     .compose(
+      'LinearGenomeView',
       BaseViewModel,
-      types.model('LinearGenomeView', {
+      types.model({
         /**
          * #property
          */
@@ -206,17 +204,6 @@ export function stateModelFactory(pluginManager: PluginManager) {
           types.enumeration(['hierarchical']),
           'hierarchical',
         ),
-
-        /**
-         * #property
-         * how to display the track labels, can be "overlapping", "offset", or
-         * "hidden"
-         */
-        trackLabels: types.optional(
-          types.string,
-          () => localStorageGetItem('lgv-trackLabels') || 'overlapping',
-        ),
-
         /**
          * #property
          * show the "center line"
@@ -239,6 +226,19 @@ export function stateModelFactory(pluginManager: PluginManager) {
 
         /**
          * #property
+         * how to display the track labels, can be "overlapping", "offset", or
+         * "hidden", or empty string "" (which results in conf being used). see
+         * LinearGenomeViewPlugin
+         * https://jbrowse.org/jb2/docs/config/lineargenomeviewplugin/ docs for
+         * how conf is used
+         */
+        trackLabels: types.optional(
+          types.string,
+          () => localStorageGetItem('lgv-trackLabels') || '',
+        ),
+
+        /**
+         * #property
          * show the "gridlines" in the track area
          */
         showGridlines: true,
@@ -248,19 +248,31 @@ export function stateModelFactory(pluginManager: PluginManager) {
       volatileWidth: undefined as number | undefined,
       minimumBlockWidth: 3,
       draggingTrackId: undefined as undefined | string,
-      volatileError: undefined as undefined | Error,
+      volatileError: undefined as unknown,
 
       // array of callbacks to run after the next set of the displayedRegions,
       // which is basically like an onLoad
       afterDisplayedRegionsSetCallbacks: [] as Function[],
       scaleFactor: 1,
-      trackRefs: {} as { [key: string]: HTMLDivElement },
+      trackRefs: {} as Record<string, HTMLDivElement>,
       coarseDynamicBlocks: [] as BaseBlock[],
       coarseTotalBp: 0,
       leftOffset: undefined as undefined | BpOffset,
       rightOffset: undefined as undefined | BpOffset,
     }))
     .views(self => ({
+      /**
+       * #getter
+       * this is the effective value of the track labels setting, incorporating
+       * both the config and view state. use this instead of view.trackLabels
+       */
+      get trackLabelsSetting() {
+        const sessionSetting = getConf(getSession(self), [
+          'LinearGenomeViewPlugin',
+          'trackLabels',
+        ])
+        return self.trackLabels || sessionSetting
+      },
       /**
        * #getter
        */
@@ -512,7 +524,7 @@ export function stateModelFactory(pluginManager: PluginManager) {
        * #getter
        */
       get trackTypeActions() {
-        const allActions: Map<string, MenuItem[]> = new Map()
+        const allActions = new Map<string, MenuItem[]>()
         self.tracks.forEach(track => {
           const trackInMap = allActions.get(track.type)
           if (!trackInMap) {
@@ -541,7 +553,7 @@ export function stateModelFactory(pluginManager: PluginManager) {
       /**
        * #action
        */
-      setError(error: Error | undefined) {
+      setError(error: unknown) {
         self.volatileError = error
       },
       /**
@@ -625,10 +637,8 @@ export function stateModelFactory(pluginManager: PluginManager) {
       ) {
         getSession(self).queueDialog(handleClose => [
           SearchResultsDialog,
-
           {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            model: self as any,
+            model: self as LinearGenomeViewModel,
             searchResults,
             searchQuery,
             handleClose,
@@ -724,6 +734,7 @@ export function stateModelFactory(pluginManager: PluginManager) {
        * #action
        */
       setTrackLabels(setting: 'overlapping' | 'offset' | 'hidden') {
+        localStorage.setItem('lgv-trackLabels', setting)
         self.trackLabels = setting
       },
 
@@ -886,8 +897,10 @@ export function stateModelFactory(pluginManager: PluginManager) {
        * creates an svg export and save using FileSaver
        */
       async exportSvg(opts: ExportSvgOptions = {}) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const html = await renderToSvg(self as any, opts)
+        const { renderToSvg } = await import(
+          './svgcomponents/SVGLinearGenomeView'
+        )
+        const html = await renderToSvg(self as LinearGenomeViewModel, opts)
         const blob = new Blob([html], { type: 'image/svg+xml' })
         saveAs(blob, opts.filename || 'image.svg')
       },
@@ -1016,7 +1029,7 @@ export function stateModelFactory(pluginManager: PluginManager) {
             icon: PhotoCameraIcon,
             onClick: () => {
               getSession(self).queueDialog(handleClose => [
-                ExportSvgDlg,
+                ExportSvgDialog,
                 { model: self, handleClose },
               ])
             },
@@ -1090,21 +1103,21 @@ export function stateModelFactory(pluginManager: PluginManager) {
                 label: 'Overlapping',
                 icon: VisibilityIcon,
                 type: 'radio',
-                checked: self.trackLabels === 'overlapping',
+                checked: self.trackLabelsSetting === 'overlapping',
                 onClick: () => self.setTrackLabels('overlapping'),
               },
               {
                 label: 'Offset',
                 icon: VisibilityIcon,
                 type: 'radio',
-                checked: self.trackLabels === 'offset',
+                checked: self.trackLabelsSetting === 'offset',
                 onClick: () => self.setTrackLabels('offset'),
               },
               {
                 label: 'Hidden',
                 icon: VisibilityIcon,
                 type: 'radio',
-                checked: self.trackLabels === 'hidden',
+                checked: self.trackLabelsSetting === 'hidden',
                 onClick: () => self.setTrackLabels('hidden'),
               },
             ],
@@ -1144,7 +1157,7 @@ export function stateModelFactory(pluginManager: PluginManager) {
             currentlyCalculatedStaticBlocks = ret
             stringifiedCurrentlyCalculatedStaticBlocks = sret
           }
-          return currentlyCalculatedStaticBlocks as BlockSet
+          return currentlyCalculatedStaticBlocks!
         },
         /**
          * #getter
@@ -1167,7 +1180,7 @@ export function stateModelFactory(pluginManager: PluginManager) {
                 ...block,
                 start: Math.floor(block.start),
                 end: Math.ceil(block.end),
-              } as BaseBlock),
+              }) as BaseBlock,
           )
         },
 
@@ -1215,9 +1228,8 @@ export function stateModelFactory(pluginManager: PluginManager) {
           self,
           autorun(() => {
             const s = (s: unknown) => JSON.stringify(s)
-            const { trackLabels, showCytobandsSetting, showCenterLine } = self
+            const { showCytobandsSetting, showCenterLine } = self
             if (typeof localStorage !== 'undefined') {
-              localStorage.setItem('lgv-trackLabels', trackLabels)
               localStorage.setItem('lgv-showCytobands', s(showCytobandsSetting))
               localStorage.setItem('lgv-showCenterLine', s(showCenterLine))
             }
@@ -1306,8 +1318,8 @@ export function stateModelFactory(pluginManager: PluginManager) {
        * Navigate to a location based on its refName and optionally start, end,
        * and assemblyName. Will not try to change displayed regions, use
        * `navToLocations` instead. Only navigates to a location if it is
-       * entirely within a displayedRegion. Navigates to the first matching location
-       * encountered.
+       * entirely within a displayedRegion. Navigates to the first matching
+       * location encountered.
        *
        * Throws an error if navigation was unsuccessful
        *
@@ -1338,8 +1350,11 @@ export function stateModelFactory(pluginManager: PluginManager) {
         ) {
           throw new Error('found start greater than end')
         }
-        const f1 = locations[0]
-        const f2 = locations[locations.length - 1]
+        const f1 = locations.at(0)
+        const f2 = locations.at(-1)
+        if (!f1 || !f2) {
+          return
+        }
         const a = self.assemblyNames[0]
         const { assemblyManager } = getSession(self)
         const assembly1 = assemblyManager.get(f1.assemblyName || a)
@@ -1473,6 +1488,32 @@ export function stateModelFactory(pluginManager: PluginManager) {
         return self.displayedRegions.length > 0
           ? this.pxToBp(self.width / 2)
           : undefined
+      },
+    }))
+    .actions(self => ({
+      afterCreate() {
+        function handler(e: KeyboardEvent) {
+          const session = getSession(self)
+          if (session.focusedViewId === self.id && (e.ctrlKey || e.metaKey)) {
+            if (e.code === 'ArrowLeft') {
+              e.preventDefault()
+              self.slide(-0.9)
+            } else if (e.code === 'ArrowRight') {
+              e.preventDefault()
+              self.slide(0.9)
+            } else if (e.code === 'ArrowUp' && self.scaleFactor === 1) {
+              e.preventDefault()
+              self.zoom(self.bpPerPx / 2)
+            } else if (e.code === 'ArrowDown' && self.scaleFactor === 1) {
+              e.preventDefault()
+              self.zoom(self.bpPerPx * 2)
+            }
+          }
+        }
+        document.addEventListener('keydown', handler)
+        addDisposer(self, () => {
+          document.removeEventListener('keydown', handler)
+        })
       },
     }))
 }

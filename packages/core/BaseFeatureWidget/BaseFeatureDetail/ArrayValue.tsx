@@ -7,7 +7,7 @@ import Attributes from './Attributes'
 import FieldName from './FieldName'
 import BasicValue from './BasicValue'
 
-export const useStyles = makeStyles()(theme => ({
+const useStyles = makeStyles()(theme => ({
   field: {
     display: 'flex',
     flexWrap: 'wrap',
@@ -17,7 +17,6 @@ export const useStyles = makeStyles()(theme => ({
     wordBreak: 'break-word',
     maxHeight: 300,
     padding: theme.spacing(0.5),
-    background: theme.palette.action.hover,
     border: `1px solid ${theme.palette.action.selected}`,
     boxSizing: 'border-box',
     overflow: 'auto',

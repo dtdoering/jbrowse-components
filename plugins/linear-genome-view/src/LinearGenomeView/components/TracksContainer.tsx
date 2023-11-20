@@ -25,7 +25,7 @@ const useStyles = makeStyles()({
 
 type LGV = LinearGenomeViewModel
 
-export default observer(function TracksContainer({
+const TracksContainer = observer(function TracksContainer({
   children,
   model,
 }: {
@@ -53,7 +53,7 @@ export default observer(function TracksContainer({
   } = useRangeSelect(ref, model, true)
   useWheelScroll(ref, model)
 
-  const additionals = pluginManager.evaluateExtensionPoint(
+  const additional = pluginManager.evaluateExtensionPoint(
     'LinearGenomeView-TracksContainerComponent',
     undefined,
     { model },
@@ -107,8 +107,10 @@ export default observer(function TracksContainer({
           />
         }
       />
-      {additionals}
+      {additional}
       {children}
     </div>
   )
 })
+
+export default TracksContainer

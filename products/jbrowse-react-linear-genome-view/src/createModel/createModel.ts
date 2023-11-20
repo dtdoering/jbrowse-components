@@ -1,3 +1,4 @@
+import React from 'react'
 import assemblyManagerFactory, {
   assemblyConfigSchemaFactory,
 } from '@jbrowse/core/assemblyManager'
@@ -20,6 +21,12 @@ export default function createModel(
   makeWorkerInstance: () => Worker = () => {
     throw new Error('no makeWorkerInstance supplied')
   },
+
+  hydrateFn?: (
+    container: Element | Document,
+    initialChildren: React.ReactNode,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) => any,
 ) {
   const pluginManager = new PluginManager(
     [...corePlugins, ...runtimePlugins].map(P => new P()),
@@ -54,13 +61,14 @@ export default function createModel(
       ),
     })
     .volatile(self => ({
-      error: undefined as Error | undefined,
+      error: undefined as unknown,
       rpcManager: new RpcManager(pluginManager, self.config.configuration.rpc, {
         WebWorkerRpcDriver: {
           makeWorkerInstance,
         },
         MainThreadRpcDriver: {},
       }),
+      hydrateFn,
       textSearchManager: new TextSearchManager(pluginManager),
       adminMode: false,
       version,
@@ -85,8 +93,8 @@ export default function createModel(
       /**
        * #action
        */
-      setError(errorMessage: Error | undefined) {
-        self.error = errorMessage
+      setError(error: unknown) {
+        self.error = error
       },
       /**
        * #action

@@ -24,6 +24,7 @@ import UrlChooser from './UrlChooser'
 
 // icons
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import { notEmpty } from '../../util'
 
 function ToggleButtonWithTooltip(props: ToggleButtonProps) {
   const { title, children, ...other } = props
@@ -41,7 +42,7 @@ function shorten(str: string, len: number) {
   return str
 }
 
-export default observer(function (props: {
+const FileSelector = observer(function (props: {
   location?: FileLocation
   setLocation: (param: FileLocation) => void
   setName?: (str: string) => void
@@ -172,13 +173,15 @@ export default observer(function (props: {
                 key={acct.internetAccountId}
                 value={acct.internetAccountId}
                 onClick={() => {
-                  const prev = shownAccts[shownAccts.length - 1]
+                  const prev = shownAccts.at(-1)
                   setShownAccts([...shownAccts.slice(0, -1), acct])
-                  setHiddenAccts([
-                    prev,
-                    ...hiddenAccts.slice(0, idx),
-                    ...hiddenAccts.slice(idx + 1),
-                  ])
+                  setHiddenAccts(
+                    [
+                      prev,
+                      ...hiddenAccts.slice(0, idx),
+                      ...hiddenAccts.slice(idx + 1),
+                    ].filter(notEmpty),
+                  )
                   setToggleButtonValue(acct.internetAccountId)
                   setAnchorEl(null)
                 }}
@@ -194,3 +197,5 @@ export default observer(function (props: {
     </>
   )
 })
+
+export default FileSelector

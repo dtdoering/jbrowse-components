@@ -27,7 +27,7 @@ config: createConfigModel(pluginManager, assemblyConfigSchema)
 
 ```js
 // type signature
-IModelType<{ id: IOptionalIType<ISimpleType<string>, [undefined]>; name: ISimpleType<string>; margin: IType<number, number, number>; } & { ...; } & { ...; } & { ...; }, { ...; } & ... 18 more ... & { ...; }, _NotCustomized, _NotCustomized>
+IModelType<{ id: IOptionalIType<ISimpleType<string>, [undefined]>; name: ISimpleType<string>; margin: IType<number, number, number>; } & { ...; } & { ...; } & { ...; }, { ...; } & ... 20 more ... & { ...; }, _NotCustomized, _NotCustomized>
 // code
 session: Session
 ```
@@ -36,9 +36,9 @@ session: Session
 
 ```js
 // type signature
-IModelType<{ assemblies: IArrayType<IModelType<{ configuration: IMaybe<IReferenceType<IAnyType>>; }, { error: unknown; loaded: boolean; loadingP: Promise<void>; volatileRegions: BasicRegion[]; refNameAliases: RefNameAliases; lowerCaseRefNameAliases: RefNameAliases; cytobands: Feature[]; } & ... 4 more ... & { ...; }...
+IOptionalIType<IModelType<{ assemblies: IArrayType<IModelType<{ configuration: IMaybe<IReferenceType<IAnyType>>; }, { error: unknown; loaded: boolean; loadingP: Promise<void>; volatileRegions: BasicRegion[]; refNameAliases: RefNameAliases; lowerCaseRefNameAliases: RefNameAliases; cytobands: Feature[]; } & ... 5 more...
 // code
-assemblyManager: assemblyManagerType
+assemblyManager: types.optional(assemblyManagerType, {})
 ```
 
 #### property: internetAccounts
@@ -88,7 +88,7 @@ renameCurrentSession: (sessionName: string) => void
 
 ```js
 // type signature
-setError: (errorMessage: Error) => void
+setError: (error: unknown) => void
 ```
 
 #### action: addInternetAccount

@@ -1,27 +1,30 @@
 import { lazy } from 'react'
 import { getParent, getSnapshot, types } from 'mobx-state-tree'
+import clone from 'clone'
 
 import SettingsIcon from '@mui/icons-material/Settings'
 import CopyIcon from '@mui/icons-material/FileCopy'
 import DeleteIcon from '@mui/icons-material/Delete'
 import InfoIcon from '@mui/icons-material/Info'
 import { Indexing } from '@jbrowse/core/ui/Icons'
+import { isSupportedIndexingAdapter } from '@jbrowse/core/util'
 
 import PluginManager from '@jbrowse/core/PluginManager'
 import { BaseTrackConfig } from '@jbrowse/core/pluggableElementTypes'
-import { supportedIndexingAdapters } from '@jbrowse/text-indexing'
 
-import type { SessionWithDialogs } from '@jbrowse/product-core/src/Session/DialogQueue'
-import type { SessionWithTracks } from '@jbrowse/product-core/src/Session/Tracks'
-import type { SessionWithDrawerWidgets } from '@jbrowse/product-core/src/Session/DrawerWidgets'
+import type {
+  SessionWithDialogs,
+  SessionWithTracks,
+  SessionWithDrawerWidgets,
+} from '@jbrowse/product-core'
 import { DesktopRootModel } from '../rootModel'
 
 const AboutDialog = lazy(() => import('./AboutDialog'))
 
 /**
- * #stateModel JBrowseDesktopSessionTrackMenuMixin
+ * #stateModel DesktopSessionTrackMenuMixin
  */
-export default function TrackMenu(pluginManager: PluginManager) {
+export function DesktopSessionTrackMenuMixin(_pluginManager: PluginManager) {
   return types.model({}).views(self => ({
     /**
      * #method
@@ -30,7 +33,7 @@ export default function TrackMenu(pluginManager: PluginManager) {
       const session = self as SessionWithDialogs &
         SessionWithTracks &
         SessionWithDrawerWidgets
-      const trackSnapshot = JSON.parse(JSON.stringify(getSnapshot(trackConfig)))
+      const trackSnapshot = clone(getSnapshot(trackConfig))
       return [
         {
           label: 'About track',
@@ -68,35 +71,43 @@ export default function TrackMenu(pluginManager: PluginManager) {
           },
           icon: CopyIcon,
         },
-        {
-          label: trackSnapshot.textSearching ? 'Re-index track' : 'Index track',
-          disabled: !supportedIndexingAdapters(trackSnapshot.adapter.type),
-          onClick: () => {
-            const rootModel = getParent<DesktopRootModel>(self)
-            const { jobsManager } = rootModel
-            const { trackId, assemblyNames, textSearching, name } =
-              trackSnapshot
-            const indexName = `${name}-index`
-            // TODO: open jobs list widget
-            jobsManager?.queueJob({
-              indexingParams: {
-                attributes: textSearching?.indexingAttributes || ['Name', 'ID'],
-                exclude: textSearching?.indexingFeatureTypesToExclude || [
-                  'CDS',
-                  'exon',
-                ],
-                assemblies: assemblyNames,
-                tracks: [trackId],
-                indexType: 'perTrack',
-                timestamp: new Date().toISOString(),
-                name: indexName,
+        ...(isSupportedIndexingAdapter(trackSnapshot.adapter?.type)
+          ? [
+              {
+                label: trackSnapshot.textSearching
+                  ? 'Re-index track'
+                  : 'Index track',
+                onClick: () => {
+                  const rootModel = getParent<DesktopRootModel>(self)
+                  const { jobsManager } = rootModel
+                  const { trackId, assemblyNames, textSearching, name } =
+                    trackSnapshot
+                  const indexName = `${name}-index`
+                  // TODO: open jobs list widget
+                  jobsManager.queueJob({
+                    indexingParams: {
+                      attributes: textSearching?.indexingAttributes || [
+                        'Name',
+                        'ID',
+                      ],
+                      exclude: textSearching?.indexingFeatureTypesToExclude || [
+                        'CDS',
+                        'exon',
+                      ],
+                      assemblies: assemblyNames,
+                      tracks: [trackId],
+                      indexType: 'perTrack',
+                      timestamp: new Date().toISOString(),
+                      name: indexName,
+                    },
+                    name: indexName,
+                    cancelCallback: () => jobsManager.abortJob(),
+                  })
+                },
+                icon: Indexing,
               },
-              name: indexName,
-              cancelCallback: () => jobsManager.abortJob(),
-            })
-          },
-          icon: Indexing,
-        },
+            ]
+          : []),
       ]
     },
   }))

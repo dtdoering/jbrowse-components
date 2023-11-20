@@ -10,10 +10,9 @@ import PluginManager from '@jbrowse/core/PluginManager'
 
 // locals
 import ShareButton from './ShareButton'
-import AdminComponent from './AdminComponent'
 import { WebSessionModel } from '../sessionModel'
 
-export default observer(function ({
+const JBrowse = observer(function ({
   pluginManager,
 }: {
   pluginManager: PluginManager
@@ -28,7 +27,7 @@ export default observer(function ({
   const currentSessionId = session.id
 
   useEffect(() => {
-    setSessionId(`local-${currentSessionId}`)
+    setSessionId(`local-${currentSessionId}`, 'replaceIn')
     // @ts-expect-error
     window.JBrowseRootModel = rootModel
     // @ts-expect-error
@@ -77,7 +76,8 @@ export default observer(function ({
         session={session}
         HeaderButtons={<ShareButton session={session} />}
       />
-      {adminKey ? <AdminComponent pluginManager={pluginManager} /> : null}
     </ThemeProvider>
   )
 })
+
+export default JBrowse

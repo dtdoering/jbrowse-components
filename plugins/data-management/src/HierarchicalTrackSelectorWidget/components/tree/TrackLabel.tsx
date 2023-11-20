@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import { Checkbox, FormControlLabel, IconButton, Tooltip } from '@mui/material'
+import React from 'react'
+import { Checkbox, FormControlLabel, Tooltip } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
-import JBrowseMenu from '@jbrowse/core/ui/Menu'
 import { getSession } from '@jbrowse/core/util'
+import SanitizedHTML from '@jbrowse/core/ui/SanitizedHTML'
 import {
   AnyConfigurationModel,
   readConfObject,
@@ -12,9 +12,9 @@ import {
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 
 // locals
-import { isUnsupported } from '../util'
-import { NodeData } from './util'
-import { SanitizedHTML } from '@jbrowse/core/ui'
+import { isUnsupported, NodeData } from '../util'
+import CascadingMenuButton from '@jbrowse/core/ui/CascadingMenuButton'
+import { HierarchicalTrackSelectorModel } from '../../model'
 
 const useStyles = makeStyles()(theme => ({
   compactCheckbox: {
@@ -39,7 +39,6 @@ export default function TrackLabel({ data }: { data: NodeData }) {
   const { classes } = useStyles()
   const { checked, conf, model, drawerPosition, id, name, onChange, selected } =
     data
-  const [info, setInfo] = useState<InfoArgs>()
   const description = (conf && readConfObject(conf, ['description'])) || ''
   return (
     <>
@@ -62,46 +61,52 @@ export default function TrackLabel({ data }: { data: NodeData }) {
             />
           }
           label={
-            <div style={{ background: selected ? '#cccc' : undefined }}>
+            <div
+              data-testid={`htsTrackLabel-${id}`}
+              style={{ background: selected ? '#cccc' : undefined }}
+            >
               <SanitizedHTML html={name} />
             </div>
           }
         />
       </Tooltip>
-      <IconButton
-        onClick={e => setInfo({ target: e.currentTarget, id, conf })}
-        style={{ padding: 0 }}
-        data-testid={`htsTrackEntryMenu-${id}`}
-      >
-        <MoreHorizIcon />
-      </IconButton>
-
-      {info ? (
-        <JBrowseMenu
-          anchorEl={info?.target}
-          menuItems={[
-            ...(getSession(model).getTrackActionMenuItems?.(info.conf) || []),
-            {
-              label: 'Add to selection',
-              onClick: () => model.addToSelection([info.conf]),
-            },
-            ...(selected
-              ? [
-                  {
-                    label: 'Remove from selection',
-                    onClick: () => model.removeFromSelection([info.conf]),
-                  },
-                ]
-              : []),
-          ]}
-          onMenuItemClick={(_event, callback) => {
-            callback()
-            setInfo(undefined)
-          }}
-          open={Boolean(info)}
-          onClose={() => setInfo(undefined)}
-        />
-      ) : null}
+      <TrackMenuButton model={model} selected={selected} id={id} conf={conf} />
     </>
+  )
+}
+
+function TrackMenuButton({
+  id,
+  model,
+  selected,
+  conf,
+}: {
+  id: string
+  selected: boolean
+  conf: AnyConfigurationModel
+  model: HierarchicalTrackSelectorModel
+}) {
+  return (
+    <CascadingMenuButton
+      style={{ padding: 0 }}
+      data-testid={`htsTrackEntryMenu-${id}`}
+      menuItems={[
+        ...(getSession(model).getTrackActionMenuItems?.(conf) || []),
+        {
+          label: 'Add to selection',
+          onClick: () => model.addToSelection([conf]),
+        },
+        ...(selected
+          ? [
+              {
+                label: 'Remove from selection',
+                onClick: () => model.removeFromSelection([conf]),
+              },
+            ]
+          : []),
+      ]}
+    >
+      <MoreHorizIcon />
+    </CascadingMenuButton>
   )
 }

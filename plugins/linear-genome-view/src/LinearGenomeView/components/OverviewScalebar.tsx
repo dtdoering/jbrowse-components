@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Typography, useTheme, alpha } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { observer } from 'mobx-react'
@@ -93,11 +93,12 @@ const Polygon = observer(function ({
   const { tertiary, primary } = theme.palette
   const polygonColor = tertiary ? tertiary.light : primary.light
 
+  // catches possible null from at's below
   if (!contentBlocks.length) {
     return null
   }
-  const first = contentBlocks[0]
-  const last = contentBlocks[contentBlocks.length - 1]
+  const first = contentBlocks.at(0)!
+  const last = contentBlocks.at(-1)!
   const topLeft =
     (overview.bpToPx({
       ...first,
@@ -238,18 +239,21 @@ const Scalebar = observer(function ({
 
   const { tertiary, primary } = theme.palette
   const scalebarColor = tertiary ? tertiary.light : primary.light
-
+  // catches possible null from at's below
   if (!visibleRegions.length) {
     return null
   }
-  const first = visibleRegions[0]
+
+  const first = visibleRegions.at(0)!
+
+  const last = visibleRegions.at(-1)!
+
   const firstOverviewPx =
     overview.bpToPx({
       ...first,
       coord: first.reversed ? first.end : first.start,
     }) || 0
 
-  const last = visibleRegions[visibleRegions.length - 1]
   const lastOverviewPx =
     overview.bpToPx({
       ...last,
@@ -298,7 +302,7 @@ const Scalebar = observer(function ({
   )
 })
 
-export default observer(function OverviewScalebar({
+const OverviewScalebar = observer(function ({
   model,
   children,
 }: {
@@ -308,15 +312,23 @@ export default observer(function OverviewScalebar({
   const { classes } = useStyles()
   const { totalBp, width, cytobandOffset, displayedRegions } = model
 
-  const overview = Base1DView.create({
-    displayedRegions: JSON.parse(JSON.stringify(displayedRegions)),
-    interRegionPaddingWidth: 0,
-    minimumBlockWidth: model.minimumBlockWidth,
-  })
-
   const modWidth = width - cytobandOffset
-  overview.setVolatileWidth(modWidth)
-  overview.showAllRegions()
+  const overview = useMemo(() => {
+    const overview = Base1DView.create({
+      displayedRegions: JSON.parse(JSON.stringify(displayedRegions)),
+      interRegionPaddingWidth: 0,
+      minimumBlockWidth: model.minimumBlockWidth,
+    })
+
+    overview.setVolatileWidth(modWidth)
+    overview.showAllRegions()
+    return overview
+  }, [
+    JSON.stringify(displayedRegions), // eslint-disable-line react-hooks/exhaustive-deps
+    model.minimumBlockWidth,
+    modWidth,
+    displayedRegions,
+  ])
 
   const scale =
     totalBp / (modWidth - (displayedRegions.length - 1) * wholeSeqSpacer)
@@ -343,3 +355,5 @@ export default observer(function OverviewScalebar({
 export { Polygon }
 
 export { default as Cytobands } from './Cytobands'
+
+export default OverviewScalebar

@@ -3,9 +3,11 @@ import { IconButton, Typography, alpha } from '@mui/material'
 import { observer } from 'mobx-react'
 import { IBaseViewModel } from '@jbrowse/core/pluggableElementTypes/models/BaseViewModel'
 import { Logomark } from '@jbrowse/core/ui'
-import ViewMenu from './ViewMenu'
 import { makeStyles } from 'tss-react/mui'
 import { getSession } from '@jbrowse/core/util'
+
+// locals
+import ViewMenu from './ViewMenu'
 
 const VersionAboutDialog = lazy(() => import('./VersionAboutDialog'))
 
@@ -20,6 +22,9 @@ const useStyles = makeStyles()(theme => ({
   grow: {
     flexGrow: 1,
   },
+  container: {
+    display: 'flex',
+  },
   iconRoot: {
     '&:hover': {
       backgroundColor: alpha(
@@ -33,13 +38,13 @@ const useStyles = makeStyles()(theme => ({
   },
 }))
 
-export default observer(({ view }: { view: IBaseViewModel }) => {
+const ViewTitle = observer(({ view }: { view: IBaseViewModel }) => {
   const { classes } = useStyles()
   const { displayName } = view
   const [dlgOpen, setDlgOpen] = useState(false)
   const session = getSession(view)
   return (
-    <div style={{ display: 'flex' }}>
+    <div className={classes.container}>
       <ViewMenu
         model={view}
         IconButtonProps={{
@@ -72,3 +77,5 @@ export default observer(({ view }: { view: IBaseViewModel }) => {
     </div>
   )
 })
+
+export default ViewTitle

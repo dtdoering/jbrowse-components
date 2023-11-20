@@ -5,14 +5,16 @@ import {
   AnyConfiguration,
   AnyConfigurationModel,
 } from '@jbrowse/core/configuration'
-import Tracks from './Tracks'
-import { isBaseSession } from './Base'
+
+// locals
+import { TracksManagerSessionMixin } from './Tracks'
+import { isBaseSession } from './BaseSession'
 
 /**
  * #stateModel SessionTracksManagerSessionMixin
  */
-export default function SessionTracks(pluginManager: PluginManager) {
-  return Tracks(pluginManager)
+export function SessionTracksManagerSessionMixin(pluginManager: PluginManager) {
+  return TracksManagerSessionMixin(pluginManager)
     .named('SessionTracksManagerSessionMixin')
     .props({
       /**
@@ -31,15 +33,17 @@ export default function SessionTracks(pluginManager: PluginManager) {
       },
     }))
     .actions(self => {
-      const super_addTrackConf = self.addTrackConf
-      const super_deletetrackConf = self.deleteTrackConf
+      const {
+        addTrackConf: superAddTrackConf,
+        deleteTrackConf: superDeleteTrackConf,
+      } = self
       return {
         /**
          * #action
          */
         addTrackConf(trackConf: AnyConfiguration) {
           if (self.adminMode) {
-            return super_addTrackConf(trackConf)
+            return superAddTrackConf(trackConf)
           }
           const { trackId, type } = trackConf as {
             type: string
@@ -61,11 +65,12 @@ export default function SessionTracks(pluginManager: PluginManager) {
          */
         deleteTrackConf(trackConf: AnyConfigurationModel) {
           // try to delete it in the main config if in admin mode
-          const found = super_deletetrackConf(trackConf)
+          const found = superDeleteTrackConf(trackConf)
           if (found) {
             return found
           }
-          // if not found or not in admin mode, try to delete it in the sessionTracks
+          // if not found or not in admin mode, try to delete it in the
+          // sessionTracks
           const { trackId } = trackConf
           const idx = self.sessionTracks.findIndex(t => t.trackId === trackId)
           if (idx === -1) {
@@ -78,7 +83,9 @@ export default function SessionTracks(pluginManager: PluginManager) {
 }
 
 /** Session mixin MST type for a session that has `sessionTracks` */
-export type SessionWithSessionTracksType = ReturnType<typeof SessionTracks>
+export type SessionWithSessionTracksType = ReturnType<
+  typeof SessionTracksManagerSessionMixin
+>
 
 /** Instance of a session that has `sessionTracks` */
 export type SessionWithSessionTracks = Instance<SessionWithSessionTracksType>

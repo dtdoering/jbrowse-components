@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { lazy } from 'react'
 import PluginManager from '@jbrowse/core/PluginManager'
 import {
   cast,
@@ -9,7 +9,6 @@ import {
 } from 'mobx-state-tree'
 import { Region } from '@jbrowse/core/util/types/mst'
 import { saveAs } from 'file-saver'
-import { renderToSvg } from '../svgcomponents/SVGCircularView'
 import {
   AnyConfigurationModel,
   readConfObject,
@@ -28,7 +27,6 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen'
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'
 
 // locals
-import ExportSvgDlg from '../components/ExportSvgDialog'
 import { calculateStaticSlices, sliceIsVisible, SliceRegion } from './slices'
 import { viewportVisibleSection } from './viewportVisibleRegion'
 import {
@@ -36,6 +34,9 @@ import {
   showTrackGeneric,
   toggleTrackGeneric,
 } from '@jbrowse/core/util/tracks'
+
+// lazies
+const ExportSvgDialog = lazy(() => import('../components/ExportSvgDialog'))
 
 export interface ExportSvgOptions {
   rasterizeLayers?: boolean
@@ -55,8 +56,9 @@ function stateModelFactory(pluginManager: PluginManager) {
   const defaultHeight = 400
   return types
     .compose(
+      'CircularView',
       BaseViewModel,
-      types.model('CircularView', {
+      types.model({
         /**
          * #property
          */
@@ -114,13 +116,33 @@ function stateModelFactory(pluginManager: PluginManager) {
          */
         scrollY: 0,
 
+        /**
+         * #property
+         */
         minimumRadiusPx: 25,
+        /**
+         * #property
+         */
         spacingPx: 10,
+        /**
+         * #property
+         */
         paddingPx: 80,
+        /**
+         * #property
+         */
         lockedPaddingPx: 100,
+        /**
+         * #property
+         */
         minVisibleWidth: 6,
+        /**
+         * #property
+         */
         minimumBlockWidth: 20,
-
+        /**
+         * #property
+         */
         trackSelectorType: 'hierarchical',
       }),
     )
@@ -145,13 +167,9 @@ function stateModelFactory(pluginManager: PluginManager) {
        * #getter
        */
       get visibleSection() {
+        const { scrollX, scrollY, width, height } = self
         return viewportVisibleSection(
-          [
-            self.scrollX,
-            self.scrollX + self.width,
-            self.scrollY,
-            self.scrollY + self.height,
-          ],
+          [scrollX, scrollX + width, scrollY, scrollY + height],
           this.centerXY,
           this.radiusPx,
         )
@@ -281,7 +299,7 @@ function stateModelFactory(pluginManager: PluginManager) {
           const widthPx = widthBp / self.bpPerPx
           if (widthPx < self.minVisibleWidth) {
             // too small to see, collapse into a single elision region
-            const lastVisible = visible[visible.length - 1]
+            const lastVisible = visible.at(-1)
             if (lastVisible?.elided) {
               lastVisible.regions.push({ ...region })
               lastVisible.widthBp += widthBp
@@ -550,8 +568,8 @@ function stateModelFactory(pluginManager: PluginManager) {
        * creates an svg export and save using FileSaver
        */
       async exportSvg(opts: ExportSvgOptions = {}) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const html = await renderToSvg(self as any, opts)
+        const { renderToSvg } = await import('../svgcomponents/SVGCircularView')
+        const html = await renderToSvg(self as CircularViewModel, opts)
         const blob = new Blob([html], { type: 'image/svg+xml' })
         saveAs(blob, opts.filename || 'image.svg')
       },
@@ -573,7 +591,7 @@ function stateModelFactory(pluginManager: PluginManager) {
             icon: PhotoCameraIcon,
             onClick: () => {
               getSession(self).queueDialog(handleClose => [
-                ExportSvgDlg,
+                ExportSvgDialog,
                 { model: self, handleClose },
               ])
             },

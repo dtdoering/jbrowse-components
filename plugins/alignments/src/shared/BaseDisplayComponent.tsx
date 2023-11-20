@@ -1,6 +1,9 @@
 import React from 'react'
 import { LoadingEllipses } from '@jbrowse/core/ui'
-import { BlockMsg } from '@jbrowse/plugin-linear-genome-view'
+import {
+  BlockMsg,
+  LinearGenomeViewModel,
+} from '@jbrowse/plugin-linear-genome-view'
 import { makeStyles } from 'tss-react/mui'
 import { observer } from 'mobx-react'
 
@@ -9,24 +12,21 @@ import { LinearReadCloudDisplayModel } from '../LinearReadCloudDisplay/model'
 import { LinearReadArcsDisplayModel } from '../LinearReadArcsDisplay/model'
 import { getContainingView } from '@jbrowse/core/util'
 
-const useStyles = makeStyles()(theme => {
-  const bg = theme.palette.action.disabledBackground
-  return {
-    loading: {
-      backgroundColor: theme.palette.background.default,
-      backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 5px, ${bg} 5px, ${bg} 10px)`,
-      position: 'absolute',
-      bottom: 0,
-      height: 50,
-      width: 300,
-      right: 0,
-      pointerEvents: 'none',
-      textAlign: 'center',
-    },
-  }
-})
+const useStyles = makeStyles()(theme => ({
+  loading: {
+    backgroundColor: theme.palette.background.default,
+    backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 5px, ${theme.palette.action.disabledBackground} 5px, ${theme.palette.action.disabledBackground} 10px)`,
+    position: 'absolute',
+    bottom: 0,
+    height: 50,
+    width: 300,
+    right: 0,
+    pointerEvents: 'none',
+    textAlign: 'center',
+  },
+}))
 
-export default observer(function ({
+const BaseDisplayComponent = observer(function ({
   model,
   children,
 }: {
@@ -56,7 +56,7 @@ const DataDisplay = observer(function ({
   children?: React.ReactNode
 }) {
   const { drawn, loading } = model
-  const view = getContainingView(model)
+  const view = getContainingView(model) as LinearGenomeViewModel
   const left = (model.lastDrawnOffsetPx || 0) - view.offsetPx
   return (
     // this data-testid is located here because changing props on the canvas
@@ -81,3 +81,5 @@ const LoadingBar = observer(function ({
     </div>
   )
 })
+
+export default BaseDisplayComponent

@@ -10,7 +10,7 @@ info
 
 ### Source file
 
-[plugins/alignments/src/LinearReadCloudDisplay/model.tsx](https://github.com/GMOD/jbrowse-components/blob/main/plugins/alignments/src/LinearReadCloudDisplay/model.tsx)
+[plugins/alignments/src/LinearReadCloudDisplay/model.ts](https://github.com/GMOD/jbrowse-components/blob/main/plugins/alignments/src/LinearReadCloudDisplay/model.ts)
 
 extends `BaseDisplay`, it is not a block based track, hence not
 BaseLinearDisplay
@@ -59,13 +59,22 @@ colorBy: types.maybe(
         )
 ```
 
+#### property: drawSingletons
+
+```js
+// type signature
+true
+// code
+drawSingletons: true
+```
+
 ### LinearReadCloudDisplay - Methods
 
 #### method: trackMenuItems
 
 ```js
 // type signature
-trackMenuItems: () => MenuItem[]
+trackMenuItems: () => (MenuDivider | MenuSubHeader | NormalMenuItem | CheckboxMenuItem | RadioMenuItem | SubMenuItem | { ...; })[]
 ```
 
 #### method: renderSvg
@@ -76,6 +85,13 @@ renderSvg: (opts: { rasterizeLayers?: boolean; }) => Promise<React.ReactNode>
 ```
 
 ### LinearReadCloudDisplay - Actions
+
+#### action: setDrawSingletons
+
+```js
+// type signature
+setDrawSingletons: (f: boolean) => void
+```
 
 #### action: setLastDrawnOffsetPx
 
@@ -126,5 +142,5 @@ setChainData: (args: ChainData) => void
 
 ```js
 // type signature
-setFilterBy: (filter: Filter) => void
+setFilterBy: (filter: IFilter) => void
 ```

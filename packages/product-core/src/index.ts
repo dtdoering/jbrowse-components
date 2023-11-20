@@ -1,4 +1,4 @@
-export * as RootModel from './RootModel'
-export * as Session from './Session'
-export { isSession } from './Session'
-export { default as AboutDialog } from './ui/AboutDialog'
+export * from './RootModel'
+export * from './Session'
+export * from './ui'
+export * from './rpcWorker'

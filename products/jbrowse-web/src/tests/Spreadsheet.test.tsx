@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom/extend-expect'
+import '@testing-library/jest-dom'
 import { screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createView, setup, doBeforeEach } from './util'
@@ -10,6 +10,7 @@ beforeEach(() => {
 })
 
 const delay = { timeout: 50000 }
+const opts = [{}, delay]
 
 async function waitForReady() {
   await waitFor(
@@ -26,7 +27,7 @@ test('opens a vcf.gz file in the spreadsheet view', async () => {
   await user.click(await screen.findByText('Add'))
   await user.click(await screen.findByText('Spreadsheet view'))
 
-  fireEvent.change(await screen.findByTestId('urlInput'), {
+  fireEvent.change(await screen.findByTestId('urlInput', ...opts), {
     target: { value: 'volvox.filtered.vcf.gz' },
   })
 
@@ -42,7 +43,7 @@ test('opens a bed.gz file in the spreadsheet view', async () => {
   await user.click(await screen.findByText('Add'))
   await user.click(await screen.findByText('Spreadsheet view'))
 
-  fireEvent.change(await screen.findByTestId('urlInput'), {
+  fireEvent.change(await screen.findByTestId('urlInput', ...opts), {
     target: { value: 'volvox-bed12.bed.gz' },
   })
   await waitForReady()

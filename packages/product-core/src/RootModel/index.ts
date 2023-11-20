@@ -1,2 +1,5 @@
-export { default as BaseRootModel } from './Base'
-export { default as InternetAccounts } from './InternetAccounts'
+export * from './BaseRootModel'
+export * from './InternetAccounts'
+export * from './FormatAbout'
+export * from './FormatDetails'
+export * from './HierarchicalConfig'

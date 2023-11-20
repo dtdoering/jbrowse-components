@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import {
   addDisposer,
   cast,
@@ -12,7 +13,7 @@ import { autorun } from 'mobx'
 
 // jbrowse
 import BaseViewModel from '@jbrowse/core/pluggableElementTypes/models/BaseViewModel'
-import { MenuItem, ReturnToImportFormDialog } from '@jbrowse/core/ui'
+import { MenuItem } from '@jbrowse/core/ui'
 import { getSession, isSessionModelWithWidgets, avg } from '@jbrowse/core/util'
 import PluginManager from '@jbrowse/core/PluginManager'
 import { ElementId } from '@jbrowse/core/util/types/mst'
@@ -29,6 +30,11 @@ import {
   showTrackGeneric,
   toggleTrackGeneric,
 } from '@jbrowse/core/util/tracks'
+
+// lazies
+const ReturnToImportFormDialog = lazy(
+  () => import('@jbrowse/core/ui/ReturnToImportFormDialog'),
+)
 
 /**
  * #stateModel LinearComparativeView
@@ -153,13 +159,15 @@ function stateModelFactory(pluginManager: PluginManager) {
       // e.g. read vs ref
       beforeDestroy() {
         const session = getSession(self)
-        self.assemblyNames.forEach(asm => session.removeTemporaryAssembly(asm))
+        for (const name of self.assemblyNames) {
+          session.removeTemporaryAssembly?.(name)
+        }
       },
 
       onSubviewAction(actionName: string, path: string, args?: unknown[]) {
         self.views.forEach(view => {
           const ret = getPath(view)
-          if (ret.lastIndexOf(path) !== ret.length - path.length) {
+          if (!ret.endsWith(path)) {
             // @ts-expect-error
             view[actionName](args?.[0])
           }

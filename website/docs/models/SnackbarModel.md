@@ -18,7 +18,7 @@ info
 
 ```js
 // type
-IObservableArray<any>
+IObservableArray<SnackbarMessage>
 ```
 
 ### SnackbarModel - Actions
@@ -34,18 +34,14 @@ notify: (message: string, level?: NotificationLevel, action?: SnackAction) => vo
 
 ```js
 // type signature
-pushSnackbarMessage: (
-  message: string,
-  level?: NotificationLevel,
-  action?: SnackAction,
-) => number
+pushSnackbarMessage: (message: string, level?: NotificationLevel, action?: SnackAction) => number
 ```
 
 #### action: popSnackbarMessage
 
 ```js
 // type signature
-popSnackbarMessage: () => any
+popSnackbarMessage: () => SnackbarMessage
 ```
 
 #### action: removeSnackbarMessage

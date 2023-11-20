@@ -12,7 +12,10 @@ import { readFeaturesToCIGAR, readFeaturesToMismatches } from './util'
 export default class CramSlightlyLazyFeature implements Feature {
   // uses parameter properties to automatically create fields on the class
   // https://www.typescriptlang.org/docs/handbook/classes.html#parameter-properties
-  constructor(private record: CramRecord, private _store: CramAdapter) {}
+  constructor(
+    private record: CramRecord,
+    private _store: CramAdapter,
+  ) {}
 
   _get_name() {
     return this.record.readName
@@ -156,9 +159,7 @@ export default class CramSlightlyLazyFeature implements Feature {
     const mismatches = this.get('mismatches')
     if (mismatches.length) {
       const record =
-        this.get('strand') === -1
-          ? mismatches[mismatches.length - 1]
-          : mismatches[0]
+        this.get('strand') === -1 ? mismatches.at(-1) : mismatches[0]
       const { type, cliplen } = record
       if (type === 'softclip' || type === 'hardclip') {
         return cliplen

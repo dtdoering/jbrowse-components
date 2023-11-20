@@ -1,10 +1,12 @@
 import React from 'react'
 import { makeStyles } from 'tss-react/mui'
-import { SanitizedHTML } from '../../ui'
 import isObject from 'is-object'
 import { Link } from '@mui/material'
 
-export const useStyles = makeStyles()(theme => ({
+// locals
+import { SanitizedHTML } from '../../ui'
+
+const useStyles = makeStyles()(theme => ({
   fieldValue: {
     wordBreak: 'break-word',
     maxHeight: 300,

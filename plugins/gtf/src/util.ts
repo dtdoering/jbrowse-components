@@ -8,7 +8,7 @@ export interface FeatureLoc {
   child_features: FeatureLoc[][]
   data: unknown
   derived_features: unknown
-  attributes: { [key: string]: unknown[] }
+  attributes: Record<string, unknown[]>
 }
 
 export function featureData(data: FeatureLoc) {
@@ -45,7 +45,7 @@ export function featureData(data: FeatureLoc) {
       if (Array.isArray(attr) && attr.length === 1) {
         // gtf uses double quotes for text values in the attributes column,
         // remove them
-        attr = `${attr[0]}`.replace(/^"|"$/g, '')
+        attr = `${attr[0]}`.replaceAll(/^"|"$/g, '')
       }
       f[b] = attr
     }

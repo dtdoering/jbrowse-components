@@ -11,14 +11,15 @@ import {
 import SyntenyTooltip from './SyntenyTooltip'
 import { LinearSyntenyDisplayModel } from '../model'
 import { getId, MAX_COLOR_RANGE } from '../drawSynteny'
+import { LinearSyntenyViewModel } from '../../LinearSyntenyView/model'
 
-export default observer(function LinearSyntenyRendering({
+const LinearSyntenyRendering = observer(function ({
   model,
 }: {
   model: LinearSyntenyDisplayModel
 }) {
   const highResolutionScaling = 1
-  const view = getContainingView(model)
+  const view = getContainingView(model) as LinearSyntenyViewModel
   const height = view.middleComparativeHeight
   const width = view.width
 
@@ -198,3 +199,5 @@ export default observer(function LinearSyntenyRendering({
     </div>
   )
 })
+
+export default LinearSyntenyRendering

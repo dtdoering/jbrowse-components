@@ -1,30 +1,32 @@
 import React from 'react'
-import { Dialog } from '@jbrowse/core/ui'
 import {
   Button,
   DialogActions,
   DialogContent,
   DialogContentText,
 } from '@mui/material'
-import WarningIcon from '@mui/icons-material/Warning'
+import { Dialog } from '@jbrowse/core/ui'
+import { nanoid } from '@jbrowse/core/util/nanoid'
+import factoryReset from '../factoryReset'
+import { SessionLoaderModel } from '../SessionLoader'
 
-export default function ConfigWarningModal({
+import WarningIcon from '@mui/icons-material/Warning'
+import {
+  PluginDefinition,
+  pluginDescriptionString,
+} from '@jbrowse/core/PluginLoader'
+
+function ConfigWarningDialog({
   onConfirm,
   onCancel,
   reason,
 }: {
   onConfirm: () => void
   onCancel: () => void
-  reason: { url: string }[]
+  reason: PluginDefinition[]
 }) {
   return (
-    <Dialog
-      open
-      maxWidth="xl"
-      data-testid="session-warning-modal"
-      title="Warning"
-      aria-labelledby="alert-dialog-title"
-    >
+    <Dialog open maxWidth="xl" title="Warning">
       <DialogContent>
         <WarningIcon fontSize="large" />
         <DialogContentText>
@@ -32,7 +34,7 @@ export default function ConfigWarningModal({
           unknown plugins:
           <ul>
             {reason.map(r => (
-              <li key={JSON.stringify(r)}>URL: {r.url}</li>
+              <li key={JSON.stringify(r)}>{pluginDescriptionString(r)}</li>
             ))}
           </ul>
           Please ensure you trust the source of this link.
@@ -52,4 +54,29 @@ export default function ConfigWarningModal({
       </DialogActions>
     </Dialog>
   )
+}
+
+export default function ConfigTriaged({
+  loader,
+  handleClose,
+}: {
+  loader: SessionLoaderModel
+  handleClose: () => void
+}) {
+  const { sessionTriaged } = loader
+  return sessionTriaged ? (
+    <ConfigWarningDialog
+      onConfirm={async () => {
+        const session = JSON.parse(JSON.stringify(sessionTriaged.snap))
+        await loader.fetchPlugins(session)
+        loader.setConfigSnapshot({ ...session, id: nanoid() })
+        handleClose()
+      }}
+      onCancel={async () => {
+        await factoryReset()
+        handleClose()
+      }}
+      reason={sessionTriaged.reason}
+    />
+  ) : null
 }

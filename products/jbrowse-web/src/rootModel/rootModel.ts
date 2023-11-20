@@ -17,7 +17,6 @@ import assemblyConfigSchemaFactory from '@jbrowse/core/assemblyManager/assemblyC
 import PluginManager from '@jbrowse/core/PluginManager'
 import RpcManager from '@jbrowse/core/rpc/RpcManager'
 import TextSearchManager from '@jbrowse/core/TextSearch/TextSearchManager'
-import TimeTraveller from '@jbrowse/core/util/TimeTraveller'
 import { AbstractSessionModel, SessionWithWidgets } from '@jbrowse/core/util'
 import { MenuItem } from '@jbrowse/core/ui'
 
@@ -40,13 +39,20 @@ import { Cable } from '@jbrowse/core/ui/Icons'
 import makeWorkerInstance from '../makeWorkerInstance'
 import jbrowseWebFactory from '../jbrowseModel'
 import { filterSessionInPlace } from '../util'
-import { RootModel as CoreRootModel } from '@jbrowse/product-core'
-import type {
+import packageJSON from '../../package.json'
+import {
   BaseSession,
   BaseSessionType,
-} from '@jbrowse/product-core/src/Session/Base'
-import type { SessionWithDialogs } from '@jbrowse/product-core/src/Session/DialogQueue'
+  SessionWithDialogs,
+  InternetAccountsRootModelMixin,
+  BaseRootModelFactory,
+} from '@jbrowse/product-core'
+import { HistoryManagementMixin, RootAppMenuMixin } from '@jbrowse/app-core'
+import { hydrateRoot } from 'react-dom/client'
+import { AssemblyManager } from '@jbrowse/plugin-data-management'
 
+// locals
+const SetDefaultSession = lazy(() => import('../components/SetDefaultSession'))
 const PreferencesDialog = lazy(() => import('../components/PreferencesDialog'))
 
 export interface Menu {
@@ -55,6 +61,10 @@ export interface Menu {
 }
 
 type AssemblyConfig = ReturnType<typeof assemblyConfigSchemaFactory>
+type SessionModelFactory = (args: {
+  pluginManager: PluginManager
+  assemblyConfigSchema: AssemblyConfig
+}) => IAnyType
 
 /**
  * #stateModel JBrowseWebRootModel
@@ -62,52 +72,59 @@ type AssemblyConfig = ReturnType<typeof assemblyConfigSchemaFactory>
  * composed of
  * - BaseRootModel
  * - InternetAccountsMixin
+ * - HistoryManagementMixin
+ * - AppFocusMixin
+ * - RootAppMenuMixin
  *
  * note: many properties of the root model are available through the session,
  * and we generally prefer using the session model (via e.g. getSession) over
  * the root model (via e.g. getRoot) in plugin code
  */
-export default function RootModel(
-  pluginManager: PluginManager,
-  sessionModelFactory: (
-    p: PluginManager,
-    assemblyConfigSchema: AssemblyConfig,
-  ) => IAnyType,
+export default function RootModel({
+  pluginManager,
+  sessionModelFactory,
   adminMode = false,
-) {
+}: {
+  pluginManager: PluginManager
+  sessionModelFactory: SessionModelFactory
+  adminMode?: boolean
+}) {
   const assemblyConfigSchema = assemblyConfigSchemaFactory(pluginManager)
+  const jbrowseModelType = jbrowseWebFactory({
+    pluginManager,
+    assemblyConfigSchema,
+  })
+  const sessionModelType = sessionModelFactory({
+    pluginManager,
+    assemblyConfigSchema,
+  })
   return types
     .compose(
-      CoreRootModel.BaseRootModel(
+      BaseRootModelFactory({
         pluginManager,
-        jbrowseWebFactory(pluginManager, assemblyConfigSchema, adminMode),
-        sessionModelFactory(pluginManager, assemblyConfigSchema),
+        jbrowseModelType,
+        sessionModelType,
         assemblyConfigSchema,
-      ),
-      CoreRootModel.InternetAccounts(pluginManager),
+      }),
+      InternetAccountsRootModelMixin(pluginManager),
+      HistoryManagementMixin(),
+      RootAppMenuMixin(),
     )
     .props({
       /**
        * #property
        */
       configPath: types.maybe(types.string),
-      /**
-       * #property
-       * used for undo/redo
-       */
-      history: types.optional(TimeTraveller, { targetPath: '../session' }),
     })
     .volatile(self => ({
-      isAssemblyEditing: false,
-      isDefaultSessionEditing: false,
+      version: packageJSON.version,
+      hydrateFn: hydrateRoot,
       pluginsUpdated: false,
       rpcManager: new RpcManager(
         pluginManager,
         self.jbrowse.configuration.rpc,
         {
-          WebWorkerRpcDriver: {
-            makeWorkerInstance,
-          },
+          WebWorkerRpcDriver: { makeWorkerInstance },
           MainThreadRpcDriver: {},
         },
       ),
@@ -161,237 +178,188 @@ export default function RootModel(
       },
     }))
 
-    .actions(self => {
-      return {
-        afterCreate() {
-          document.addEventListener('keydown', e => {
-            const cm = e.ctrlKey || e.metaKey
-            if (
-              self.history.canRedo &&
-              // ctrl+shift+z or cmd+shift+z
-              ((cm && e.shiftKey && e.code === 'KeyZ') ||
-                // ctrl+y
-                (e.ctrlKey && !e.shiftKey && e.code === 'KeyY'))
-            ) {
-              self.history.redo()
-            }
-            if (
-              self.history.canUndo && // ctrl+z or cmd+z
-              cm &&
-              !e.shiftKey &&
-              e.code === 'KeyZ'
-            ) {
-              self.history.undo()
-            }
-          })
-
-          for (const [key, val] of Object.entries(localStorage)
-            .filter(([key, _val]) => key.startsWith('localSaved-'))
-            .filter(([key]) => key.includes(self.configPath || 'undefined'))) {
-            try {
-              const { session } = JSON.parse(val)
-              self.savedSessionsVolatile.set(key, session)
-            } catch (e) {
-              console.error('bad session encountered', key, val)
-            }
+    .actions(self => ({
+      afterCreate() {
+        for (const [key, val] of Object.entries(localStorage)
+          .filter(([key, _val]) => key.startsWith('localSaved-'))
+          .filter(([key]) => key.includes(self.configPath || 'undefined'))) {
+          try {
+            const { session } = JSON.parse(val)
+            self.savedSessionsVolatile.set(key, session)
+          } catch (e) {
+            console.error('bad session encountered', key, val)
           }
-          addDisposer(
-            self,
-            autorun(() => {
-              for (const [, val] of self.savedSessionsVolatile.entries()) {
-                try {
-                  const key = self.localStorageId(val.name)
-                  localStorage.setItem(key, JSON.stringify({ session: val }))
-                } catch (e) {
-                  // @ts-expect-error
-                  if (e.code === '22' || e.code === '1024') {
-                    alert(
-                      'Local storage is full! Please use the "Open sessions" panel to remove old sessions',
-                    )
-                  }
+        }
+        addDisposer(
+          self,
+          autorun(() => {
+            for (const [, val] of self.savedSessionsVolatile.entries()) {
+              try {
+                const key = self.localStorageId(val.name)
+                localStorage.setItem(key, JSON.stringify({ session: val }))
+              } catch (e) {
+                // @ts-expect-error
+                if (e.code === '22' || e.code === '1024') {
+                  alert(
+                    'Local storage is full! Please use the "Open sessions" panel to remove old sessions',
+                  )
                 }
               }
-            }),
-          )
+            }
+          }),
+        )
 
-          addDisposer(
-            self,
-            autorun(() => {
-              if (self.session) {
-                // we use a specific initialization routine after session is
-                // created to get it to start tracking itself sort of related
-                // issue here
-                // https://github.com/mobxjs/mobx-state-tree/issues/1089#issuecomment-441207911
-                self.history.initialize()
+        addDisposer(
+          self,
+          autorun(
+            () => {
+              if (!self.session) {
+                return
               }
-            }),
+              const snapshot = getSnapshot(self.session as BaseSession) || {
+                name: 'empty',
+              }
+              const s = JSON.stringify
+              sessionStorage.setItem('current', s({ session: snapshot }))
+              localStorage.setItem(
+                `autosave-${self.configPath}`,
+                s({
+                  session: {
+                    ...snapshot,
+                    name: `${snapshot.name}-autosaved`,
+                  },
+                }),
+              )
+
+              // this check is not able to be modularized into it's own autorun
+              // at current time because it depends on session storage snapshot
+              // being set above
+              if (self.pluginsUpdated) {
+                window.location.reload()
+              }
+            },
+            { delay: 400 },
+          ),
+        )
+      },
+      /**
+       * #action
+       */
+      setSession(sessionSnapshot?: SnapshotIn<BaseSessionType>) {
+        const oldSession = self.session
+        self.session = cast(sessionSnapshot)
+        if (self.session) {
+          // validate all references in the session snapshot
+          try {
+            filterSessionInPlace(self.session, getType(self.session))
+          } catch (error) {
+            // throws error if session filtering failed
+            self.session = oldSession
+            throw error
+          }
+        }
+      },
+
+      /**
+       * #action
+       */
+      setPluginsUpdated(flag: boolean) {
+        self.pluginsUpdated = flag
+      },
+      /**
+       * #action
+       */
+      setDefaultSession() {
+        const { defaultSession } = self.jbrowse
+        const newSession = {
+          ...defaultSession,
+          name: `${defaultSession.name} ${new Date().toLocaleString()}`,
+        }
+
+        this.setSession(newSession)
+      },
+      /**
+       * #action
+       */
+      renameCurrentSession(sessionName: string) {
+        if (self.session) {
+          const snapshot = JSON.parse(JSON.stringify(getSnapshot(self.session)))
+          snapshot.name = sessionName
+          this.setSession(snapshot)
+        }
+      },
+      /**
+       * #action
+       */
+      addSavedSession(session: { name: string }) {
+        const key = self.localStorageId(session.name)
+        self.savedSessionsVolatile.set(key, session)
+      },
+      /**
+       * #action
+       */
+      removeSavedSession(session: { name: string }) {
+        const key = self.localStorageId(session.name)
+        localStorage.removeItem(key)
+        self.savedSessionsVolatile.delete(key)
+      },
+      /**
+       * #action
+       */
+      duplicateCurrentSession() {
+        if (self.session) {
+          const snapshot = JSON.parse(JSON.stringify(getSnapshot(self.session)))
+          let newSnapshotName = `${self.session.name} (copy)`
+          if (self.savedSessionNames.includes(newSnapshotName)) {
+            let newSnapshotCopyNumber = 2
+            do {
+              newSnapshotName = `${self.session.name} (copy ${newSnapshotCopyNumber})`
+              newSnapshotCopyNumber += 1
+            } while (self.savedSessionNames.includes(newSnapshotName))
+          }
+          snapshot.name = newSnapshotName
+          this.setSession(snapshot)
+        }
+      },
+      /**
+       * #action
+       */
+      activateSession(name: string) {
+        const localId = self.localStorageId(name)
+        const newSessionSnapshot = localStorage.getItem(localId)
+        if (!newSessionSnapshot) {
+          throw new Error(
+            `Can't activate session ${name}, it is not in the savedSessions`,
           )
-          addDisposer(
-            self,
-            autorun(
-              () => {
-                if (self.session) {
-                  const noSession = { name: 'empty' }
-                  const snapshot =
-                    getSnapshot(self.session as BaseSession) || noSession
-                  sessionStorage.setItem(
-                    'current',
-                    JSON.stringify({ session: snapshot }),
-                  )
+        }
 
-                  localStorage.setItem(
-                    `autosave-${self.configPath}`,
-                    JSON.stringify({
-                      session: {
-                        ...snapshot,
-                        name: `${snapshot.name}-autosaved`,
-                      },
-                    }),
-                  )
-                  if (self.pluginsUpdated) {
-                    // reload app to get a fresh plugin manager
-                    window.location.reload()
-                  }
-                }
-              },
-              { delay: 400 },
-            ),
-          )
-        },
-        /**
-         * #action
-         */
-        setSession(sessionSnapshot?: SnapshotIn<BaseSessionType>) {
-          const oldSession = self.session
-          self.session = cast(sessionSnapshot)
-          if (self.session) {
-            // validate all references in the session snapshot
-            try {
-              filterSessionInPlace(self.session, getType(self.session))
-            } catch (error) {
-              // throws error if session filtering failed
-              self.session = oldSession
-              throw error
-            }
-          }
-        },
-        /**
-         * #action
-         */
-        setAssemblyEditing(flag: boolean) {
-          self.isAssemblyEditing = flag
-        },
-        /**
-         * #action
-         */
-        setDefaultSessionEditing(flag: boolean) {
-          self.isDefaultSessionEditing = flag
-        },
-        /**
-         * #action
-         */
-        setPluginsUpdated(flag: boolean) {
-          self.pluginsUpdated = flag
-        },
-        /**
-         * #action
-         */
-        setDefaultSession() {
-          const { defaultSession } = self.jbrowse
-          const newSession = {
-            ...defaultSession,
-            name: `${defaultSession.name} ${new Date().toLocaleString()}`,
-          }
-
-          this.setSession(newSession)
-        },
-        /**
-         * #action
-         */
-        renameCurrentSession(sessionName: string) {
-          if (self.session) {
-            const snapshot = JSON.parse(
-              JSON.stringify(getSnapshot(self.session)),
-            )
-            snapshot.name = sessionName
-            this.setSession(snapshot)
-          }
-        },
-        /**
-         * #action
-         */
-        addSavedSession(session: { name: string }) {
-          const key = self.localStorageId(session.name)
-          self.savedSessionsVolatile.set(key, session)
-        },
-        /**
-         * #action
-         */
-        removeSavedSession(session: { name: string }) {
-          const key = self.localStorageId(session.name)
-          localStorage.removeItem(key)
-          self.savedSessionsVolatile.delete(key)
-        },
-        /**
-         * #action
-         */
-        duplicateCurrentSession() {
-          if (self.session) {
-            const snapshot = JSON.parse(
-              JSON.stringify(getSnapshot(self.session)),
-            )
-            let newSnapshotName = `${self.session.name} (copy)`
-            if (self.savedSessionNames.includes(newSnapshotName)) {
-              let newSnapshotCopyNumber = 2
-              do {
-                newSnapshotName = `${self.session.name} (copy ${newSnapshotCopyNumber})`
-                newSnapshotCopyNumber += 1
-              } while (self.savedSessionNames.includes(newSnapshotName))
-            }
-            snapshot.name = newSnapshotName
-            this.setSession(snapshot)
-          }
-        },
-        /**
-         * #action
-         */
-        activateSession(name: string) {
-          const localId = self.localStorageId(name)
-          const newSessionSnapshot = localStorage.getItem(localId)
-          if (!newSessionSnapshot) {
-            throw new Error(
-              `Can't activate session ${name}, it is not in the savedSessions`,
-            )
-          }
-
-          this.setSession(JSON.parse(newSessionSnapshot).session)
-        },
-        /**
-         * #action
-         */
-        saveSessionToLocalStorage() {
-          if (self.session) {
-            const key = self.localStorageId(self.session.name)
-            self.savedSessionsVolatile.set(key, getSnapshot(self.session))
-          }
-        },
-        loadAutosaveSession() {
-          const previousAutosave = localStorage.getItem(self.previousAutosaveId)
-          const autosavedSession = previousAutosave
-            ? JSON.parse(previousAutosave).session
-            : {}
-          const { name } = autosavedSession
-          autosavedSession.name = `${name.replace('-autosaved', '')}-restored`
-          this.setSession(autosavedSession)
-        },
-        /**
-         * #action
-         */
-        setError(error?: unknown) {
-          self.error = error
-        },
-      }
-    })
+        this.setSession(JSON.parse(newSessionSnapshot).session)
+      },
+      /**
+       * #action
+       */
+      saveSessionToLocalStorage() {
+        if (self.session) {
+          const key = self.localStorageId(self.session.name)
+          self.savedSessionsVolatile.set(key, getSnapshot(self.session))
+        }
+      },
+      loadAutosaveSession() {
+        const previousAutosave = localStorage.getItem(self.previousAutosaveId)
+        const autosavedSession = previousAutosave
+          ? JSON.parse(previousAutosave).session
+          : {}
+        const { name } = autosavedSession
+        autosavedSession.name = `${name.replace('-autosaved', '')}-restored`
+        this.setSession(autosavedSession)
+      },
+      /**
+       * #action
+       */
+      setError(error?: unknown) {
+        self.error = error
+      },
+    }))
     .volatile(self => ({
       menus: [
         {
@@ -485,11 +453,12 @@ export default function RootModel(
               label: 'Open connection...',
               icon: Cable,
               onClick: (session: SessionWithWidgets) => {
-                const widget = session.addWidget(
-                  'AddConnectionWidget',
-                  'addConnectionWidget',
+                session.showWidget(
+                  session.addWidget(
+                    'AddConnectionWidget',
+                    'addConnectionWidget',
+                  ),
                 )
-                session.showWidget(widget)
               },
             },
             { type: 'divider' },
@@ -507,11 +476,19 @@ export default function RootModel(
                 menuItems: [
                   {
                     label: 'Open assembly manager',
-                    onClick: () => self.setAssemblyEditing(true),
+                    onClick: () =>
+                      self.session.queueDialog((onClose: () => void) => [
+                        AssemblyManager,
+                        { onClose, rootModel: self },
+                      ]),
                   },
                   {
                     label: 'Set default session',
-                    onClick: () => self.setDefaultSessionEditing(true),
+                    onClick: () =>
+                      self.session.queueDialog((onClose: () => void) => [
+                        SetDefaultSession,
+                        { rootModel: self, onClose },
+                      ]),
                   },
                 ],
               },
@@ -548,11 +525,12 @@ export default function RootModel(
               icon: ExtensionIcon,
               onClick: () => {
                 if (self.session) {
-                  const widget = self.session.addWidget(
-                    'PluginStoreWidget',
-                    'pluginStoreWidget',
+                  self.session.showWidget(
+                    self.session.addWidget(
+                      'PluginStoreWidget',
+                      'pluginStoreWidget',
+                    ),
                   )
-                  self.session.showWidget(widget)
                 }
               },
             },
@@ -577,148 +555,6 @@ export default function RootModel(
         },
       ] as Menu[],
       adminMode,
-    }))
-    .actions(self => ({
-      /**
-       * #action
-       */
-      setMenus(newMenus: Menu[]) {
-        self.menus = newMenus
-      },
-      /**
-       * #action
-       * Add a top-level menu
-       * @param menuName - Name of the menu to insert.
-       * @returns The new length of the top-level menus array
-       */
-      appendMenu(menuName: string) {
-        return self.menus.push({ label: menuName, menuItems: [] })
-      },
-      /**
-       * #action
-       * Insert a top-level menu
-       * @param menuName - Name of the menu to insert.
-       * @param position - Position to insert menu. If negative, counts from th
-       * end, e.g. `insertMenu('My Menu', -1)` will insert the menu as the
-       * second-to-last one.
-       * @returns The new length of the top-level menus array
-       */
-      insertMenu(menuName: string, position: number) {
-        self.menus.splice(
-          (position < 0 ? self.menus.length : 0) + position,
-          0,
-          { label: menuName, menuItems: [] },
-        )
-        return self.menus.length
-      },
-      /**
-       * #action
-       * Add a menu item to a top-level menu
-       * @param menuName - Name of the top-level menu to append to.
-       * @param menuItem - Menu item to append.
-       * @returns The new length of the menu
-       */
-      appendToMenu(menuName: string, menuItem: MenuItem) {
-        const menu = self.menus.find(m => m.label === menuName)
-        if (!menu) {
-          self.menus.push({ label: menuName, menuItems: [menuItem] })
-          return 1
-        }
-        return menu.menuItems.push(menuItem)
-      },
-      /**
-       * #action
-       * Insert a menu item into a top-level menu
-       * @param menuName - Name of the top-level menu to insert into
-       * @param menuItem - Menu item to insert
-       * @param position - Position to insert menu item. If negative, counts
-       * from the end, e.g. `insertMenu('My Menu', -1)` will insert the menu as
-       * the second-to-last one.
-       * @returns The new length of the menu
-       */
-      insertInMenu(menuName: string, menuItem: MenuItem, position: number) {
-        const menu = self.menus.find(m => m.label === menuName)
-        if (!menu) {
-          self.menus.push({ label: menuName, menuItems: [menuItem] })
-          return 1
-        }
-        const insertPosition =
-          position < 0 ? menu.menuItems.length + position : position
-        menu.menuItems.splice(insertPosition, 0, menuItem)
-        return menu.menuItems.length
-      },
-      /**
-       * #action
-       * Add a menu item to a sub-menu
-       * @param menuPath - Path to the sub-menu to add to, starting with the
-       * top-level menu (e.g. `['File', 'Insert']`).
-       * @param menuItem - Menu item to append.
-       * @returns The new length of the sub-menu
-       */
-      appendToSubMenu(menuPath: string[], menuItem: MenuItem) {
-        let topMenu = self.menus.find(m => m.label === menuPath[0])
-        if (!topMenu) {
-          const idx = this.appendMenu(menuPath[0])
-          topMenu = self.menus[idx - 1]
-        }
-        let { menuItems: subMenu } = topMenu
-        const pathSoFar = [menuPath[0]]
-        menuPath.slice(1).forEach(menuName => {
-          pathSoFar.push(menuName)
-          let sm = subMenu.find(mi => 'label' in mi && mi.label === menuName)
-          if (!sm) {
-            const idx = subMenu.push({ label: menuName, subMenu: [] })
-            sm = subMenu[idx - 1]
-          }
-          if (!('subMenu' in sm)) {
-            throw new Error(
-              `"${menuName}" in path "${pathSoFar}" is not a subMenu`,
-            )
-          }
-          subMenu = sm.subMenu
-        })
-        return subMenu.push(menuItem)
-      },
-      /**
-       * #action
-       * Insert a menu item into a sub-menu
-       * @param menuPath - Path to the sub-menu to add to, starting with the
-       * top-level menu (e.g. `['File', 'Insert']`).
-       * @param menuItem - Menu item to insert.
-       * @param position - Position to insert menu item. If negative, counts
-       * from the end, e.g. `insertMenu('My Menu', -1)` will insert the menu as
-       * the second-to-last one.
-       * @returns The new length of the sub-menu
-       */
-      insertInSubMenu(
-        menuPath: string[],
-        menuItem: MenuItem,
-        position: number,
-      ) {
-        let topMenu = self.menus.find(m => m.label === menuPath[0])
-        if (!topMenu) {
-          const idx = this.appendMenu(menuPath[0])
-          topMenu = self.menus[idx - 1]
-        }
-        let { menuItems: subMenu } = topMenu
-        const pathSoFar = [menuPath[0]]
-        menuPath.slice(1).forEach(menuName => {
-          pathSoFar.push(menuName)
-          let sm = subMenu.find(mi => 'label' in mi && mi.label === menuName)
-          if (!sm) {
-            const idx = subMenu.push({ label: menuName, subMenu: [] })
-            sm = subMenu[idx - 1]
-          }
-          if (!('subMenu' in sm)) {
-            throw new Error(
-              `"${menuName}" in path "${pathSoFar}" is not a subMenu`,
-            )
-          }
-          subMenu = sm.subMenu
-        })
-        subMenu.splice(position, 0, menuItem)
-        return subMenu.length
-      },
     }))
 }
 

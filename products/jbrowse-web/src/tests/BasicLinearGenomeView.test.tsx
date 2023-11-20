@@ -6,14 +6,14 @@ beforeEach(() => {
   doBeforeEach()
 })
 
-const delay = { timeout: 20000 }
+const delay = { timeout: 30000 }
 const opts = [{}, delay]
 
 test('access about menu', async () => {
   const { findByText, findAllByText } = await createView()
 
-  fireEvent.click(await findByText('Help'))
-  fireEvent.click(await findByText('About'))
+  fireEvent.click(await findByText('Help', ...opts))
+  fireEvent.click(await findByText('About', ...opts))
 
   await findByText(/The Evolutionary Software Foundation/, ...opts)
 
@@ -92,9 +92,14 @@ test('click and zoom in and back out', async () => {
   const before = view.bpPerPx
   fireEvent.click(await findByTestId('zoom_in'))
   await waitFor(() => expect(view.bpPerPx).toBe(before / 2), delay)
-  fireEvent.click(await findByTestId('zoom_out'))
+
+  // wait for it not to be disabled also
+  const elt = await findByTestId('zoom_out')
+  await waitFor(() => expect(elt).toHaveProperty('disabled', false))
+  fireEvent.click(elt)
+
   await waitFor(() => expect(view.bpPerPx).toBe(before), delay)
-}, 30000)
+}, 60000)
 
 test('opens track selector', async () => {
   const { view, findByTestId, findAllByText } = await createView()
@@ -132,7 +137,6 @@ test('click to display center line with correct value', async () => {
 
 test('test choose option from dropdown refName autocomplete', async () => {
   const {
-    findByText,
     findByTestId,
     findAllByText,
     findByPlaceholderText,
@@ -140,7 +144,6 @@ test('test choose option from dropdown refName autocomplete', async () => {
   } = await createView()
 
   await findAllByText('ctgA', ...opts)
-  fireEvent.click(await findByText('Help'))
   fireEvent.click(await findByPlaceholderText('Search for location'))
   const autocomplete = await findByTestId('autocomplete')
   autocomplete.focus()

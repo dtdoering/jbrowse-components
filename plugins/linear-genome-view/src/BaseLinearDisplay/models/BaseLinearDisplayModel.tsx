@@ -27,7 +27,6 @@ import { LinearGenomeViewModel, ExportSvgOptions } from '../../LinearGenomeView'
 import { Tooltip } from '../components/BaseLinearDisplay'
 import BlockState from './serverSideRenderedBlock'
 import configSchema from './configSchema'
-import renderBaseLinearDisplaySvg from './renderSvg'
 import TrackHeightMixin from './TrackHeightMixin'
 import FeatureDensityMixin from './FeatureDensityMixin'
 
@@ -42,6 +41,11 @@ export interface Layout {
 }
 
 type LayoutRecord = [number, number, number, number]
+
+export interface ExportSvgDisplayOptions extends ExportSvgOptions {
+  overrideHeight: number
+  theme: ThemeOptions
+}
 
 /**
  * #stateModel BaseLinearDisplay
@@ -348,12 +352,8 @@ function stateModelFactory() {
       /**
        * #method
        */
-      async renderSvg(
-        opts: ExportSvgOptions & {
-          overrideHeight: number
-          theme: ThemeOptions
-        },
-      ) {
+      async renderSvg(opts: ExportSvgDisplayOptions) {
+        const { renderBaseLinearDisplaySvg } = await import('./renderSvg')
         return renderBaseLinearDisplaySvg(self as BaseLinearDisplayModel, opts)
       },
       afterAttach() {
@@ -363,7 +363,7 @@ function stateModelFactory() {
         addDisposer(
           self,
           autorun(() => {
-            const blocksPresent: { [key: string]: boolean } = {}
+            const blocksPresent: Record<string, boolean> = {}
             const view = getContainingView(self) as LGV
             if (!view.initialized) {
               return
@@ -376,7 +376,7 @@ function stateModelFactory() {
             })
             self.blockState.forEach((_, key) => {
               if (!blocksPresent[key]) {
-                self.deleteBlock(key)
+                self.deleteBlock(key as string)
               }
             })
           }),

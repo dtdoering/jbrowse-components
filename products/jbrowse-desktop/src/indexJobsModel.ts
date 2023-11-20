@@ -13,10 +13,9 @@ import {
 } from '@jbrowse/text-indexing'
 import { isAbortException, isSessionModelWithWidgets } from '@jbrowse/core/util'
 
-interface Track {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Track = Record<string, any>
+
 interface TrackTextIndexing {
   attributes: string[]
   exclude: string[]
@@ -41,7 +40,7 @@ export interface TextJobsEntry extends JobsEntry {
   statusMessage?: string
 }
 
-export default function jobsModelFactory(pluginManager: PluginManager) {
+export default function jobsModelFactory(_pluginManager: PluginManager) {
   return types
     .model('JobsManager', {})
     .volatile(() => ({
@@ -103,7 +102,9 @@ export default function jobsModelFactory(pluginManager: PluginManager) {
         if (Number.isNaN(progress)) {
           this.setStatusMessage(arg)
         } else {
-          progress === 100 && this.setStatusMessage('Generating ixIxx files.')
+          if (progress === 100) {
+            this.setStatusMessage('Generating ixIxx files.')
+          }
           self.progressPct = progress
         }
         this.setWidgetStatus()
@@ -143,8 +144,7 @@ export default function jobsModelFactory(pluginManager: PluginManager) {
           const jobStatusWidget = self.getJobStatusWidget()
           jobStatusWidget.removeJob(self.jobName)
         }
-        const entry = self.jobsQueue.splice(0, 1)[0]
-        return entry
+        return self.jobsQueue.splice(0, 1)[0]
       },
       clear() {
         this.setRunning(false)
@@ -252,7 +252,6 @@ export default function jobsModelFactory(pluginManager: PluginManager) {
         }
         // clear
         this.clear()
-        return
       },
       async runJob() {
         const { session } = self
@@ -273,7 +272,6 @@ export default function jobsModelFactory(pluginManager: PluginManager) {
           }
           await this.runIndexingJob(firstIndexingJob)
         }
-        return
       },
       addTrackTextSearchConf(
         trackId: string,

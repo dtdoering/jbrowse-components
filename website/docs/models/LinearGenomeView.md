@@ -125,20 +125,6 @@ trackSelectorType: types.optional(
         )
 ```
 
-#### property: trackLabels
-
-how to display the track labels, can be "overlapping", "offset", or "hidden"
-
-```js
-// type signature
-IOptionalIType<ISimpleType<string>, [undefined]>
-// code
-trackLabels: types.optional(
-          types.string,
-          () => localStorageGetItem('lgv-trackLabels') || 'overlapping',
-        )
-```
-
 #### property: showCenterLine
 
 show the "center line"
@@ -169,6 +155,23 @@ showCytobandsSetting: types.optional(types.boolean, () =>
         )
 ```
 
+#### property: trackLabels
+
+how to display the track labels, can be "overlapping", "offset", or "hidden", or
+empty string "" (which results in conf being used). see LinearGenomeViewPlugin
+https://jbrowse.org/jb2/docs/config/lineargenomeviewplugin/ docs for how conf is
+used
+
+```js
+// type signature
+IOptionalIType<ISimpleType<string>, [undefined]>
+// code
+trackLabels: types.optional(
+          types.string,
+          () => localStorageGetItem('lgv-trackLabels') || '',
+        )
+```
+
 #### property: showGridlines
 
 show the "gridlines" in the track area
@@ -181,6 +184,16 @@ showGridlines: true
 ```
 
 ### LinearGenomeView - Getters
+
+#### getter: trackLabelsSetting
+
+this is the effective value of the track labels setting, incorporating both the
+config and view state. use this instead of view.trackLabels
+
+```js
+// type
+any
+```
 
 #### getter: width
 
@@ -503,18 +516,7 @@ rubberBandMenuItems: () => MenuItem[]
 
 ```js
 // type signature
-bpToPx: ({
-  refName,
-  coord,
-  regionNumber,
-}: {
-  refName: string,
-  coord: number,
-  regionNumber?: number,
-}) => {
-  index: number
-  offsetPx: number
-}
+bpToPx: ({ refName, coord, regionNumber, }: { refName: string; coord: number; regionNumber?: number; }) => { index: number; offsetPx: number; }
 ```
 
 #### method: centerAt
@@ -531,17 +533,7 @@ centerAt: (coord: number, refName: string, regionNumber: number) => void
 
 ```js
 // type signature
-pxToBp: (px: number) => {
-  coord: number
-  index: number
-  refName: string
-  oob: boolean
-  assemblyName: string
-  offset: number
-  start: number
-  end: number
-  reversed: boolean
-}
+pxToBp: (px: number) => { coord: number; index: number; refName: string; oob: boolean; assemblyName: string; offset: number; start: number; end: number; reversed: boolean; }
 ```
 
 ### LinearGenomeView - Actions
@@ -564,7 +556,7 @@ setWidth: (newWidth: number) => void
 
 ```js
 // type signature
-setError: (error: Error) => void
+setError: (error: unknown) => void
 ```
 
 #### action: toggleHeader
@@ -645,11 +637,7 @@ horizontallyFlip: () => void
 
 ```js
 // type signature
-showTrack: (
-  trackId: string,
-  initialSnapshot?: {},
-  displayInitialSnapshot?: {},
-) => any
+showTrack: (trackId: string, initialSnapshot?: {}, displayInitialSnapshot?: {}) => any
 ```
 
 #### action: hideTrack
@@ -684,7 +672,7 @@ toggleTrack: (trackId: string) => void
 
 ```js
 // type signature
-setTrackLabels: (setting: "hidden" | "offset" | "overlapping") => void
+setTrackLabels: (setting: "offset" | "hidden" | "overlapping") => void
 ```
 
 #### action: toggleCenterLine

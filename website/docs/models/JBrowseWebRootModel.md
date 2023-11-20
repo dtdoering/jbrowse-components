@@ -16,6 +16,9 @@ composed of
 
 - BaseRootModel
 - InternetAccountsMixin
+- HistoryManagementMixin
+- AppFocusMixin
+- RootAppMenuMixin
 
 note: many properties of the root model are available through the session, and
 we generally prefer using the session model (via e.g. getSession) over the root
@@ -30,17 +33,6 @@ model (via e.g. getRoot) in plugin code
 IMaybe<ISimpleType<string>>
 // code
 configPath: types.maybe(types.string)
-```
-
-#### property: history
-
-used for undo/redo
-
-```js
-// type signature
-IOptionalIType<IModelType<{ undoIdx: IType<number, number, number>; targetPath: IType<string, string, string>; }, { history: unknown[]; notTrackingUndo: boolean; } & { readonly canUndo: boolean; readonly canRedo: boolean; } & { ...; }, _NotCustomized, _NotCustomized>, [...]>
-// code
-history: types.optional(TimeTraveller, { targetPath: '../session' })
 ```
 
 ### JBrowseWebRootModel - Getters
@@ -96,20 +88,6 @@ localStorageId: (name: string) => string
 ```js
 // type signature
 setSession: (sessionSnapshot?: ModelCreationType<ExtractCFromProps<{ id: IOptionalIType<ISimpleType<string>, [undefined]>; name: ISimpleType<string>; margin: IType<number, number, number>; }>>) => void
-```
-
-#### action: setAssemblyEditing
-
-```js
-// type signature
-setAssemblyEditing: (flag: boolean) => void
-```
-
-#### action: setDefaultSessionEditing
-
-```js
-// type signature
-setDefaultSessionEditing: (flag: boolean) => void
 ```
 
 #### action: setPluginsUpdated
@@ -173,66 +151,4 @@ saveSessionToLocalStorage: () => void
 ```js
 // type signature
 setError: (error?: unknown) => void
-```
-
-#### action: setMenus
-
-```js
-// type signature
-setMenus: (newMenus: Menu[]) => void
-```
-
-#### action: appendMenu
-
-Add a top-level menu
-
-```js
-// type signature
-appendMenu: (menuName: string) => number
-```
-
-#### action: insertMenu
-
-Insert a top-level menu
-
-```js
-// type signature
-insertMenu: (menuName: string, position: number) => number
-```
-
-#### action: appendToMenu
-
-Add a menu item to a top-level menu
-
-```js
-// type signature
-appendToMenu: (menuName: string, menuItem: MenuItem) => number
-```
-
-#### action: insertInMenu
-
-Insert a menu item into a top-level menu
-
-```js
-// type signature
-insertInMenu: (menuName: string, menuItem: MenuItem, position: number) => number
-```
-
-#### action: appendToSubMenu
-
-Add a menu item to a sub-menu
-
-```js
-// type signature
-appendToSubMenu: (menuPath: string[], menuItem: MenuItem) => number
-```
-
-#### action: insertInSubMenu
-
-Insert a menu item into a sub-menu
-
-```js
-// type signature
-insertInSubMenu: (menuPath: string[], menuItem: MenuItem, position: number) =>
-  number
 ```

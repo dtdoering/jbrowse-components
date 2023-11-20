@@ -12,6 +12,7 @@ import { CircularViewStateModel } from '@jbrowse/plugin-circular-view'
 
 // icons
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import FolderOpenIcon from '@mui/icons-material/FolderOpen'
 
 // locals
 import {
@@ -39,8 +40,9 @@ function SvInspectorViewF(pluginManager: PluginManager) {
   const circularViewOptionsBarHeight = 52
   return types
     .compose(
+      'SvInspectorView',
       BaseViewModel,
-      types.model('SvInspectorView', {
+      types.model({
         /**
          * #property
          */
@@ -80,7 +82,6 @@ function SvInspectorViewF(pluginManager: PluginManager) {
         spreadsheetView: types.optional(SpreadsheetModel, () =>
           SpreadsheetModel.create({
             type: 'SpreadsheetView',
-            hideViewControls: true,
             hideVerticalResizeHandle: true,
           }),
         ),
@@ -99,7 +100,6 @@ function SvInspectorViewF(pluginManager: PluginManager) {
     )
     .volatile(() => ({
       width: 800,
-      dragHandleHeight: 4,
     }))
     .views(self => ({
       /**
@@ -123,6 +123,9 @@ function SvInspectorViewF(pluginManager: PluginManager) {
         return self.spreadsheetView.mode === 'display'
       },
 
+      /**
+       * #getter
+       */
       get features() {
         const session = getSession(self)
         const { spreadsheetView } = self
@@ -220,6 +223,20 @@ function SvInspectorViewF(pluginManager: PluginManager) {
         self.onlyDisplayRelevantRegionsInCircularView = Boolean(val)
       },
     }))
+    .views(self => ({
+      /**
+       * #method
+       */
+      menuItems() {
+        return [
+          {
+            label: 'Return to import form',
+            onClick: () => self.setImportMode(),
+            icon: FolderOpenIcon,
+          },
+        ]
+      },
+    }))
     .actions(self => ({
       /**
        * #action
@@ -261,8 +278,9 @@ function SvInspectorViewF(pluginManager: PluginManager) {
             { name: 'SvInspectorView height binding' },
           ),
         )
-        // bind circularview displayedRegions to spreadsheet assembly, mediated by
-        // the onlyRelevantRegions toggle
+
+        // bind circularview displayedRegions to spreadsheet assembly, mediated
+        // by the onlyRelevantRegions toggle
         addDisposer(
           self,
           autorun(

@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom/extend-expect'
+import '@testing-library/jest-dom'
 
 import { fireEvent } from '@testing-library/react'
 import { readConfObject, getConf } from '@jbrowse/core/configuration'
@@ -28,14 +28,8 @@ test('renders with an empty config', async () => {
   await findByText('Help', {}, delay)
 }, 20000)
 
-test('renders with an initialState', async () => {
-  const { findByText } = await createView()
-  await findByText('Help', {}, delay)
-}, 20000)
-
 test('lollipop track test', async () => {
-  const { view, findByTestId, findByText } = await createView()
-  await findByText('Help')
+  const { view, findByTestId } = await createView()
   view.setNewView(1, 150)
   fireEvent.click(await findByTestId(hts('lollipop_track'), {}, delay))
 
@@ -44,20 +38,19 @@ test('lollipop track test', async () => {
 }, 30000)
 
 test('toplevel configuration', () => {
-  const pm = new PluginManager([...corePlugins, TestPlugin].map(P => new P()))
-  pm.createPluggableElements()
-  const rootModel = JBrowseRootModelFactory(
-    pm,
+  const plugins = [...corePlugins, TestPlugin].map(P => new P())
+  const pluginManager = new PluginManager(plugins).createPluggableElements()
+  const rootModel = JBrowseRootModelFactory({
+    pluginManager,
     sessionModelFactory,
-    true,
-  ).create({
+    adminMode: true,
+  }).create({
     jbrowse: volvoxConfigSnapshot,
-    assemblyManager: {},
   })
   rootModel.setDefaultSession()
-  pm.setRootModel(rootModel)
-  pm.configure()
-  const state = pm.rootModel
+  pluginManager.setRootModel(rootModel)
+  pluginManager.configure()
+  const state = pluginManager.rootModel
   const { jbrowse } = state!
   const { configuration } = jbrowse
   // test reading top level configurations added by Test Plugin
@@ -68,8 +61,7 @@ test('toplevel configuration', () => {
 })
 
 test('assembly aliases', async () => {
-  const { view, findByTestId, findByText } = await createView()
-  await findByText('Help')
+  const { view, findByTestId } = await createView()
   view.setNewView(0.05, 5000)
   fireEvent.click(
     await findByTestId(hts('volvox_filtered_vcf_assembly_alias'), {}, delay),
@@ -79,7 +71,6 @@ test('assembly aliases', async () => {
 
 test('nclist track test with long name', async () => {
   const { view, findByTestId, findByText } = await createView()
-  await findByText('Help')
   view.setNewView(6.2, -301)
   fireEvent.click(await findByTestId(hts('nclist_long_names'), {}, delay))
 
@@ -101,14 +92,13 @@ test('test sharing', async () => {
   })
   const { findByLabelText, findByText } = await createView()
   fireEvent.click(await findByText('Share'))
-  expect(((await findByLabelText('URL')) as HTMLInputElement).value).toBe(
-    'http://localhost/?session=share-abc&password=123',
-  )
+  expect(
+    ((await findByLabelText('URL', {}, delay)) as HTMLInputElement).value,
+  ).toBe('http://localhost/?session=share-abc&password=123')
 }, 15000)
 
 test('looks at about this track dialog', async () => {
   const { findByTestId, findAllByText, findByText } = await createView()
-  await findByText('Help')
 
   // load track
   fireEvent.click(await findByTestId(hts('volvox-long-reads-cram')))

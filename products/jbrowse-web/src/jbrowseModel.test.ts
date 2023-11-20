@@ -5,22 +5,28 @@ import configSnapshot from '../test_data/volvox/config.json'
 import corePlugins from './corePlugins'
 import jbrowseModelFactory from './jbrowseModel'
 
-function getModel() {
-  const pluginManager = new PluginManager(corePlugins.map(P => new P()))
-    .createPluggableElements()
-    .configure()
+type JBrowseModelType = ReturnType<typeof jbrowseModelFactory>
 
-  const assemblyConfigSchema = assemblyConfigSchemasFactory(pluginManager)
-  return jbrowseModelFactory(pluginManager, assemblyConfigSchema, false)
-}
 describe('JBrowse model', () => {
+  let JBrowseModel: JBrowseModelType
+  beforeAll(() => {
+    const pluginManager = new PluginManager(corePlugins.map(P => new P()))
+      .createPluggableElements()
+      .configure()
+
+    JBrowseModel = jbrowseModelFactory({
+      pluginManager,
+      assemblyConfigSchema: assemblyConfigSchemasFactory(pluginManager),
+    })
+  })
+
   it('creates with empty snapshot', () => {
-    const model = getModel().create({})
+    const model = JBrowseModel.create({})
     expect(getSnapshot(model)).toMatchSnapshot()
   })
 
   it('creates with non-empty snapshot', () => {
-    const model = getModel().create(configSnapshot)
+    const model = JBrowseModel.create(configSnapshot)
     expect(getSnapshot(model)).toMatchSnapshot()
   })
 })

@@ -10,7 +10,7 @@ info
 
 ### Source file
 
-[packages/product-core/src/RootModel/Base.ts](https://github.com/GMOD/jbrowse-components/blob/main/packages/product-core/src/RootModel/Base.ts)
+[packages/product-core/src/RootModel/BaseRootModel.ts](https://github.com/GMOD/jbrowse-components/blob/main/packages/product-core/src/RootModel/BaseRootModel.ts)
 
 factory function for the Base-level root model shared by all products
 
@@ -25,15 +25,6 @@ factory function for the Base-level root model shared by all products
 IAnyType
 // code
 jbrowse: jbrowseModelType
-```
-
-#### property: version
-
-```js
-// type signature
-string
-// code
-version: 'development'
 ```
 
 #### property: session
@@ -61,7 +52,7 @@ sessionPath: types.optional(types.string, '')
 
 ```js
 // type signature
-IOptionalIType<IModelType<{ assemblies: IArrayType<IModelType<{ configuration: IMaybe<IReferenceType<IAnyType>>; }, { error: unknown; loaded: boolean; loadingP: Promise<void>; volatileRegions: BasicRegion[]; refNameAliases: RefNameAliases; lowerCaseRefNameAliases: RefNameAliases; cytobands: Feature[]; } & ... 4 more...
+IOptionalIType<IModelType<{ assemblies: IArrayType<IModelType<{ configuration: IMaybe<IReferenceType<IAnyType>>; }, { error: unknown; loaded: boolean; loadingP: Promise<void>; volatileRegions: BasicRegion[]; refNameAliases: RefNameAliases; lowerCaseRefNameAliases: RefNameAliases; cytobands: Feature[]; } & ... 5 more...
 // code
 assemblyManager: types.optional(
         assemblyManagerFactory(assemblyConfigSchema, pluginManager),
@@ -103,7 +94,7 @@ setSessionPath: (path: string) => void
 
 ```js
 // type signature
-renameCurrentSession: (newName: string) => Promise<void>
+renameCurrentSession: (newName: string) => void
 ```
 
 #### action: setAssemblyEditing

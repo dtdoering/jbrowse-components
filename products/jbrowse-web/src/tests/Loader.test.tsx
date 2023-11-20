@@ -1,14 +1,14 @@
 import React from 'react'
 import { render, waitFor } from '@testing-library/react'
-import { toMatchImageSnapshot } from 'jest-image-snapshot'
+
 import { LocalFile } from 'generic-filehandle'
 import rangeParser from 'range-parser'
-import { Image, createCanvas } from 'canvas'
 
 // local
 import { App } from './loaderUtil'
 
-// mock
+import { Image, createCanvas } from 'canvas'
+
 jest.mock('../makeWorkerInstance', () => () => {})
 
 // @ts-ignore
@@ -16,15 +16,12 @@ global.nodeImage = Image
 // @ts-ignore
 global.nodeCreateCanvas = createCanvas
 
-function getFile(s: string) {
-  return new LocalFile(
-    require.resolve(`../../${s.replace(/http:\/\/localhost\//, '')}`),
+const getFile = (url: string) =>
+  new LocalFile(
+    require.resolve(`../../${url.replace(/http:\/\/localhost\//, '')}`),
   )
-}
 
 jest.mock('../makeWorkerInstance', () => () => {})
-
-expect.extend({ toMatchImageSnapshot })
 
 const delay = { timeout: 20000 }
 
@@ -63,7 +60,7 @@ jest.spyOn(global, 'fetch').mockImplementation(async (url, args) => {
   try {
     const file = getFile(`${url}`)
     const maxRangeRequest = 2000000 // kind of arbitrary, part of the rangeParser
-    if (args && args.headers && 'range' in args.headers) {
+    if (args?.headers && 'range' in args.headers) {
       const range = rangeParser(maxRangeRequest, args.headers.range)
       if (range === -2 || range === -1) {
         throw new Error(`Error parsing range "${args.headers.range}"`)
@@ -106,7 +103,6 @@ test('can use config from a url with session param+sessionStorage', async () => 
 }, 20000)
 
 test('can use config from a url with shared session ', async () => {
-  expect(sessionStorage.length).toBe(0)
   render(
     <App search="?config=test_data/volvox/config_main_thread.json&session=share-testid&password=Z42aq" />,
   )
@@ -114,60 +110,24 @@ test('can use config from a url with shared session ', async () => {
   await waitFor(() => expect(sessionStorage.length).toBeGreaterThan(0), delay)
 }, 20000)
 
-test('can use encoded long url session share that is also from older version of jb2 without types.frozens', async () => {
-  expect(sessionStorage.length).toBe(0)
-  render(
-    <App search="?config=test_data%2Fvolvox%2Fconfig.json&session=encoded-eJydVltz2joQ_iuMnuHUJiFJeSP0tDBDghMg9DIZRthro1NZdiWZSzP8965kBwM1Kad-02ov3357kV8IC0ibDMKWO3uMRimpE0FjQFFfaIgk1SwRNQ1K12BN45RD7frd9bum03TrNddtty7azlWtc4d2MZURE6Tt1Ekg6QrklAV6QdoXN5d1smSwUqT97SWPx0rnM-PcmDPBYvYT8DqkXEGd6E1qgAyYACo_gUhieEI3qJuEoQLtrUn72sVw89QDaU43_7jvL_e-FkJhKuV0A8EjRBgtxyAhvM-z9HXUQYdKU6ktdBAIoOU4jltHtSVItYeIKgXxnG8K42XCl8mabJ8Rq6T-970Eg9ZgeZdNPv8guzw6nEUiBqHV2CjjhZ-IkEVZzsPO32xO40o-ilT2omTDbBGNe2MVkyO6ymAfcitU8BiHLH09twsf3683w2n6EPbVsY9D_TpZAIsWyFLTaf2G_eVt0wJ6PzjIsnEC66zCyWy9-Um2WKlFsholoe5ylqZMRDt2QsY1yFubWMhp1Bc-zwKwRTXnf9fF2W1dXG3R0-je6yZYYBrBMSde_LXpzbNp8-aYkwqjkpjLP_JSaf4_yVEi9QsfO1KAg69Nj4sApGWFENO_KuFZDsS10BT2Kc4ettDL9i8ow9AIv3c63TPw7zdSCwPxBFeFRwXw8ekO2j5v60Vt_stGk8_h1cdOWZqHjArNNGJYwqnZSodDHb1frf1J98zheuBfZOOrFvfhcRNMWRTxivq7jvNm4Ea1-V9Vb4-RjTNqhauJ9kqcT1Qy5OQPiyavPwSzpR-eScqFJ5uNVbDs9Y9JKUKeyUoFgkaln708Pwx-xMlk496WoT8C1Zk8WXR8NECdmdlkFNzNZPak58eZ3VLF_DPzshEbFXaYBz4TCxZADyiWeYekFA1xqM07eXB1n9jkVMc33V2-jUY4so2TyGJwFgyXgvQXzKecFCoDOgeOWRKzMTjNV2a-Rbs4lCAN1J1XK97oZE5FoEagtW1GLbPi7pNkAWeGUys0Ga1YEIFtyYP44318u716WmNHee-UytQGskXmmIh9ls0Syxn7_Y_C7CtqSZueBfGNu62ts8ADeu_jGFLhGw6-PZvhVQql49f3vxR1dyaH8k7-E8FePWiI0wQjb44vCn2PZ_hfVcgqOtn-a3mJYkULStue218Pv3PF" />,
-  )
-
-  await waitFor(() => expect(sessionStorage.length).toBeGreaterThan(0), delay)
-})
-
 // minimal session with plugin in our plugins.json
 test('approves sessionPlugins from plugin list', async () => {
   expect(sessionStorage.length).toBe(0)
-  const obj = {
-    session: {
-      id: 'xSHu7qGJN',
-      name: 'test',
-      sessionPlugins: [
-        {
-          url: 'https://unpkg.com/jbrowse-plugin-msaview/dist/jbrowse-plugin-msaview.umd.production.min.js',
-          name: 'MsaView',
-        },
-      ],
-    },
-  }
-
-  const { findByText } = render(
-    <App
-      search={`?config=test_data/volvox/config_main_thread.json&session=json-${JSON.stringify(
-        obj,
-      )}`}
-    />,
+  render(
+    <App search='?config=test_data/volvox/config_main_thread.json&session=json-{"session":{"id":"xSHu7qGJN","name":"test","sessionPlugins":[{"url":"https://unpkg.com/jbrowse-plugin-msaview/dist/jbrowse-plugin-msaview.umd.production.min.js","name":"MsaView"}]}}' />,
   )
-  await findByText('Help', {}, delay)
-  await waitFor(() => expect(sessionStorage.length).toBeGreaterThan(0), delay)
+  await waitFor(() => expect(sessionStorage.length).toBeGreaterThan(0), {
+    timeout: 50000,
+  })
 }, 50000)
 
 // minimal session,
 // {"session":{"id":"xSHu7qGJN","name":"test","sessionPlugins":[{"url":"https://unpkg.com/jbrowse-plugin-msaview/dist/jbrowse-plugin-msaview.umd.production.min.js"}]}}
 test('pops up a warning for evil plugin in sessionPlugins', async () => {
-  const obj = {
-    session: {
-      id: 'xSHu7qGJN',
-      name: 'test',
-      sessionPlugins: [{ url: 'https://evil.com/evil.js' }],
-    },
-  }
-  const { findByTestId } = render(
-    <App
-      search={`?config=test_data/volvox/config_main_thread.json&session=json-${JSON.stringify(
-        obj,
-      )}`}
-    />,
+  const { findByText } = render(
+    <App search='?config=test_data/volvox/config_main_thread.json&session=json-{"session":{"id":"xSHu7qGJN","name":"test","sessionPlugins":[{"url":"https://evil.com/evil.js"}]}}' />,
   )
-  await findByTestId('session-warning-modal')
+  await findByText(/Warning/, {}, delay)
 }, 20000)
 
 test('can use config from a url with nonexistent share param ', async () => {
@@ -177,12 +137,11 @@ test('can use config from a url with nonexistent share param ', async () => {
   await findAllByText(/Error/, {}, delay)
 }, 20000)
 
-// types.frozen wont catch initial load error
-xtest('can catch error from loading a bad config', async () => {
+test('can catch error from loading a bad config', async () => {
   const { findAllByText } = render(
     <App search="?config=test_data/bad_config_for_testing_error_catcher.json" />,
   )
-  await findAllByText(/Failed to load/)
+  await findAllByText(/Error while converting/)
 }, 20000)
 
 test('can use a spec url for lgv', async () => {

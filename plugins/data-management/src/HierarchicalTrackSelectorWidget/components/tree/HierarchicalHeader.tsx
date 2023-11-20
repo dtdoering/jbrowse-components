@@ -24,18 +24,42 @@ const useStyles = makeStyles()(theme => ({
   },
 }))
 
-function HierarchicalTrackSelectorHeader({
+const SearchTracksTextField = observer(function ({
+  model,
+}: {
+  model: HierarchicalTrackSelectorModel
+}) {
+  const { filterText } = model
+  const { classes } = useStyles()
+  return (
+    <TextField
+      className={classes.searchBox}
+      label="Filter tracks"
+      value={filterText}
+      onChange={event => model.setFilterText(event.target.value)}
+      fullWidth
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <IconButton onClick={() => model.clearFilterText()}>
+              <ClearIcon />
+            </IconButton>
+          </InputAdornment>
+        ),
+      }}
+    />
+  )
+})
+
+const HierarchicalTrackSelectorHeader = observer(function ({
   model,
   setHeaderHeight,
-  setAssemblyIdx,
 }: {
   model: HierarchicalTrackSelectorModel
   setHeaderHeight: (n: number) => void
-  setAssemblyIdx: (n: number) => void
 }) {
   const { classes } = useStyles()
   const [facetedOpen, setFacetedOpen] = useState(false)
-  const { filterText } = model
 
   return (
     <div
@@ -43,25 +67,9 @@ function HierarchicalTrackSelectorHeader({
       data-testid="hierarchical_track_selector"
     >
       <div style={{ display: 'flex' }}>
-        <HamburgerMenu model={model} setAssemblyIdx={setAssemblyIdx} />
+        <HamburgerMenu model={model} />
         <ShoppingCart model={model} />
-
-        <TextField
-          className={classes.searchBox}
-          label="Filter tracks"
-          value={filterText}
-          onChange={event => model.setFilterText(event.target.value)}
-          fullWidth
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => model.clearFilterText()}>
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
+        <SearchTracksTextField model={model} />
         <Button
           className={classes.menuIcon}
           onClick={() => setFacetedOpen(true)}
@@ -80,6 +88,6 @@ function HierarchicalTrackSelectorHeader({
       </Suspense>
     </div>
   )
-}
+})
 
-export default observer(HierarchicalTrackSelectorHeader)
+export default HierarchicalTrackSelectorHeader
